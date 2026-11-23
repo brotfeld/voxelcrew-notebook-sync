@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-23T20:36:29.569Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-23T21:07:33.943Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -1094,6 +1094,30 @@ Pflicht aus AGENTS.md §11 und §12 A: erst Inventur, dann Umsetzung. Quellen: `
 **Vier-Stufen-Prozess (AGENTS.md §13):** vor dem Coding in `ops/plan/BP-016-ui-prozess.md` dokumentiert — Job-to-be-Done, vier Zustände (`leer`/`lädt`/`gefüllt`/`handlungsbedarf`), Wireframe + Exporter-/Workflow-Vertrag, Abnahme mit Playwright/HTTP-Crawler und Screenshot-Beleg.
 
 **Gaps / Risiken:** Veröffentlichung und Live-Curl hängen vom ersten Workflow-Lauf auf `main` und vom hinterlegten Repo-Secret ab; ohne Token bleibt der Artifact-Fallback grün. Worker-Dispatch bleibt pausiert; keine finale Einladung zur Live-Präsentation.
+
+## 14) T-233 — Eine URL: `index.html` als vollständige Hauptquelle (Soll → Ist)
+
+**User Journey:** Externe Website-Quellen rufen genau `https://github.io` auf und folgen keinen
+HTML-Unterlinks. Deshalb enthält die direkt gelieferte `index.html` seit T-233 alle fünf
+Wissensblöcke selbst: Stand/Commit, SSOT/Kernregeln, Handbuch/Fähigkeiten, alle 17 Baupläne
+und die vier echten Observer-Punkte samt Verify-Historie. `GET /` und `GET /index.html`
+liefern identischen Inhalt; die Unterseiten bleiben nur noch Detail-Archiv.
+
+| Soll | Ist | Beleg |
+| --- | --- | --- |
+| Eine URL genügt | Fünf `<section>`-Blöcke, 17 Baupläne, vier Observer-Punkte direkt im DOM | `tests/notebook-pages-e2e.test.js`, `tests/notebook-pages-browser.test.js` |
+| Strenges Budget | `index.html` strikt < 179 200 Byte; alle anderen Seiten < 184 320 Byte | `INDEX_LIMIT_BYTES` in `ops/scripts/export-notebook-sync.mjs` |
+| Nie an der Größe scheitern | `verdichteIndexHtml()`: Verify-Historie auf 5 Läufe, Whitespace, Detaillisten; Guard gibt verdichtete Seiten zurück | Guard-Negativ- und Positivfall im E2E-Test |
+| 0 JavaScript, 0 externe Requests | Inline-Icon, `pruefePagesGuard()` vor dem ersten Write, Browser-Ressourcen-Check | `tests/notebook-pages-browser.test.js`, 5 Screenshots in `ops/results/T-233-belege/` |
+| Kein manueller Chris-Klick | Workflow baut, prüft Budget/Blöcke und pusht nur ins Doku-Repo; ohne Token Artifact-Fallback | `.github/workflows/notebook-pages.yml` |
+
+**Vier-Stufen-Prozess (AGENTS.md §13):** vor dem Coding in `ops/plan/T-233-ein-url-ui-prozess.md`
+dokumentiert — Job-to-be-Done, vier Zustände, Wireframe plus Budget-Vertrag, Abnahme per
+HTTP-Crawler und echtem Chromium mit Screenshot-Belegen.
+
+**Gaps / Risiken:** Die tatsächliche Veröffentlichung hängt weiterhin vom Workflow-Lauf auf
+`main` und dem Doku-Token ab; lokal ist der Artifact-Fallback grün. Keine Änderung an Ports,
+Safety, Auth oder Sichtbarkeit der Quell-Repos.
 ```
 
 ## ops/capabilities.json
