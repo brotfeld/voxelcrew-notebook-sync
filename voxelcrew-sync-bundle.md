@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-23T13:44:41.224Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-23T14:11:20.755Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -11,7 +11,7 @@
 - `AGENTS.md`, `ops/WORLD_INVARIANTS.md`, `ops/SPEC_MAPPING.md`, `ops/capabilities.json`, `ops/blueprints/registry.json`
 - Handbuchkapitel: 7 (01–07)
 - Konzept-/Anlagendokumente: 20
-- Baupläne: 16 (BP-000–BP-015)
+- Baupläne: 17 (BP-000–BP-016)
 
 ## Post-Spülgang-Inventur
 
@@ -1075,7 +1075,25 @@ Pflicht aus AGENTS.md §11 und §12 A: erst Inventur, dann Umsetzung. Quellen: `
 | CI ohne Vault bleibt funktionsfähig | `ops/notebook-sync/quellen/` (27 Dateien, `_manifest.json`) als eingecheckter Quellspiegel; `npm run notebook:quellen` frischt ihn aus dem Vault auf | `tests/notebook-export-bundle.test.mjs` (Fallback-Modus) |
 | Keine Secrets im Bundle | `pruefeRedaction()` vor jedem Schreiben; SSOT `repos` enthält nur Slugs/Pages-URL | `tests/notebook-export-bundle.test.mjs` (5 verbotene Muster) |
 
-**Gaps / Risiken:** Der Pages-Link ist erst nach dem ersten erfolgreichen Workflow-Lauf auf `main` öffentlich erreichbar; das Secret `NOTEBOOK_SYNC_TOKEN` muss im Mirror-Repo vorhanden sein. Worker-Dispatch bleibt pausiert; keine finale Einladung zur Live-Präsentation.
+**Gaps / Risiken:** Der Pages-Link ist erst nach dem ersten erfolgreichen Workflow-Lauf auf `main` öffentlich erreichbar; das Secret `NOTEBOOK_SYNC_TOKEN` muss im Mirror-Repo vorhanden sein. Worker-Dispatch bleibt pausiert; keine finale Einladung zur Live-Präsentation. T-232 (BP-016 (GitHub-Pages-Sync & 4-Punkte-Ergebnis-Feed)) ergänzt die Aufteilung in kleine Seiten und den 4-Punkte-Feed; die Quell-Repos bleiben privat.
+
+## 13) T-232 — BP-016: GitHub-Pages-Sync & 4-Punkte-Ergebnis-Feed (Soll → Ist)
+
+**User Journey ohne manuelle Klicks:** Ein Push auf `main` (SSOT, Handbücher, Baupläne, Observer-Proof, Verify-Artefakte, Exporter oder Workflow) startet `.github/workflows/notebook-pages.yml`. Der Exporter liest dieselben geprüften Quellen wie T-231, ergänzt echte Belege aus `ops/runtime/latest-observer-proof.json` und `ops/results/*.verify.json` und baut acht kleine, JS-freie Dateien in `_site/`. Der `pruefePagesGuard()` prüft vor jedem Schreiben Redaction, 0 `<script>`, 0 externe Ressourcen, UTF-8, Überschriften und strikt `< 180 KB` pro Datei. Der lokale E2E-Test crawlt alle Seiten über einen echten HTTP-Server auf ephemeralem Port. `_site/` wird als Artifact hochgeladen und — nur bei hinterlegtem `DOCS_PAGES_TOKEN` — in das reine Doku-Repo `brotfeld/voxelcrew-pages` gepusht. Danach prüft `curl` HTTP 200, Content-Type, Dateigröße und Commit-SHA im Body. Chris tippt nichts; beide Quell-Repos bleiben privat.
+
+| Soll | Ist | Beleg |
+| --- | --- | --- |
+| Kleine, stabile Seiten statt einer großen HTML-Datei | `index.html`, `ssot-und-regeln.html`, `handbuecher-1-4.html`, `handbuecher-5-7.html`, `bauplaene-000-007.html`, `bauplaene-008-016.html`, `e2e-ergebnisse.html`, `stand.json`, `.nojekyll` | `tests/notebook-pages-e2e.test.js`, `ops/results/T-232.md` |
+| JS-frei, kompakt, UTF-8, semantisch | 0 `<script>`, 0 externe Requests, `<meta charset="utf-8">`, `h1`–`h3`, jede Datei strikt < 184 320 Byte | `pruefePagesGuard()` in `ops/scripts/export-notebook-sync.mjs` |
+| Vier Punkte mit echten Belegen | observer-proof: `update_block`, `mob_equipment`, ViewPort/Raycast, Server-Identität 19133; zusätzlich echte `total/passed/failed` aller `*.verify.json` | `ops/runtime/latest-observer-proof.json`, `ops/results/*.verify.json` |
+| Kein Secret im Bundle | Redaction vor jedem Write; `DOCS_PAGES_TOKEN`/`DOCS_PAGES_REPO` stehen nur in GitHub Secrets/Variables und nie in `_site` | `pruefeRedaction()`, `pruefePagesGuard()` |
+| Privat bleibt privat | Kein Pages im Code-Repo, keine Sichtbarkeitsänderung; Push nur ins separate Doku-Repo | `.github/workflows/notebook-pages.yml`, Chris' Nachtrag 2026-11-23 |
+| Fallback ohne Token | Artifact `_site`, lokaler E2E grün, Push übersprungen — kein Stopp, keine Rückfrage | Workflow-Schritt `Doku-Pages publizieren` |
+| Registrierter Baustein | Capability `export.notebookPages`, BP-016 (`manual`, `entwurf`) in Registry/Versionen/Landkarte | `ops/capabilities.json`, `ops/blueprints/registry.json`, `ops/system-map.json` |
+
+**Vier-Stufen-Prozess (AGENTS.md §13):** vor dem Coding in `ops/plan/BP-016-ui-prozess.md` dokumentiert — Job-to-be-Done, vier Zustände (`leer`/`lädt`/`gefüllt`/`handlungsbedarf`), Wireframe + Exporter-/Workflow-Vertrag, Abnahme mit Playwright/HTTP-Crawler und Screenshot-Beleg.
+
+**Gaps / Risiken:** Veröffentlichung und Live-Curl hängen vom ersten Workflow-Lauf auf `main` und vom hinterlegten Repo-Secret ab; ohne Token bleibt der Artifact-Fallback grün. Worker-Dispatch bleibt pausiert; keine finale Einladung zur Live-Präsentation.
 ```
 
 ## ops/capabilities.json
@@ -1652,7 +1670,37 @@ Pflicht aus AGENTS.md §11 und §12 A: erst Inventur, dann Umsetzung. Quellen: `
       "block_states": [],
       "doku": "ops/werkbank/README.md",
       "verified": true,
-      "beleg": "tests/notebook-export-bundle.test.mjs: Bundle mit SSOT inkl. repos, AGENTS.md, WORLD_INVARIANTS.md, SPEC_MAPPING.md, capabilities.json, Registry, BP-000–BP-015, Handbuch 01–07 und 20 Konzept-/Anlagendokumenten; vollständiges index.html plus .nojekyll; Inventur grün; Redaction hart; Fallback grün"
+      "beleg": "tests/notebook-export-bundle.test.mjs: Bundle mit SSOT inkl. repos, AGENTS.md, WORLD_INVARIANTS.md, SPEC_MAPPING.md, capabilities.json, Registry, BP-000–BP-016, Handbuch 01–07 und 20 Konzept-/Anlagendokumenten; vollständiges index.html plus .nojekyll; Inventur grün; Redaction hart; Fallback grün"
+    },
+    {
+      "id": "export.notebookPages",
+      "modul": "ops/scripts/export-notebook-sync.mjs",
+      "funktion": "exportNotebookPages",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "pagesDir",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Zielordner für die acht statischen Seiten (z. B. _site); nie die Repo-Wurzel"
+        },
+        {
+          "name": "commitSha",
+          "typ": "string",
+          "pflicht": false,
+          "beschreibung": "Commit-SHA aus GITHUB_SHA für stand.json und die Seiten; lokal 'lokal'"
+        },
+        {
+          "name": "ohneVault",
+          "typ": "boolean",
+          "pflicht": false,
+          "beschreibung": "CI-Fallback: Quellen aus ops/notebook-sync/quellen/ statt aus dem Vault"
+        }
+      ],
+      "block_states": [],
+      "doku": ".github/workflows/notebook-pages.yml, ops/plan/BP-016-ui-prozess.md, ops/SPEC_MAPPING.md Abschnitt 13",
+      "verified": true,
+      "beleg": "tests/notebook-pages-e2e.test.js: lokaler HTTP-Server auf ephemeralem Port, 8 Seiten, Content-Type text/html; charset=utf-8, 0 <script>, 0 externe Requests, jede Datei < 180 KB, vier echte Punkte aus latest-observer-proof.json, Commit-SHA in stand.json, Pages-Guard bricht bei Secret/JS/Größe hart ab"
     },
     {
       "id": "mirror.notebookPages",
@@ -1893,7 +1941,8 @@ Pflicht aus AGENTS.md §11 und §12 A: erst Inventur, dann Umsetzung. Quellen: `
     "BP-012",
     "BP-013",
     "BP-014",
-    "BP-015"
+    "BP-015",
+    "BP-016"
   ]
 }
 ```
@@ -3444,6 +3493,107 @@ Pflicht aus AGENTS.md §11 und §12 A: erst Inventur, dann Umsetzung. Quellen: `
   "version": 1,
   "erstelltAm": "2026-11-23T10:15:55.285Z",
   "geaendertAm": "2026-11-23T10:15:55.285Z"
+}
+```
+
+## ops/blueprints/BP-016.json
+
+```json
+{
+  "titel": "GitHub-Pages-Sync & 4-Punkte-Ergebnis-Feed",
+  "klartextziel": "Wenn ein Bauplan fertig ist oder ein Testlauf vorbei ist, will ich, dass alle Handbücher, Baupläne und Testergebnisse von allein als einfache Internet-Seiten bereitstehen, damit mein Notizbuch sie ohne Anmeldung lesen kann.",
+  "weltvorlage": "Kein Serverbezug: statische HTML5-Seiten aus SSOT, Regeln, Handbüchern, Bauplänen und echten Observer-/Verify-Belegen.",
+  "quellen": [
+    "ops/plan/BP-016-ui-prozess.md (Vier-Stufen-Prozess vor dem Coding)",
+    "ops/tasks/T-232.md",
+    "ops/SYSTEM_SSOT.json (repos, Serverrollen, regieLeitplanken, uiProzess)",
+    "ops/WORLD_INVARIANTS.md, AGENTS.md §10.2 (vier Observer-Punkte)",
+    "ops/capabilities.json, ops/SPEC_MAPPING.md Abschnitt 13",
+    "ops/runtime/latest-observer-proof.json, ops/results/*.verify.json"
+  ],
+  "capabilityAbgleich": {
+    "vorhanden": [
+      "export.notebookSync (T-231: Bundle, HTML, Redaction, CI-Fallback)",
+      "mirror.notebookPages (T-231: Push auf main + workflow_dispatch)",
+      "qa.acceptance / observer.proof (4 echte Gate-Punkte im latest-observer-proof.json)"
+    ],
+    "fehlend": [
+      "export.notebookPages (kleine, JS-freie Einzelseiten + stand.json + Größen-/Sanitizer-Guard)",
+      "pages.publishDocs (Push des geprüften _site/ in ein separates Doku-Repo, Token nur in CI)"
+    ],
+    "hinweis": "Nur registrierte Capabilities mit grünem Beleg zählen als vorhanden. Beide fehlenden Bausteine werden in T-232 umgesetzt."
+  },
+  "meilensteine": [
+    {
+      "id": "M1",
+      "titel": "Vier-Stufen-Vertrag",
+      "inhalt": "Job-to-be-Done, vier Zustände, Wireframe + API-/Workflow-Vertrag und Abnahmeplan vor dem Coding dokumentieren."
+    },
+    {
+      "id": "M2",
+      "titel": "Statische Seiten",
+      "inhalt": "Exporter um --pages-dir erweitern: acht kompakte Dateien, 0 JavaScript, UTF-8, semantische Überschriften, hartes Limit < 180 KB pro Datei."
+    },
+    {
+      "id": "M3",
+      "titel": "Echter Ergebnis-Feed",
+      "inhalt": "Vier Punkte aus latest-observer-proof.json und echte Zahlen aus ops/results/*.verify.json darstellen; kein erfundener Wert."
+    },
+    {
+      "id": "M4",
+      "titel": "Auto-Publish & Abnahme",
+      "inhalt": "GitHub-Action mit lokalem E2E-Test, Artifact-Fallback und Push ins Doku-Repo via DOCS_PAGES_REPO/DOCS_PAGES_TOKEN; Live-Curl-Verify."
+    }
+  ],
+  "e2eKriterien": {
+    "observerPunkte": 4,
+    "observerBelege": [
+      "Punkt 1: echte update_block-Pakete (Blöcke/Bühne) mit 0 Fehlern",
+      "Punkt 2: echtes mob_equipment-Paket (Crew-Jukebox/minecraft:music_disc_cat)",
+      "Punkt 3: 3D-ViewPort/Raycast für Bühne und alle Akteure ohne Verdeckung",
+      "Punkt 4: Server-Identität ShowWorld auf 19133, wrong_server=false, openrouter_calls=0",
+      "Zusätzlich: echte Zahlen aus allen ops/results/*.verify.json im Feed"
+    ],
+    "viewPort": {
+      "augenhoeheOffset": 1.62,
+      "horizontalGrad": 45,
+      "vertikalGrad": 35,
+      "distanzBlocks": [
+        3,
+        32
+      ],
+      "raycastSchritt": 0.25
+    },
+    "port": 19133,
+    "showcasePort": 19133,
+    "e2ePort": 19134,
+    "belege": [
+      "node tests/notebook-pages-e2e.test.js",
+      "npm run notebook:pages",
+      "npm test",
+      "npm run verify -- --out ops/results/T-232.verify.json",
+      "GitHub Actions: .github/workflows/notebook-pages.yml (Artifact + Push + Live-Curl)"
+    ]
+  },
+  "risiken": [
+    "brotfeld/mc-bot-leitstelle-code und brotfeld/mc-bot-vault bleiben privat; keine Sichtbarkeitsänderung, kein Pages im Code-Repo.",
+    "DOCS_PAGES_TOKEN wird ausschließlich als GitHub-Repo-Secret verwendet und nie ins Repo, Bundle oder _site geschrieben.",
+    "Ohne Token/Variable kein Stopp: _site als Artifact, lokaler E2E-Test grün, Push übersprungen.",
+    "Jede Seite strikt < 180 KB; Redaction und JS-/Extern-Ressourcen-Guard brechen vor dem Schreiben hart ab.",
+    "Freigabe bleibt manual — kein Agent setzt den Bauplan selbst frei.",
+    "Kein Eingriff in 19132, Weltdaten, Auth, Firewall; keine neuen Abhängigkeiten, keine kostenpflichtigen API-Calls.",
+    "Die finale Einladung zur Live-Präsentation ist ausschließlich Chris vorbehalten."
+  ],
+  "haengtVon": [
+    "BP-015"
+  ],
+  "bedienPort": 7070,
+  "freigabe": "manual",
+  "id": "BP-016",
+  "status": "entwurf",
+  "version": 1,
+  "erstelltAm": "2026-11-23T13:46:36.198Z",
+  "geaendertAm": "2026-11-23T13:46:36.198Z"
 }
 ```
 
