@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-23T21:28:29.035Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-23T21:41:53.381Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -1101,7 +1101,9 @@ Pflicht aus AGENTS.md §11 und §12 A: erst Inventur, dann Umsetzung. Quellen: `
 HTML-Unterlinks. Deshalb enthält die direkt gelieferte `index.html` seit T-233 alle fünf
 Wissensblöcke selbst: Stand/Commit, SSOT/Kernregeln, Handbuch/Fähigkeiten, alle 17 Baupläne
 und die vier echten Observer-Punkte samt Verify-Historie. `GET /` und `GET /index.html`
-liefern identischen Inhalt; die Unterseiten bleiben nur noch Detail-Archiv.
+liefern identischen Inhalt. Die seinerzeit verbliebenen Unterseiten wurden in T-234
+(Ziel-Repo brotfeld/voxelcrew-pages auf genau eine index.html bereinigen) auch physisch
+entfernt — siehe Abschnitt 15.
 
 | Soll | Ist | Beleg |
 | --- | --- | --- |
@@ -1118,6 +1120,31 @@ HTTP-Crawler und echtem Chromium mit Screenshot-Belegen.
 **Gaps / Risiken:** Die tatsächliche Veröffentlichung hängt weiterhin vom Workflow-Lauf auf
 `main` und dem Doku-Token ab; lokal ist der Artifact-Fallback grün. Keine Änderung an Ports,
 Safety, Auth oder Sichtbarkeit der Quell-Repos.
+
+## 15) T-234 — Ziel-Repo restlos bereinigt (Soll → Ist)
+
+**User Journey:** Ein Push auf `main` baut `_site/` neu; der Workflow löscht im Ziel-Branch
+`brotfeld/voxelcrew-pages@main` alles außer `.git`, kopiert ausschließlich `index.html`,
+`stand.json` und `.nojekyll` und pusht. Danach wartet der Live-Verify bis zu 6× alle 5 s,
+bis das CDN den aktuellen `commitSha` ausliefert, und beweist HTTP 200 + SHA + `< 175 KB`
+für `index.html` sowie HTTP 404 für alle sechs ehemaligen Unterseiten. Chris muss nichts
+manuell prüfen oder eintippen; Tokens bleiben im GitHub-Secret.
+
+| Soll | Ist | Beleg |
+| --- | --- | --- |
+| `--pages-dir` erzeugt genau drei Dateien | `PAGES_DATEIEN = ['index.html','stand.json']`, `PAGES_ZUSATZ = ['.nojekyll']`, Altlast-Bereinigung im Zielordner, Unterseiten-Helfer entfernt | `ops/scripts/export-notebook-sync.mjs`, `tests/notebook-pages-e2e.test.js` |
+| Vollständige eine Seite | Fünf `<section>`-Blöcke, 17 Baupläne, vier Observer-Punkte, 0 `<script>`, 0 externe Requests, < 179 200 Byte | `index.html` 25 298 Byte im E2E-/Export-Lauf; `ops/results/T-234-belege/` |
+| `stand.json` als Verify-Kern | `commitSha`, `generatedAt`, `observerPunkte: 4`, `indexBytes` (muss mit `index.html` übereinstimmen) | Guard in `pruefePagesGuard()`, E2E- und Browser-Test |
+| Ziel-Branch ohne Altlasten | `find … ! -name .git -exec rm -rf {} +` vor `cp` der drei Dateien; `git add -A` löscht alte Dateien mit | `.github/workflows/notebook-pages.yml`, Schritt „Doku-Pages sauber neu aufbauen und publizieren" |
+| CDN-Cache sicher abgefangen | 6 Retry-Versuche à 5 s auf `stand.json` mit aktuellem `commitSha` | `.github/workflows/notebook-pages.yml`, Schritt „Live-Verify" |
+| Keine Altlast live erreichbar | HTTP 404 für `ssot-und-regeln.html`, `handbuecher-*.html`, `bauplaene-*.html`, `e2e-ergebnisse.html` | Workflow-Live-Verify + beide Notebook-Tests |
+| Vier-Stufen-Prozess vor dem Code | Job-to-be-Done, vier Zustände, Wireframe/API-Vertrag, Abnahmeplan vor der Umsetzung | `ops/plan/T-234-eine-datei-ui-prozess.md` |
+
+**Gaps / Risiken:** Die echte Veröffentlichung bleibt vom hinterlegten `DOCS_PAGES_TOKEN`
+und vom ersten Workflow-Lauf auf `main` abhängig; ohne Token bleibt der Artifact-Fallback
+grün. Der Live-404-Beweis wird im Workflow gegen `https://brotfeld.github.io/voxelcrew-pages/`
+geführt (dokumentierter Alias: `https://github.io`). Keine Änderung an Ports, Safety, Auth,
+Vault oder Sichtbarkeit der Quell-Repos.
 ```
 
 ## ops/capabilities.json
@@ -1706,7 +1733,7 @@ Safety, Auth oder Sichtbarkeit der Quell-Repos.
           "name": "pagesDir",
           "typ": "string",
           "pflicht": true,
-          "beschreibung": "Zielordner für die acht statischen Seiten (z. B. _site); nie die Repo-Wurzel"
+          "beschreibung": "Zielordner für exakt drei Dateien (index.html, stand.json, .nojekyll; z. B. _site); nie die Repo-Wurzel"
         },
         {
           "name": "commitSha",
@@ -1722,9 +1749,9 @@ Safety, Auth oder Sichtbarkeit der Quell-Repos.
         }
       ],
       "block_states": [],
-      "doku": ".github/workflows/notebook-pages.yml, ops/plan/BP-016-ui-prozess.md, ops/SPEC_MAPPING.md Abschnitt 13",
+      "doku": ".github/workflows/notebook-pages.yml, ops/plan/BP-016-ui-prozess.md, ops/plan/T-234-eine-datei-ui-prozess.md, ops/SPEC_MAPPING.md Abschnitte 13–15",
       "verified": true,
-      "beleg": "tests/notebook-pages-e2e.test.js: lokaler HTTP-Server auf ephemeralem Port, 8 Seiten, Content-Type text/html; charset=utf-8, 0 <script>, 0 externe Requests, jede Datei < 180 KB, vier echte Punkte aus latest-observer-proof.json, Commit-SHA in stand.json, Pages-Guard bricht bei Secret/JS/Größe hart ab"
+      "beleg": "tests/notebook-pages-e2e.test.js und tests/notebook-pages-browser.test.js: genau 3 Dateien (index.html, stand.json, .nojekyll), eine URL mit 5 Blöcken/17 Bauplänen/4 Punkten direkt im DOM, index.html < 179200 Byte, 0 <script>, 0 externe Requests, stand.json mit commitSha/observerPunkte/indexBytes, sechs Altlasten mit HTTP 404, Pages-Guard bricht bei Secret/JS/Größe/altem Dateisatz hart ab"
     },
     {
       "id": "mirror.notebookPages",
