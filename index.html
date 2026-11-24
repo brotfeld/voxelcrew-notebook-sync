@@ -22,7 +22,7 @@
 <body>
   <header>
     <h1>VoxelCrew — Gesamtspezifikation</h1>
-    <p class="meta">Exportiert am 2026-11-24T02:06:37.779Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
+    <p class="meta">Exportiert am 2026-11-24T02:28:45.620Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
     <p class="meta">Leitstelle: brotfeld/mc-bot-leitstelle · Mirror: brotfeld/voxelcrew-notebook-sync · Pages: https://github.io</p>
     <nav aria-label="Inhalt">
       <a href="#abschnitt-1">Post-Spülgang-Inventur</a>
@@ -478,6 +478,30 @@
         &quot;ingame:kompass (Umsetzung in BP-011)&quot;
       ],
       &quot;ablage&quot;: &quot;ops/runtime/bot-hilfe/ (gitignored)&quot;
+    }
+  },
+  &quot;bauplaene&quot;: {
+    &quot;BP-014&quot;: {
+      &quot;titel&quot;: &quot;Tribes/Frontier &amp; Weltgedächtnis&quot;,
+      &quot;freigabe&quot;: &quot;manual&quot;,
+      &quot;phase1&quot;: {
+        &quot;task&quot;: &quot;T-236&quot;,
+        &quot;stand&quot;: &quot;2026-11-24&quot;,
+        &quot;status&quot;: &quot;umgesetzt&quot;,
+        &quot;analyse&quot;: &quot;ops/blueprints/BP-014.md&quot;,
+        &quot;bausteine&quot;: [
+          &quot;modules/living-tribes/ (TribeEventBus, TribeWorld, StateMigrator)&quot;,
+          &quot;ops/runtime/tribes-world-registry.mjs (registrierter Aufrufpfad, resetForE2E nur 19134)&quot;,
+          &quot;config/tribes/*.md (neun Zod-Validierungen, npm run lint:config)&quot;
+        ],
+        &quot;meilensteine&quot;: {
+          &quot;M1&quot;: &quot;umgesetzt&quot;,
+          &quot;M2&quot;: &quot;offen&quot;,
+          &quot;M3&quot;: &quot;offen&quot;,
+          &quot;M4&quot;: &quot;offen&quot;
+        },
+        &quot;hinweis&quot;: &quot;Kein Dispatch und keine Freigabeänderung; 19132 unberührt; alle Werte weiterhin TODO_VERIFY.&quot;
+      }
     }
   }
 }</code></pre>
@@ -1117,7 +1141,7 @@ Pflicht aus AGENTS.md §11 und §12 A: erst Inventur, dann Umsetzung. Quellen: `
 | Adaptive Scene Director + Multi-Seed-Gate (N ≥ 3) | SSOT `regieLeitplanken A–D`, AGENTS.md §12, Handbuch 05, `world.chooseAndReset` (atomarer Master-Reset) | Ausführender 32×32-Regisseur und 3-Fach-Beweis → **BP-007 (manual, unverändert)**. |
 | User-Empathy-Simulator (FOV 70°, ruhiges Tempo) | 10-Jahre-Verständlichkeitscheck in den Stufe-4-Browser-Tests (`hilfe.botHilfe`), SSOT `regieLeitplanken.D` | Unprivilegierter FOV-70°-Spieler-Simulator → **BP-007/D**. |
 | Showcases (E2E trocken → Abnahme 19133 → Review) | `show.run`, Observer-Proof (254 `update_block` + 1 `mob_equipment`), `qa.acceptance` via `npm run show:accept`, `verify:show` grün | Showcase-Skript/Review-Rückfluss als eigener Baustein → **BP-015**. |
-| Tribes/Frontier (SQLite-Weltgedächtnis, Frontier, eine Instanz pro Welt) | Schnittstelle v2 volltextinventarisiert in Abschnitt 7/8 (Status `extracted`/`beantwortet`) | Implementierung und offene Zahlen/IDs → **BP-014** (nicht raten). |
+| Tribes/Frontier (SQLite-Weltgedächtnis, Frontier, eine Instanz pro Welt) | Schnittstelle v2 volltextinventarisiert in Abschnitt 7/8; **Phase 1 (T-236)**: `tribes.eventBus`, `tribes.worldInstance`, `tribes.stateMigration`, `tribes.configLint` mit Isolations- und Linter-Beleg; Synergie-Matrix in `ops/blueprints/BP-014.md` | Frontier-Grenzen (M2), Relay (M3), Zwei-Welten-Beweis (M4) und alle Zahlen/IDs → **BP-014 (manual, unverändert)**; nicht raten. |
 | Zero-Terminal-Betrieb (Auto-Sync, Notebook-Export, RAM-Schranken) | `sync.werkbankAuto` (25 Prüfungen), `export.notebookSync`, `ram.maschinenSchwellen` (13 Prüfungen), Bot-Hilfe in beiden UIs | Kein offener Soll-Anteil; Knowledge-/Worker-Dispatch bleibt bewusst pausiert. |
 
 **Fazit:** Jeder Soll-Bereich der Spezifikation ist entweder mit Beleg grün oder eindeutig einem Bauplan zugeordnet. Damit ist das Mapping lückenlos; kein Agent muss blind raten oder mehrfach nach demselben Baustein suchen. Die Kette ab `BP-008` ist abhängigkeitsgeprüft (siehe `ops/blueprints/registry.json`, `haengtVon` je Bauplan) und bleibt vollständig `status: entwurf`, `freigabe: manual`. `BP-000`–`BP-007` sind unverändert. Der ausführliche, kindgerechte Plan steht in `vault/handbuch/06_Gesamt_Entwicklungsplan_und_Meilensteine.md`.
@@ -1265,6 +1289,39 @@ Dateipfade dort sind keine aktiven Referenzen. In `ops/SYSTEM_SSOT.json` wurde n
 veraltete Guard-Dateisuffix-Verweis `.mjs` → `.cjs` richtiggestellt; die Regel selbst und alle
 Port-/Akteurswerte sind unverändert. Live-`19132` wurde nicht kontaktiert, keine finale
 Einladung zur Live-Präsentation.
+
+## 18) T-236 — BP-014 Phase 1: Analyse, Synergie-Matrix &amp; M1-Grundgerüst (Soll → Ist)
+
+**User Journey ohne manuelle Klicks:** Supervisor fordert die Phase-1-Analyse zu
+`BP-014 (Tribes/Frontier &amp; Weltgedächtnis)` → der Agent gleicht zuerst Vault, Referenzanlagen,
+Codebase und Board gegen `ops/capabilities.json` und dieses Mapping ab → die Synergie-Matrix
+benennt Wiederverwendung (`WorldMemory`, Master-Reset, `Pathfinder`, Observer-Gate) und Neubau
+(`living-tribes`, Config-Linter) → das M1-Modulgerüst entsteht mit `worldId`, `schemaVersion: 1`
+und `StateMigrator` → `masterReset()` ruft den Reset-Hook mit der echten `worldMemoryId` aus
+`.world-origin.json` auf `19134` vor dem Bot-Join → `npm test`, `npm run lint:config` und
+`npm run verify` liefern den maschinellen Beleg für Board, Result und Pages. Chris tippt
+nichts; die finale Live-Einladung bleibt sein Tor.
+
+| Soll aus T-236 | Ist | Beleg |
+| --- | --- | --- |
+| Vollständiges Spezifikations-Mapping vor dem Bau | Synergie-Matrix mit 8 Soll/Ist-Zeilen, Wiederverwendung vs. Neubau, M1–M4 und User-Journey | `ops/blueprints/BP-014.md`, Vault-Entwurf `vault/handbuch/BP-014-Synergie-Matrix.md` |
+| Eine Instanz pro Welt, harte Isolation | `TribeEventBus`, `TribeWorld`, `StateMigrator`, Registry mit `worldId` als Key; Cross-World-Zugriff wird abgewiesen | `tests/tribes-world-isolation.test.mjs` 5/5, `ops/runtime/tribes-world-registry.mjs` |
+| Reset vor Bot-Join auf 19134 | `masterReset()` übergibt echte `worldMemoryId`; Hook sperrt 19132 und akzeptiert nur 19134 | `tests/wissenanalyse-pipeline.test.js` 13/13, `tests/e2e-world-reset.test.mjs` 9/9 |
+| Neun Config-Dateien, keine geratenen Werte | `config/tribes/*.md` mit YAML-Frontmatter, alle Werte `TODO_VERIFY`; Zod weist Extra-Keys ab | `npm run lint:config` (9 Dateien), `tests/tribes-config-lint.test.mjs` 4/4 |
+| Fortschritt in SSOT/Bauplan/Capabilities | `BP-014.json` mit M1–M4-Status und `fortschritt`, SSOT `bauplaene.BP-014`, vier neue Capabilities; `freigabe: manual` unverändert | `ops/blueprints/BP-014.json`, `ops/SYSTEM_SSOT.json`, `ops/capabilities.json` |
+
+**Neue wiederverwendbare Bausteine:** `tribes.eventBus`, `tribes.worldInstance`,
+`tribes.stateMigration`, `tribes.configLint` — alle über den registrierten Aufrufpfad
+`ops/runtime/tribes-world-registry.mjs` erreichbar, kein `_dbg`-Skript.
+
+**Gaps / Risiken / Backlog:** M2 (Frontier-Grenzen aus echten Blockdaten und SQLite-Spalten),
+M3 (Relay-Anbindung nach BP-012) und M4 (Observer-Beweis mit zwei Welten/Seeds) bleiben offen
+und `BP-014` bleibt `freigabe: manual`. Alle fachlichen Zahlen und IDs bleiben `TODO_VERIFY`.
+`zod` wurde als `devDependency` freigegeben; der Konflikt mit dem Bauplan-Risiko „keine neuen
+Abhängigkeiten&quot; ist in `ops/blueprints/BP-014.md` dokumentiert. `ops/runner.stop` ist aktiv,
+deshalb lief der Task als Mastermind-Ausführung statt über die pausierte Worker-Queue.
+Live-`19132`/UDP 7551 blieb unberührt; keine kostenpflichtigen API-Calls, keine Windows- oder
+Sichtbarkeitsänderung, keine finale Live-Einladung.
 </code></pre>
     </article>
     <article class="abschnitt" id="abschnitt-7">
@@ -2009,6 +2066,102 @@ Einladung zur Live-Präsentation.
       &quot;doku&quot;: &quot;ops/SYSTEM_SSOT.json → maschinen.&lt;name&gt;.ram&quot;,
       &quot;verified&quot;: true,
       &quot;beleg&quot;: &quot;tests/runtime-guard-ram.test.mjs (13 Prüfungen grün): Hauptrechner 80/90, FELDBOOK 85/90 aus SSOT; generierte worker/runner-Configs ohne Drift; Live-19132 nie beendet&quot;
+    },
+    {
+      &quot;id&quot;: &quot;tribes.eventBus&quot;,
+      &quot;modul&quot;: &quot;ops/runtime/tribes-world-registry.mjs&quot;,
+      &quot;funktion&quot;: &quot;TribeEventBus.publish / subscribe&quot;,
+      &quot;zeile&quot;: null,
+      &quot;parameter&quot;: [
+        {
+          &quot;name&quot;: &quot;worldId&quot;,
+          &quot;typ&quot;: &quot;string&quot;,
+          &quot;pflicht&quot;: true,
+          &quot;beschreibung&quot;: &quot;Pflicht-Welt-ID; Events mit abweichender ID werden abgewiesen&quot;
+        },
+        {
+          &quot;name&quot;: &quot;topic&quot;,
+          &quot;typ&quot;: &quot;string&quot;,
+          &quot;pflicht&quot;: true,
+          &quot;beschreibung&quot;: &quot;Event-Topic im Format name.teil&quot;
+        },
+        {
+          &quot;name&quot;: &quot;payload&quot;,
+          &quot;typ&quot;: &quot;object&quot;,
+          &quot;pflicht&quot;: false,
+          &quot;beschreibung&quot;: &quot;Kopierter Event-Inhalt, flaches Objekt&quot;
+        }
+      ],
+      &quot;block_states&quot;: [],
+      &quot;doku&quot;: &quot;ops/blueprints/BP-014.md §3; modules/living-tribes/TribeEventBus.mjs&quot;,
+      &quot;verified&quot;: true,
+      &quot;beleg&quot;: &quot;tests/tribes-world-isolation.test.mjs (5/5): getrennte Event-Puffer pro Welt, Cross-World-Event und fremde schemaVersion abgewiesen&quot;
+    },
+    {
+      &quot;id&quot;: &quot;tribes.worldInstance&quot;,
+      &quot;modul&quot;: &quot;ops/runtime/tribes-world-registry.mjs&quot;,
+      &quot;funktion&quot;: &quot;getTribeWorld / resetForE2E&quot;,
+      &quot;zeile&quot;: null,
+      &quot;parameter&quot;: [
+        {
+          &quot;name&quot;: &quot;worldId&quot;,
+          &quot;typ&quot;: &quot;string&quot;,
+          &quot;pflicht&quot;: true,
+          &quot;beschreibung&quot;: &quot;Registrierungskey; genau eine Instanz pro Welt&quot;
+        },
+        {
+          &quot;name&quot;: &quot;port&quot;,
+          &quot;typ&quot;: &quot;number&quot;,
+          &quot;pflicht&quot;: false,
+          &quot;beschreibung&quot;: &quot;E2E-Port 19134; 19132 ist gesperrt&quot;
+        }
+      ],
+      &quot;block_states&quot;: [],
+      &quot;doku&quot;: &quot;ops/blueprints/BP-014.md §3; modules/living-tribes/TribeWorld.mjs&quot;,
+      &quot;verified&quot;: true,
+      &quot;beleg&quot;: &quot;tests/tribes-world-isolation.test.mjs + tests/wissenanalyse-pipeline.test.js (13/13): Reset mit echter worldMemoryId vor Bot-Join, keine Vermischung zweier Welten&quot;
+    },
+    {
+      &quot;id&quot;: &quot;tribes.stateMigration&quot;,
+      &quot;modul&quot;: &quot;ops/runtime/tribes-world-registry.mjs&quot;,
+      &quot;funktion&quot;: &quot;StateMigrator.migrate&quot;,
+      &quot;zeile&quot;: null,
+      &quot;parameter&quot;: [
+        {
+          &quot;name&quot;: &quot;raw&quot;,
+          &quot;typ&quot;: &quot;object&quot;,
+          &quot;pflicht&quot;: true,
+          &quot;beschreibung&quot;: &quot;Gespeicherter Zustand mit schemaVersion und worldId&quot;
+        },
+        {
+          &quot;name&quot;: &quot;expectedWorldId&quot;,
+          &quot;typ&quot;: &quot;string&quot;,
+          &quot;pflicht&quot;: true,
+          &quot;beschreibung&quot;: &quot;Erwartete Welt-ID; fremde IDs werden abgewiesen&quot;
+        }
+      ],
+      &quot;block_states&quot;: [],
+      &quot;doku&quot;: &quot;ops/blueprints/BP-014.md §3; modules/living-tribes/StateMigrator.mjs&quot;,
+      &quot;verified&quot;: true,
+      &quot;beleg&quot;: &quot;tests/tribes-world-isolation.test.mjs: Legacy-v0 wird deterministisch auf schemaVersion 1 migriert, neuere Version und fremde Welt abgewiesen&quot;
+    },
+    {
+      &quot;id&quot;: &quot;tribes.configLint&quot;,
+      &quot;modul&quot;: &quot;ops/runtime/tribes-world-registry.mjs&quot;,
+      &quot;funktion&quot;: &quot;lintTribeConfigs&quot;,
+      &quot;zeile&quot;: null,
+      &quot;parameter&quot;: [
+        {
+          &quot;name&quot;: &quot;dir&quot;,
+          &quot;typ&quot;: &quot;string&quot;,
+          &quot;pflicht&quot;: true,
+          &quot;beschreibung&quot;: &quot;Verzeichnis mit den neun config/tribes-Markdown-Dateien&quot;
+        }
+      ],
+      &quot;block_states&quot;: [],
+      &quot;doku&quot;: &quot;ops/blueprints/BP-014.md §2; modules/living-tribes/ConfigSchema.mjs&quot;,
+      &quot;verified&quot;: true,
+      &quot;beleg&quot;: &quot;npm run lint:config: 9 Config-Dateien gültig; tests/tribes-config-lint.test.mjs (4/4) weist TODO_VERIFY in Parametern, falsche IDs und Extra-Keys ab&quot;
     }
   ],
   &quot;inventur&quot;: {
@@ -2086,6 +2239,12 @@ Einladung zur Live-Präsentation.
         &quot;capability&quot;: &quot;sync.werkbankAuto / export.notebookSync / ram.maschinenSchwellen&quot;,
         &quot;beleg&quot;: &quot;tests/werkbank-auto-sync.test.mjs (25), tests/runtime-guard-ram.test.mjs (13), npm run notebook:export&quot;,
         &quot;hinweis&quot;: &quot;Automatischer Commit/Push, git-freier Export und maschinenspezifische RAM-Schranken grün (T-228).&quot;
+      },
+      {
+        &quot;bereich&quot;: &quot;Tribes/Frontier Phase 1&quot;,
+        &quot;capability&quot;: &quot;tribes.eventBus / tribes.worldInstance / tribes.stateMigration / tribes.configLint&quot;,
+        &quot;beleg&quot;: &quot;ops/blueprints/BP-014.md, tests/tribes-world-isolation.test.mjs (5/5), tests/tribes-config-lint.test.mjs (4/4), npm run lint:config&quot;,
+        &quot;hinweis&quot;: &quot;Modulgerüst, Welt-Isolation, Migration und Config-Linter grün; Frontier-Grenzen, Relay und Zwei-Welten-Beweis bleiben offen.&quot;
       }
     ],
     &quot;fehlt&quot;: [
@@ -2151,9 +2310,9 @@ Einladung zur Live-Präsentation.
       },
       {
         &quot;bereich&quot;: &quot;Tribes/Frontier&quot;,
-        &quot;soll&quot;: &quot;Tribes/SQLite-Weltgedächtnis, Frontier-Grenzen, eine Instanz pro Welt&quot;,
+        &quot;soll&quot;: &quot;SQLite-Spalten aus Schnittstelle v2, Frontier-Grenzen aus echten Blockdaten, Relay-Anbindung und Observer-Beweis mit zwei Welten&quot;,
         &quot;bauplan&quot;: &quot;BP-014&quot;,
-        &quot;grund&quot;: &quot;Schnittstelle v2 inventarisiert, keine Umsetzung; Zahlen/IDs offen (nicht raten).&quot;
+        &quot;grund&quot;: &quot;M1-Modulgerüst und Config-Linter sind umgesetzt; M2–M4 bleiben manual/backlog, Zahlen und IDs nicht raten.&quot;
       }
     ]
   }
@@ -3551,24 +3710,67 @@ Einladung zur Live-Präsentation.
     {
       &quot;id&quot;: &quot;M1&quot;,
       &quot;titel&quot;: &quot;Instanz pro Welt&quot;,
-      &quot;inhalt&quot;: &quot;Jede Welt bekommt genau eine SQLite-Instanz; world_context_id trennt sie strikt.&quot;
+      &quot;inhalt&quot;: &quot;Jede Welt bekommt genau eine Instanz mit worldId, schemaVersion 1 und StateMigrator; der Reset-Hook läuft vor dem Bot-Join auf 19134.&quot;,
+      &quot;abhaengigkeiten&quot;: [],
+      &quot;status&quot;: &quot;umgesetzt&quot;,
+      &quot;task&quot;: &quot;T-236&quot;,
+      &quot;beleg&quot;: &quot;modules/living-tribes/, ops/runtime/tribes-world-registry.mjs, tests/tribes-world-isolation.test.mjs (5/5)&quot;
     },
     {
       &quot;id&quot;: &quot;M2&quot;,
       &quot;titel&quot;: &quot;Frontier-Grenzen&quot;,
-      &quot;inhalt&quot;: &quot;Grenzen aus echten Weltdaten ableiten; keine erfundenen Koordinaten.&quot;
+      &quot;inhalt&quot;: &quot;Grenzen aus echten Weltdaten ableiten; keine erfundenen Koordinaten.&quot;,
+      &quot;abhaengigkeiten&quot;: [
+        &quot;M1&quot;
+      ],
+      &quot;status&quot;: &quot;offen&quot;,
+      &quot;task&quot;: null,
+      &quot;beleg&quot;: &quot;ops/blueprints/BP-014.md §4&quot;
     },
     {
       &quot;id&quot;: &quot;M3&quot;,
       &quot;titel&quot;: &quot;Relay-Anbindung&quot;,
-      &quot;inhalt&quot;: &quot;Gruppen über das lokale Relay aus BP-012 bedienen, ohne neue Ports nach außen.&quot;
+      &quot;inhalt&quot;: &quot;Gruppen über das lokale Relay aus BP-012 bedienen, ohne neue Ports nach außen.&quot;,
+      &quot;abhaengigkeiten&quot;: [
+        &quot;M1&quot;,
+        &quot;BP-012&quot;
+      ],
+      &quot;status&quot;: &quot;offen&quot;,
+      &quot;task&quot;: null,
+      &quot;beleg&quot;: &quot;ops/blueprints/BP-014.md §4&quot;
     },
     {
       &quot;id&quot;: &quot;M4&quot;,
       &quot;titel&quot;: &quot;Tribes-Beweis&quot;,
-      &quot;inhalt&quot;: &quot;Observer-Proof auf 19134: zwei Welten, kein Gedächtnis-Überlauf, Reset sauber.&quot;
+      &quot;inhalt&quot;: &quot;Observer-Proof auf 19134: zwei Welten, kein Gedächtnis-Überlauf, Reset sauber.&quot;,
+      &quot;abhaengigkeiten&quot;: [
+        &quot;M1&quot;,
+        &quot;M2&quot;,
+        &quot;M3&quot;
+      ],
+      &quot;status&quot;: &quot;offen&quot;,
+      &quot;task&quot;: null,
+      &quot;beleg&quot;: &quot;ops/blueprints/BP-014.md §4&quot;
     }
   ],
+  &quot;fortschritt&quot;: {
+    &quot;phase&quot;: &quot;Phase 1 — Architektur-Analyse, Synergie-Matrix &amp; M1-Grundgerüst&quot;,
+    &quot;task&quot;: &quot;T-236&quot;,
+    &quot;stand&quot;: &quot;2026-11-24&quot;,
+    &quot;analyse&quot;: &quot;ops/blueprints/BP-014.md (kanonisch), vault/handbuch/BP-014-Synergie-Matrix.md (Entwurf)&quot;,
+    &quot;umgesetzt&quot;: [
+      &quot;M1: TribeEventBus, TribeWorld mit worldId und schemaVersion 1, StateMigrator, Reset-Hook in masterReset()&quot;,
+      &quot;Neun Zod-validierte Config-Dateien in config/tribes/ mit npm run lint:config&quot;,
+      &quot;Capability-Einträge tribes.eventBus, tribes.worldInstance, tribes.stateMigration, tribes.configLint&quot;
+    ],
+    &quot;offen&quot;: [
+      &quot;M2 Frontier-Grenzen aus echten Blockdaten und SQLite-Spalten aus Schnittstelle v2&quot;,
+      &quot;M3 Relay-Anbindung nach Freigabe von BP-012&quot;,
+      &quot;M4 Observer-Beweis mit zwei Welten/Seeds auf 19134&quot;,
+      &quot;Alle Tribes-/Frontier-Zahlen und IDs bleiben TODO_VERIFY&quot;
+    ],
+    &quot;freigabeHinweis&quot;: &quot;freigabe bleibt manual; diese Phase ist kein Dispatch und keine Selbstfreigabe.&quot;
+  },
   &quot;e2eKriterien&quot;: {
     &quot;observerPunkte&quot;: 4,
     &quot;observerBelege&quot;: [
@@ -3594,7 +3796,7 @@ Einladung zur Live-Präsentation.
     &quot;belege&quot;: [
       &quot;node ops/scripts/check-e2e-server.mjs&quot;,
       &quot;npm test&quot;,
-      &quot;npm run verify -- --out ops/results/T-228.verify.json&quot;,
+      &quot;npm run verify -- --out ops/results/T-236.verify.json&quot;,
       &quot;node ops/scripts/rebuild-verify.mjs --live&quot;,
       &quot;ops/blueprints/events.json&quot;
     ]
@@ -3604,7 +3806,8 @@ Einladung zur Live-Präsentation.
     &quot;Kein Eingriff in 19132 oder echte Konten.&quot;,
     &quot;Freigabe bleibt manual — kein Agent setzt den Bauplan selbst frei.&quot;,
     &quot;Kein Eingriff in den Live-Server 19132 (UDP 7551, LAN true); keine Weltdaten-/Auth-/Secret-Änderung.&quot;,
-    &quot;Keine neuen Abhängigkeiten, keine kostenpflichtigen API-Calls, keine Safety-/Auth-Änderung.&quot;
+    &quot;Keine neuen Abhängigkeiten, keine kostenpflichtigen API-Calls, keine Safety-/Auth-Änderung.&quot;,
+    &quot;T-236 hat zod als devDependency freigegeben (Supervisor-Auftrag); Konflikt mit obigem Risiko in ops/blueprints/BP-014.md dokumentiert.&quot;
   ],
   &quot;haengtVon&quot;: [
     &quot;BP-010&quot;,
@@ -3616,7 +3819,7 @@ Einladung zur Live-Präsentation.
   &quot;status&quot;: &quot;entwurf&quot;,
   &quot;version&quot;: 1,
   &quot;erstelltAm&quot;: &quot;2026-11-23T10:15:55.274Z&quot;,
-  &quot;geaendertAm&quot;: &quot;2026-11-23T10:15:55.274Z&quot;
+  &quot;geaendertAm&quot;: &quot;2026-11-24T00:00:00.000Z&quot;
 }</code></pre>
     </article>
     <article class="abschnitt" id="abschnitt-24">
