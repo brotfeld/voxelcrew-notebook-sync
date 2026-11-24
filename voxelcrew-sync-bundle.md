@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-23T21:41:53.381Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-24T01:23:10.265Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -828,7 +828,7 @@ node tests/world-invariants.test.js   # Logik-Selbsttest, keine Calls
 ```markdown
 # SPEC_MAPPING.md — Vollständiges Mapping der Systemspezifikation gegen Ist-Stand
 
-Stand: 2026-11-22 (Mastermind/Resident-Agent). Zweck: verhindert blindes Raten und doppelte Suche nach Bausteinen. Basisdokumente: `AGENTS.md`, `ops/PRAESENTATION.md`, `ops/WORLD_INVARIANTS.md`, `ops/BOARD.md`, `ops/QUESTIONS.md`, `ops/capabilities.json`, Code unter `app/`, `ops/qa/`, `ops/scripts/`, Tests unter `tests/`.
+Stand: 2026-11-24 (Mastermind/Resident-Agent). Zweck: verhindert blindes Raten und doppelte Suche nach Bausteinen. Basisdokumente: `AGENTS.md`, `ops/PRAESENTATION.md`, `ops/WORLD_INVARIANTS.md`, `ops/BOARD.md`, `ops/QUESTIONS.md`, `ops/capabilities.json`, Code unter `app/`, `ops/qa/`, `ops/scripts/`, Tests unter `tests/`.
 
 ## 1) Port-/Protokoll- und Betriebsinvarianten (Soll)
 
@@ -1145,6 +1145,37 @@ und vom ersten Workflow-Lauf auf `main` abhängig; ohne Token bleibt der Artifac
 grün. Der Live-404-Beweis wird im Workflow gegen `https://brotfeld.github.io/voxelcrew-pages/`
 geführt (dokumentierter Alias: `https://github.io`). Keine Änderung an Ports, Safety, Auth,
 Vault oder Sichtbarkeit der Quell-Repos.
+
+## 16) T-235 — CI-Pages-Verify und BP-004-Reset auf 19134 (Soll → Ist)
+
+**User Journey ohne manuelle Klicks:** Push auf `main` → Pages-Workflow baut eine `index.html`
+→ Live-Verify akzeptiert für gelöschte Altlasten `404/410/503` und wartet bis zu 10×6 s auf
+den aktuellen `commitSha` → read-only Inventur liest Chris' neun echte `FW - …`-Welten aus
+`level.dat` → `npm run e2e:reset` stoppt 19134, archiviert die alte Welt, spielt `FW-Base`
+bitgenau aus, startet den BDS, verbindet einen `OBSERVER` ohne UDP 7551, platziert ihn per
+BDS-Konsole, löst ein echtes `update_block` aus und schreibt vier Gate-Punkte in den
+Zyklus-Beleg. Chris tippt nichts; 19132 bleibt unberührt.
+
+| Soll aus BP-004 / T-235 | Ist | Beleg |
+| --- | --- | --- |
+| Echte `FW-*`-Namen, keine geratenen Parameter | `FW-<preset_id>` aus `FlatWorldLayers.preset_id`, Originalnamen und SHA256 dokumentiert | `ops/runtime/fw-world-inventory.json`, `tests/fw-world-inventory.test.mjs` 5/5 |
+| Datenschonender Reset | Alte Welt als `worlds/.alt-E2EWorld-…` bewahrt, Origin + `world.reset.completed`, Gedächtnis vor Bot-Join geleert | `ops/runtime/e2e-reset-cycle.json` Punkt 4 grün, `ops/runtime/world-memory.json` |
+| Wiederholbarer Observer-Beweis auf 19134 | Eigenständiger Orchestrator statt Ad-hoc-Skript; `SHOW_ACTOR`/`OBSERVER` via Actor-Profile-Guard | `ops/scripts/e2e-world-reset.mjs`, `npm run e2e:reset`, `ops/scripts/e2e-world-reset.test.mjs` 9/9 |
+| Direkter NetherNet-Endpunkt ohne Live-Discovery | HTTP-Signalling auf dem Server-Port, identische Offline-Identität zum Login; `19132`/UDP 7551 tabu | `app/backend/bedrock/NethernetHttpSignalling.js`, SDP-Antwort 2004 Byte, `level_id=E2EWorld` |
+| Pages-Live-Verify toleriert CDN-Rennen | `404/410/503` als „nicht mehr ausgeliefert“, `10 × 6 s` auf `commitSha` | `.github/workflows/notebook-pages.yml`, `tests/notebook-pages-e2e.test.js` |
+| Capability- und Bauplan-Mapping | Drei neue registrierte Bausteine; BP-004 nur Nachweis, `freigabe: manual` unverändert | `ops/capabilities.json`, `ops/blueprints/BP-004.json` |
+
+**Neue wiederverwendbare Bausteine:** `world.fwInventory`, `world.resetE2e` und
+`bedrock.nethernetHttpSignalling` (alle in `ops/capabilities.json` registriert). Damit ist die
+Journey vollständig auf reguläre Aufrufpfade abgebildet; es gibt kein `_dbg`-Skript als
+Dauerlösung.
+
+**Gaps / Risiken:** `BP-004 (Flache Welt als Vorlage / FW-Namensschema + Reset (19134))`
+bleibt `freigabe: manual`; der Nachweis ist kein Freigabe- oder Dispatch-Ersatz. Die echte
+Pages-Veröffentlichung hängt weiterhin vom Workflow-Lauf auf `main` und dem Doku-Token ab.
+Der Reset betrifft ausschließlich die E2E-Welt `E2EWorld` auf `19134`; der geschützte Live-BDS
+`19132` (PID 18356) wurde nur attachiert und nie angesprochen. Keine finale Einladung zur
+Live-Präsentation.
 ```
 
 ## ops/capabilities.json
@@ -1152,7 +1183,7 @@ Vault oder Sichtbarkeit der Quell-Repos.
 ```json
 {
   "schema": "capability-registry.v1",
-  "stand": "2026-11-23",
+  "stand": "2026-11-24",
   "capabilities": [
     {
       "id": "bedrock.sendChat",
@@ -1800,6 +1831,78 @@ Vault oder Sichtbarkeit der Quell-Repos.
       "doku": "vault/handbuch/07_Vier_Stufen_UI_Prozess.md",
       "verified": true,
       "beleg": "tests/werkbank-browser-e2e.test.js + tests/cockpit-browser-e2e.test.js: 60-s-Flugschreiber-Clip, Eskalationskarte mit 3 Optionen, Screenshot-Beleg, 0 Konsolenfehler"
+    },
+    {
+      "id": "world.fwInventory",
+      "modul": "ops/scripts/fw-world-inventory.mjs",
+      "funktion": "readFlatWorldInventory/erstelleInventar/schreibeInventar",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "worldsDirs",
+          "typ": "string[]",
+          "pflicht": true,
+          "beschreibung": "Echte minecraftWorlds-Verzeichnisse; read-only"
+        },
+        {
+          "name": "options",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "spielername, nowIso, ausgabePfad"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/SPEC_MAPPING.md Abschnitt 16: T-235 (CI-Pages-Verify und BP-004-Reset auf 19134)",
+      "verified": true,
+      "beleg": "tests/fw-world-inventory.test.mjs 5/5 grün: neun echte FW-*-Welten aus level.dat (Generator, GameType, Difficulty, showcoordinates, FlatWorldLayers.preset_id, SHA256), 0 offene Parameter; keine Welt kopiert oder committet"
+    },
+    {
+      "id": "world.resetE2e",
+      "modul": "ops/scripts/e2e-world-reset.mjs",
+      "funktion": "fuehreResetZyklus/bewerteZyklus/normalisiereResetErgebnis",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "port",
+          "typ": "number (19134)",
+          "pflicht": true,
+          "beschreibung": "Jede andere Portnummer wird vor jeder Aktion abgelehnt"
+        },
+        {
+          "name": "dryRun",
+          "typ": "boolean",
+          "pflicht": false,
+          "beschreibung": "Nur Vorabprüfung ohne BDS-Start, Reset oder OBSERVER"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/qa/e2e-reset-spec.json, npm run e2e:reset, ops/SPEC_MAPPING.md Abschnitt 16",
+      "verified": true,
+      "beleg": "npm run e2e:reset GRÜN: ops/runtime/e2e-reset-cycle.json mit vier grünen Punkten (Observer-Identität 19134/E2EWorld, update_block am Marker, ViewPort-Raycast, FW-Base-SHA256 vor/nach + Archiv + world.reset.completed vor Bot-Join); tests/e2e-world-reset.test.mjs 9/9"
+    },
+    {
+      "id": "bedrock.nethernetHttpSignalling",
+      "modul": "app/backend/bedrock/NethernetHttpSignalling.js",
+      "funktion": "installEarly/attachRaw/attachGameIdentity",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "host",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Direkter BDS-Endpunkt (127.0.0.3 für 19134)"
+        },
+        {
+          "name": "port",
+          "typ": "number (19133|19134)",
+          "pflicht": true,
+          "beschreibung": "Kein HTTP-Signalling auf 19132"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/SPEC_MAPPING.md Abschnitt 16; Mojang NetherNet HTTP-SignallingGuide",
+      "verified": true,
+      "beleg": "E2E-Reset 19134: POST /v1/join/{clientNetworkId} mit 2004-Byte-SDP-Antwort, Player connected/spawned observer, level_id=E2EWorld; kein UDP-7551-Discovery, keine Xbox-Tokens, 19132 unberührt"
     },
     {
       "id": "ram.maschinenSchwellen",
@@ -2455,12 +2558,30 @@ Vault oder Sichtbarkeit der Quell-Repos.
     "Ohne Chris' Vorlagennamen keine echte FW-Vorlage ausspielen.",
     "Keine Weltdateien committen."
   ],
+  "nachweis": {
+    "stand": "2026-11-24",
+    "auftrag": "T-235 (CI-Pages-Verify und BP-004-Reset auf 19134)",
+    "zustaendig": "nur Nachweis; keine Selbst-Freigabe, kein Worker-Dispatch, keine Live-Einladung",
+    "inventar": "ops/runtime/fw-world-inventory.json: neun echte FW-*-Welten, read-only aus level.dat, 0 offene Parameter",
+    "zyklus": "ops/runtime/e2e-reset-cycle.json: ok=true, vier Observer-Punkte grün",
+    "belege": [
+      "ops/runtime/e2e-reset-proof.json (observer, update_block, ViewPort, E2EWorld)",
+      "ops/results/T-235.md",
+      "ops/results/T-235.verify.json"
+    ],
+    "punkte": [
+      "observer-identity-19134",
+      "update-block-beweis",
+      "viewport-raycast",
+      "reset-hash-und-event"
+    ]
+  },
   "freigabe": "manual",
   "id": "BP-004",
   "status": "entwurf",
   "version": 1,
   "erstelltAm": "2026-11-23T00:48:40.407Z",
-  "geaendertAm": "2026-11-23T00:48:40.407Z"
+  "geaendertAm": "2026-11-24T00:00:00.000Z"
 }
 ```
 
