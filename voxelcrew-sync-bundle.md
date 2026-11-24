@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-24T10:26:24.642Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-24T12:08:24.476Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -43,7 +43,7 @@
 ```json
 {
   "schema": "voxelcrew-ssot.v1",
-  "stand": "2026-11-23",
+  "stand": "2026-11-24",
   "konzept_revision": "v1 von Chris",
   "zweck": "Einzige widerspruchsfreie Quelle für Worker, Maschinen, Server, Akteure und Schutzgrenzen. ops/runner.json, ops/runner.feldbuch.json, ops/workers.json, ops/WORLD_INVARIANTS.md und AGENTS.md leiten sich hieraus ab.",
   "repos": {
@@ -417,6 +417,125 @@
       "ablage": "ops/runtime/bot-hilfe/ (gitignored)"
     }
   },
+  "governance": {
+    "stand": "2026-11-24",
+    "quelle": "Chris, 24.11.2026 (Supervisor-Auftrag BP-000); T-239",
+    "verbindlich": true,
+    "captain": {
+      "rolle": "Supervisor/Mastermind als Kapitän",
+      "regel": "Der Supervisor schreibt keinen umfangreichen Produktivcode direkt. Jeder Bauplan wird konsequent in kleine atomare T-xxx-Subtasks in ops/BOARD.md zerlegt; Implementierung und Tests gehen an die autonomen Worker kilo1-kilo5. Governance-/Meta-Tasks, SafetyGuard, Auth, Secrets, Vault-Tore und Zeiten mit pausiertem Dispatch verbleiben beim Mastermind.",
+      "subtaskRegeln": {
+        "einZielProTask": true,
+        "dateienMax": 4,
+        "laufzeitMinutenMax": 20,
+        "einPruefkriterium": true
+      },
+      "delegation": [
+        "kilo1",
+        "kilo2",
+        "kilo3",
+        "kilo4",
+        "kilo5"
+      ],
+      "board": "ops/BOARD.md",
+      "handbuch": "vault/handbuch/01_Systemueberblick_und_Architektur.md"
+    },
+    "orchestration": {
+      "geschuetzt": true,
+      "workers": [
+        "kilo1",
+        "kilo2",
+        "kilo3",
+        "kilo4",
+        "kilo5"
+      ],
+      "reihenfolge": [
+        "openrouter",
+        "gateway",
+        "mastermind"
+      ],
+      "verfuegbarkeitsPruefung": true,
+      "modellSpezialitaetenFreeTier": true,
+      "cooldown": {
+        "keinTaskLevelCooldownBei429": true,
+        "quotaCooldownProModellUndWorkerTyp": true,
+        "handbuch": "ops/kilo-handler/handler.mjs",
+        "tests": "tests/kilo-handler.test.js"
+      },
+      "fallbackChain": {
+        "task": "T-199 (OpenRouter-Modellausfall: Preset prüfen und freigeben)",
+        "preset": "ops/kilo-handler/openrouter-preset.json",
+        "worker": "kilo2",
+        "nurFreieModelle": true,
+        "kiloAutoFinalTry": false,
+        "router": "ops/kilo-handler/model-router.mjs",
+        "tests": "tests/kilo-handler.test.js"
+      },
+      "ramWatcher": {
+        "quelle": "maschinen.<name>.ram",
+        "hauptrechnerPausePct": 80,
+        "feldbuchPausePct": 85,
+        "notbremsePct": 90,
+        "liveServerGeschuetzt": 19132,
+        "guard": "ops/runtime/runtime-guard.mjs",
+        "tests": "tests/runtime-guard-ram.test.mjs"
+      },
+      "generierteConfigs": [
+        "ops/workers.json",
+        "ops/runner.json",
+        "ops/runner.feldbuch.json"
+      ],
+      "generator": "ops/scripts/system-config-sync.mjs",
+      "guard": "ops/qa/worker-orchestration-guard.mjs",
+      "verifySuite": "tests/worker-orchestration-guard.test.mjs",
+      "regel": "Die Worker-Steuerung darf bei keinem Umbau überschrieben oder umgangen werden. Der Guard prüft SSOT, generierte Configs, aktiven Code und Verify-Registrierung und protokolliert jeden Punkt."
+    },
+    "actionBlueprint": {
+      "name": "Garantierte Mitspieler-Wahrnehmung",
+      "kette": [
+        "mob_equipment",
+        "sichtkontakt",
+        "useBlock_oder_interaktion"
+      ],
+      "beweisQuelle": "OBSERVER",
+      "selbstaussagenAlsBeweis": false,
+      "regel": "Jede Bot-Handlung (Item halten, Schallplatte einlegen, Block nutzen, Tiere füttern) läuft exakt wie aus dem eigenen Inventar eines echten Spielers: mob_equipment → Sichtkontakt → useBlock/Interaktion. Als Beweis zählt ausschließlich der unabhängige OBSERVER mit echten Bedrock-Paketen im Umfeld; Selbstmeldungen des ausführenden Bots zählen nicht.",
+      "guard": "ops/qa/action-chain-guard.mjs",
+      "verifySuite": "tests/action-chain-guard.test.mjs",
+      "grundlage": "ops/WORLD_INVARIANTS.md §1–2"
+    },
+    "acceptance": {
+      "keineEinladungVorGruen": true,
+      "stageHeightActors": 4,
+      "stageHeightQuelle": "ops/qa/show-spec.tanzshow.json",
+      "ritualImPublikumsSichtfeld": true,
+      "multiSeed": {
+        "minSeeds": 3,
+        "port": 19134,
+        "beweiseProSeed": [
+          "blockdaten",
+          "freier3dRaycast",
+          "bequemeErreichbarkeit"
+        ],
+        "worldMemoryFallbackOhneBehaviorPack": true,
+        "regelLeitplanke": "regieLeitplanken.C_dreifacheRealitaetsKopplung"
+      },
+      "observerProofPunkte": 4,
+      "gate": "ops/qa/showcase-release-gate.mjs",
+      "verifySuite": "tests/showcase-release-gate.test.mjs"
+    },
+    "autoMerge": {
+      "nurNachReview": true,
+      "verifyKomplettGruen": true,
+      "observerPunkte": 4,
+      "negativlisteTreffer": 0,
+      "pages": {
+        "jsFrei": true,
+        "maxBytes": 179200
+      },
+      "regel": "Merge nach main erst, wenn npm run verify 0 Fehler meldet, alle 4 Observer-Punkte auf 19133/19134 grün sind, die Negativliste 0 Treffer hat und die JS-freie Pages-Ausgabe voxelcrew-pages unter 175 KB bleibt."
+    }
+  },
   "bauplaene": {
     "BP-014": {
       "titel": "Tribes/Frontier & Weltgedächtnis",
@@ -715,6 +834,70 @@ Für **jede** neue oder veränderte Oberfläche gilt: Erst die vier Stufen durch
 4. **Abnahme wie ein Profi:** Playwright-Klick-/Formular-Test mit Screenshot-Beleg, **0 Browser-Konsolenfehler, 0 fehlgeschlagene API-Requests**. 10-Jahre-Verständlichkeitscheck: Haupttext ohne Dateipfade und Tech-Kürzel. Pflicht ist der große **„Bot-Hilfe"-Notfallknopf** in der Leitstelle und im In-Game-Kompass; er erzeugt automatisch einen **60-s-Flugschreiber-Clip** und eine **Eskalationskarte** in Klartext (wiederverwendbarer Baustein `ops/runtime/bot-hilfe.mjs`).
 
 Ein UI-Task ohne Nachweis aller vier Stufen ist nicht abnahmefähig. `npm run test:browser` bzw. der Werkbank-Browser-Test sind zusätzliche harte Bedingungen (§10.4). Die In-Game-Umsetzung des Kompass-Knopfs liegt im Bauplan `BP-011 (In-Game-UI & Pure-Client-Fallback)`; `server/**` bleibt bis zu dessen Freigabe unangetastet.
+
+## 14. Kapitäns-Rolle des Supervisors (Chris, 24.11.2026, verbindlich)
+
+Der Supervisor/Mastermind arbeitet als **Kapitän**: Er schreibt **keinen umfangreichen
+Produktivcode direkt**. Jeder Bauplan wird konsequent in kleine, atomare `T-xxx`-
+Subtasks in `ops/BOARD.md` zerlegt — ein Ziel, höchstens 2–4 Dateien, unter 20 Minuten
+und ein prüfbares Kriterium je Task — und die Implementierungs- und Testarbeit wird an
+die autonomen Worker **`kilo1`–`kilo5`** delegiert (§9 bleibt maßgeblich für Reihenfolge,
+Runden und Cooldown).
+
+Ausnahmen, die beim Mastermind verbleiben: Governance-/Meta-Tasks wie
+`T-239 (BP-000 (Governance — Kapitäns-Rolle, Kilo-Orchestrierung & Handlungs-Blaupause))`,
+SafetyGuard, Auth, Secrets, echte Konten, Vault-Tore sowie alle Lagen mit aktivem
+`ops/runner.stop` (Dispatch pausiert). Der Kapitän prüft und mergt nach grünem Review;
+er ist kein manueller Test-Klicker (§11).
+
+## 15. Schutz der Kilo-Orchestrierung & Handlungs-Blaupause (Chris, 24.11.2026)
+
+Die bestehende Worker-Steuerung — Verfügbarkeitsprüfung, Modell-Spezialitäten für
+Free-Tier-Erfolge, Cooldown-Handling, die OpenRouter-Fallback-Kette aus
+`T-199 (OpenRouter-Modellausfall: Preset prüfen und freigeben)` sowie die RAM-Wächter
+(Hauptrechner 80 % Pause / 90 % Notbremse, FELDBOOK 85 % Pause / 90 % Notbremse) —
+darf bei **keinem** Umbau überschrieben oder umgangen werden. Quelle ist ausschließlich
+`ops/SYSTEM_SSOT.json` → `governance.orchestration`; `ops/workers.json` und die beiden
+`ops/runner*.json` bleiben generiert (`node ops/scripts/system-config-sync.mjs`).
+`npm run verify` enthält den Guard `tests/worker-orchestration-guard.test.mjs`
+(Baustein `ops/qa/worker-orchestration-guard.mjs`); er prüft und protokolliert SSOT,
+generierte Configs, aktiven Code und Verify-Registrierung.
+
+**Garantierte Mitspieler-Wahrnehmung:** Jede Bot-Handlung im gesamten System — Item aus
+dem Inventar halten, Schallplatte in die Jukebox einlegen, Block nutzen, Tiere füttern —
+läuft exakt wie durch einen echten Spieler aus dem eigenen Inventar:
+**`mob_equipment` → Sichtkontakt → `useBlock`/Interaktion**. Als Beweis zählt
+ausschließlich der unabhängige `OBSERVER` (stellvertretend für alle menschlichen
+Spieler), dass das gehaltene Item im Blickfeld sichtbar ist und das Welt-/Sound-Ereignis
+über echte Bedrock-Pakete im Umfeld registriert wurde (§10.2,
+`ops/WORLD_INVARIANTS.md`). Selbst-Behauptungen des ausführenden Bots zählen **nicht**
+als Beweis. Wiederverwendbarer Baustein: `ops/qa/action-chain-guard.mjs` mit
+`tests/action-chain-guard.test.mjs`.
+
+## 16. Abnahme-Disziplin & Auto-Merge (Chris, 24.11.2026, verbindlich)
+
+Ein Showcase wird Chris **erst** zur Abnahme gemeldet, wenn gleichzeitig bewiesen ist:
+
+1. alle **4 Crew-Bots** stehen nachweislich auf der Bühnen-Y-Höhe
+   (`ops/qa/show-spec.tanzshow.json`, harter `move_player`-Beweis gemäß §10.2),
+2. das Item-Ritual findet im direkten Sichtfeld der Zuschauer statt
+   (Observer-Proof + freier 3D-ViewPort-Raycast, keine Selbstaussage),
+3. der **3-Welten-Beweis** mit `N >= 3` unterschiedlichen Zufalls-Seeds auf `19134`
+   ist maschinell grün — Blockdaten, freier Raycast und bequeme Erreichbarkeit
+   gleichzeitig, inklusive `WorldMemory`-Fallback **ohne** Behavior-Pack (§12 C).
+
+Der reguläre, fail-closed Baustein `ops/qa/showcase-release-gate.mjs`
+(`tests/showcase-release-gate.test.mjs`) verhindert eine Einladung vor Grün; Chris'
+Tor in §7 Punkt 4 bleibt unangetastet. Der Merge nach `main` erfolgt ausschließlich
+nach abgeschlossenem Review und nur bei: komplett grünem `npm run verify` (0 Fehler,
+inklusive neuem Worker-Orchestrierungs-Guard), **4/4** grünen Observer-Punkten auf
+`19133`/`19134` (`ops/runtime/latest-observer-proof.json`), **0** Treffern auf der
+Negativliste und JS-freier Pages-Ausgabe `voxelcrew-pages` **< 175 KB**.
+Verbindlich ist die Fassung in `ops/SYSTEM_SSOT.json` → `governance.acceptance` und
+`governance.autoMerge`; das Handbuch steht in
+`vault/handbuch/01_Systemueberblick_und_Architektur.md` und
+`vault/handbuch/04_Bedienung_und_Ablaeufe.md`. `BP-000` bleibt `status: entwurf` /
+`freigabe: manual`.
 ```
 
 ## ops/WORLD_INVARIANTS.md
@@ -1288,6 +1471,25 @@ Abhängigkeiten" ist in `ops/blueprints/BP-014.md` dokumentiert. `ops/runner.sto
 deshalb lief der Task als Mastermind-Ausführung statt über die pausierte Worker-Queue.
 Live-`19132`/UDP 7551 blieb unberührt; keine kostenpflichtigen API-Calls, keine Windows- oder
 Sichtbarkeitsänderung, keine finale Live-Einladung.
+
+## 16) BP-000 Governance — Kapitän, Orchestrierung, Handlungs-Blaupause, Abnahme (T-239, 24.11.2026)
+
+**Soll (Chris-Vorgabe, `AGENTS.md` §14–§16, `ops/SYSTEM_SSOT.json` → `governance`):**
+Supervisor als Kapitän ohne umfangreichen Produktivcode; atomare `T-xxx`-Subtasks, Delegation an `kilo1`–`kilo5`. Die Worker-Steuerung (Verfügbarkeit, Free-Tier-Spezialitäten, Cooldown, `T-199 (OpenRouter-Modellausfall: Preset prüfen und freigeben)`-Kette, RAM-Wächter 80/85/90) bleibt unverändert und aus der SSOT generiert. Jede Bot-Handlung folgt `mob_equipment → Sichtkontakt → useBlock` mit ausschließlichem OBSERVER-Paketbeweis. Showcase-Einladung und Auto-Merge erst bei 4/4 Bühnen-Y, Sichtfeld-Ritual, `N ≥ 3` Seeds, grünem Verify, 4/4 Observer-Punkten, 0 Negativliste-Treffern und JS-freien Pages < 175 KB.
+
+**Ist (wiederverwendbare Bausteine, keine Wegwerf-Skripte):**
+
+| Soll | Ist | Beleg |
+| --- | --- | --- |
+| Kapitäns-Rolle dauerhaft verankert | `ops/SYSTEM_SSOT.json` → `governance.captain`, `AGENTS.md` §14, Handbuch 01 §7, 03, 04 §7 | SSOT-Stand 2026-11-24, `BP-000` bleibt `entwurf`/`manual` |
+| Orchestrierungsschutz gegen Umbauten | `ops/qa/worker-orchestration-guard.mjs` prüft 11 Punkte: SSOT, `kilo1`–`kilo5`, kein `kilo6`, 429-Cooldown, generierte `workers`/`runner*`, RAM-Schwellen, T-199-Fallbackkette, Router/Handler/Watcher, Generator, Verify-Registrierung | `tests/worker-orchestration-guard.test.mjs` (44 Prüfungen, Positive + 12 Negativfälle), CLI 11/11 grün |
+| Mitspieler-Wahrnehmung als Handlungskette | `ops/qa/action-chain-guard.mjs` verlangt `mob_equipment` + freien 3D-Sichtkontakt + `use_block` aus dem OBSERVER-Paketstrom; Selbstmeldungen sind hart abgewiesen | `tests/action-chain-guard.test.mjs` (57 Prüfungen), CLI gegen echten Proof rot — `use_block` fehlt, fail-closed |
+| Abnahme- und Auto-Merge-Disziplin | `ops/qa/showcase-release-gate.mjs` verlangt 4/4 `move_player`-Bühnenbeweis, Observer-4/4, Ritual im Sichtfeld, 3 Seeds auf 19134 inkl. `WorldMemory`-Fallback, grünes Verify, 0 Negativliste, JS-freie Pages < 179200 Byte, Review | `tests/showcase-release-gate.test.mjs` (56 Prüfungen), CLI gegen echten Stand rot — Multi-Seed-Evidenz fehlt, fail-closed |
+| Universelle Verankerung | Drei Suites in `ops/scripts/verify.mjs`; drei `governance.*`-Capabilities in `ops/capabilities.json`; Vault-Handbuch 01/03/04 plus Spiegel `ops/notebook-sync/quellen/handbuch` | `npm run verify`, `ops/results/T-239.verify.json` |
+
+**User Journey ohne manuelle Klicks:** Chris erteilt eine Governance-Vorgabe → der Kapitän zerlegt sie in atomare Tasks im Board → der Guard prüft bei jedem Verify die SSOT gegen generierte Configs und aktiven Code → der OBSERVER liefert Paketbeweise für Item-Haltung, Blickfeld und Interaktion → der Freigabegate verweigert Einladung und Merge, solange ein Seed, ein Paket oder ein Beleg fehlt → erst nach grünem Gesamturteil geht der Task ins Review und der Kapitän mergt. Chris tippt nichts; die finale Live-Einladung bleibt sein Tor.
+
+**Gaps / Risiken / Backlog:** Die echte Abnahme-Kette hat derzeit **kein** `use_block`-Paket und **keine** `N ≥ 3`-Seed-Evidenz; beide Gates sind deshalb bewusst rot und dürfen nicht durch Spec-Seeding oder Bot-Selbstaussagen grün gemacht werden. Der Multi-Seed-Baustein aus `BP-012`/`BP-014` bleibt Backlog. `ops/runner.stop` ist aktiv; `BP-000` bleibt `status: entwurf` / `freigabe: manual`. Live-`19132`/UDP 7551, Weltdaten, Auth, Firewall, kostenpflichtige API-Calls und Vision-Calls blieben unberührt; keine finale Live-Einladung.
 ```
 
 ## ops/capabilities.json
@@ -2188,6 +2390,60 @@ Sichtbarkeitsänderung, keine finale Live-Einladung.
       "doku": "ops/blueprints/BP-014.md §2; modules/living-tribes/ConfigSchema.mjs",
       "verified": true,
       "beleg": "npm run lint:config: 9 Config-Dateien gültig; tests/tribes-config-lint.test.mjs (4/4) weist TODO_VERIFY in Parametern, falsche IDs und Extra-Keys ab"
+    },
+    {
+      "id": "governance.orchestrationGuard",
+      "modul": "ops/qa/worker-orchestration-guard.mjs",
+      "funktion": "pruefeWorkerOrchestrierung",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "options",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "Ueberschreibungen fuer Tests: root, ssot, workers, runner, preset, verifySource"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/SYSTEM_SSOT.json → governance.orchestration; AGENTS.md §15; vault/handbuch/01 §7",
+      "verified": true,
+      "beleg": "tests/worker-orchestration-guard.test.mjs: 44 Pruefungen, 11 Gate-Punkte gegen echte SSOT/Configs gruen, 12 Override-Negativfaelle rot; CLI 11/11"
+    },
+    {
+      "id": "governance.actionChainGuard",
+      "modul": "ops/qa/action-chain-guard.mjs",
+      "funktion": "pruefeAktionskette",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "options",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "proof-Objekt oder proofFile, ssot, verifySource, root"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/SYSTEM_SSOT.json → governance.actionBlueprint; AGENTS.md §15; ops/WORLD_INVARIANTS.md §1–2",
+      "verified": true,
+      "beleg": "tests/action-chain-guard.test.mjs: 57 Pruefungen; OBSERVER-Kette gruen, Selbstbericht und fehlendes use_block hart rot; echter Proof fail-closed rot"
+    },
+    {
+      "id": "governance.showcaseReleaseGate",
+      "modul": "ops/qa/showcase-release-gate.mjs",
+      "funktion": "pruefeShowcaseFreigabe",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "options",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "Beweisobjekte proof, showSpec, multiSeed, verify, inventur, pages, review"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/SYSTEM_SSOT.json → governance.acceptance/autoMerge; AGENTS.md §16; vault/handbuch/04 §7",
+      "verified": true,
+      "beleg": "tests/showcase-release-gate.test.mjs: 56 Pruefungen, 11 Gate-Punkte; fehlende Seeds/useBlock/Verify-Belege/Pages-Budget rot"
     }
   ],
   "inventur": {
@@ -4104,7 +4360,7 @@ Sichtbarkeitsänderung, keine finale Live-Einladung.
 ```markdown
 ---
 typ: handbuch
-stand: 2026-11-23
+stand: 2026-11-24
 quelle: ops/SYSTEM_SSOT.json
 auto_aktualisierung: bauplan_abschluss
 ---
@@ -4113,7 +4369,7 @@ auto_aktualisierung: bauplan_abschluss
 
 ## 1. Einzige Quelle der Wahrheit
 
-`ops/SYSTEM_SSOT.json` (Stand 2026-11-23) ist die **einzige** maßgebliche Quelle für Worker, Maschinen, Server, Akteure, Vision, Prozessschutz und Freigaberegeln. Aus ihr abgeleitet, aber nicht eigenständig pflegbar:
+`ops/SYSTEM_SSOT.json` (Stand 2026-11-24) ist die **einzige** maßgebliche Quelle für Worker, Maschinen, Server, Akteure, Vision, Prozessschutz und Freigaberegeln. Aus ihr abgeleitet, aber nicht eigenständig pflegbar:
 
 - `ops/runner.json`, `ops/runner.alt-laptop.json`, `ops/workers.json` — erzeugt mit `node ops/scripts/system-config-sync.mjs`, **nie manuell editieren**. Der Dateiname `runner.alt-laptop.json` bleibt aus Kompatibilitätsgründen erhalten; die Maschine heißt fachlich **FELDBOOK**.
 - `AGENTS.md` (Spielregeln), `ops/WORLD_INVARIANTS.md` (QA-Standard), `ops/capabilities.json` (Fähigkeitsregister), `ops/BOARD.md` (aktueller Task-Stand).
@@ -4169,6 +4425,19 @@ Der Dispatch ist derzeit pausiert (`ops/runner.stop`): Freigabe erst nach grüne
 ## 6. Wissenspflege
 
 Dieses Handbuch hat `auto_aktualisierung: bauplan_abschluss`: Bei abgeschlossenen oder freigegebenen Bauplänen aktualisiert `ops/wissenanalyse/handbuch-sync.mjs` den Bauplan-Katalog in Handbuch 03 und die Ereigniszeile in Handbuch 04 (idempotent pro Bauplan-ID, Markdown UTF-8 ohne BOM). Die Architektur-Abschnitte bleiben SSOT-basiert und werden nur bei einer SSOT-Änderung überarbeitet.
+
+## 7. Governance — Kapitän, Orchestrierung, Handlungs-Blaupause, Abnahme
+
+Chris-Vorgabe vom 24.11.2026 (Supervisor-Auftrag zu `BP-000`), festgeschrieben in `ops/SYSTEM_SSOT.json` → `governance` und `AGENTS.md` §14–§16. Die vier Regeln gelten dauerhaft für jeden Task und jedes Vorhaben; `BP-000` bleibt `status: entwurf` / `freigabe: manual`.
+
+| Regel | Verbindlicher Inhalt | Verankerung |
+| --- | --- | --- |
+| Kapitäns-Rolle | Der Supervisor/Mastermind schreibt **keinen umfangreichen Produktivcode direkt**. Jeder Bauplan wird in kleine atomare `T-xxx`-Subtasks zerlegt (ein Ziel, ≤ 4 Dateien, < 20 min, ein Prüfkriterium); Implementierung und Tests gehen an `kilo1`–`kilo5`. Meta-/Governance-Tasks, SafetyGuard, Auth, Secrets, Vault-Tore und pausierter Dispatch verbleiben beim Mastermind. | `governance.captain`, `ops/BOARD.md`, Handbuch 04 §4 |
+| Orchestrierungsschutz | Verfügbarkeitsprüfung, Free-Tier-Modellspezialitäten, Cooldown-Handling, die `T-199 (OpenRouter-Modellausfall: Preset prüfen und freigeben)`-Fallbackkette und die RAM-Wächter (Hauptrechner 80 % Pause / 90 % Notbremse, FELDBOOK 85 % Pause) werden bei keinem Umbau überschrieben. `ops/workers.json` und `ops/runner*.json` bleiben generiert. | `governance.orchestration`, `node ops/qa/worker-orchestration-guard.mjs`, `tests/worker-orchestration-guard.test.mjs` |
+| Handlungs-Blaupause | Jede Bot-Handlung läuft wie aus dem Inventar eines echten Spielers: **`mob_equipment` → Sichtkontakt → `useBlock`/Interaktion**. Als Beweis zählt ausschließlich der unabhängige `OBSERVER` über echte Bedrock-Pakete; Selbstmeldungen des ausführenden Bots zählen nicht. | `governance.actionBlueprint`, `node ops/qa/action-chain-guard.mjs`, `tests/action-chain-guard.test.mjs` |
+| Abnahme-Disziplin | Einladung an Chris erst bei 4/4 Crew-Bots auf Bühnen-Y, Item-Ritual im Publikums-Sichtfeld und `N ≥ 3` Seeds auf `19134` (Blockdaten + freier Raycast + Erreichbarkeit, `WorldMemory`-Fallback ohne Behavior-Pack). Auto-Merge nur bei grünem `npm run verify`, 4/4 Observer-Punkten, 0 Negativlisten-Treffern und JS-freien Pages < 175 KB. | `governance.acceptance`, `governance.autoMerge`, `node ops/qa/showcase-release-gate.mjs`, `tests/showcase-release-gate.test.mjs` |
+
+Die drei Guard-Bausteine unter `ops/qa/` sind wiederverwendbare Plattformkomponenten (kein Ad-hoc-Testskript), in `ops/capabilities.json` registriert und in `npm run verify` verankert. Sie protokollieren jeden geprüften Punkt und sind fail-closed: Fehlt ein Beweis, bleibt das Gate rot. Chris' hartes Tor zur finalen Live-Präsentation (§6, Punkt 4) bleibt unangetastet.
 ```
 
 ## vault/handbuch/02_Server_Welten_und_Akteure.md
@@ -4238,7 +4507,7 @@ Selbstnoten durch Befehlssenden zählen nicht. Wer nicht aus `observer`-Sicht un
 ```markdown
 ---
 typ: handbuch
-stand: 2026-11-23
+stand: 2026-11-24
 quelle: ops/SYSTEM_SSOT.json
 auto_aktualisierung: bauplan_abschluss
 ---
@@ -4266,6 +4535,9 @@ Auswahl registrierter Fähigkeiten:
 | `show.run` | `ShowDirector.js` / `run` | Show-Ablauf mit Observer-Nachweis |
 | `werkbank.freigabe` | `ops/blueprints/pipeline.mjs` / `setApprovalMode`, `approveBlueprint` | Freigabe-Modus der Bauplan-Pipeline |
 | `monitor.machine` / `monitor.feldbook` | `machine-monitor.mjs`, `feldbook-telemetry.mjs` | Laufzeit- und FELDBOOK-Telemetrie |
+| `governance.orchestrationGuard` | `ops/qa/worker-orchestration-guard.mjs` | Prüft SSOT, generierte Configs, aktiven Code und Verify-Registrierung der Worker-Steuerung (`kilo1`–`kilo5`) |
+| `governance.actionChainGuard` | `ops/qa/action-chain-guard.mjs` | Beweist `mob_equipment → Sichtkontakt → useBlock` ausschließlich aus OBSERVER-Paketen |
+| `governance.showcaseReleaseGate` | `ops/qa/showcase-release-gate.mjs` | Fail-closed Freigabegate: 4/4 Bühnen-Y, Sichtfeld-Ritual, `N ≥ 3` Seeds, Auto-Merge-Bedingungen |
 
 Keine IDs, Härtewerte oder Rezepte raten. Fehlendes wird als offener Punkt markiert; jede Kuratierung braucht `source` und `begruendung`. Nie schreiben: `Daten/extrahiert/**`, `Index/**`, `Schema.md`. Vor Item-, Block- oder Rezeptarbeit `wissen/minecraft/README.md` und die genannten Datensätze lesen.
 
@@ -4290,7 +4562,9 @@ Aktualisierung bei abgeschlossenen/freigegebenen Bauplänen durch `ops/wissenana
 
 ## 4. Sync-Regeln
 
-`syncHandbookFromBlueprint(blueprint, options)` schreibt nur bei `abgeschlossen`/`freigegeben` und nur UTF-8 ohne BOM. Ein vorhandener Eintrag derselben ID wird aktualisiert (Katalog) bzw. unverändert gelassen (Ereigniszeile in Handbuch 04); es entstehen keine Doppelzeilen. `HANDBUCH_DATEIEN` nennt die fünf Dateien dieses Handbuchs (inkl. `05_Autonome_Weltanpassung_und_Regie.md`).
+`syncHandbookFromBlueprint(blueprint, options)` schreibt nur bei `abgeschlossen`/`freigegeben` und nur UTF-8 ohne BOM. Ein vorhandener Eintrag derselben ID wird aktualisiert (Katalog) bzw. unverändert gelassen (Ereigniszeile in Handbuch 04); es entstehen keine Doppelzeilen. `HANDBUCH_DATEIEN` nennt die sieben Dateien dieses Handbuchs (inkl. `05_Autonome_Weltanpassung_und_Regie.md`, `06_Gesamt_Entwicklungsplan_und_Meilensteine.md` und `07_Vier_Stufen_UI_Prozess.md`).
+
+Die drei `governance.*`-Bausteine aus `T-239 (BP-000 (Governance — Kapitäns-Rolle, Kilo-Orchestrierung & Handlungs-Blaupause))` stehen unter `ops/qa/` und sind über `npm run verify` in den Dauerbetrieb eingebunden. Ihre Quelle ist ausschließlich `ops/SYSTEM_SSOT.json` → `governance`; Kapitän und Worker ändern keine Regel durch Code, sondern passen bei Bedarf die SSOT an (mit Datum und Chris-Vorgabe). Details und Verankerung: Handbuch 01 §7.
 ```
 
 ## vault/handbuch/04_Bedienung_und_Ablaeufe.md
@@ -4298,7 +4572,7 @@ Aktualisierung bei abgeschlossenen/freigegebenen Bauplänen durch `ops/wissenana
 ```markdown
 ---
 typ: handbuch
-stand: 2026-11-23
+stand: 2026-11-24
 quelle: ops/SYSTEM_SSOT.json
 auto_aktualisierung: bauplan_abschluss
 ---
@@ -4357,7 +4631,19 @@ Nur bei diesen vier Lagen wird gestoppt und Chris gefragt:
 
 Alles andere — Merge-Konflikte in `ops/BOARD.md`, `ops/LOG.md`, `ops/QUESTIONS.md`, rote QA-Gates, beantwortete Rückfragen — läuft autonom weiter. Die Notbremse beendet nie den Live-Server `19132`.
 
-## 7. Ereignisprotokoll (Baupläne)
+## 7. Abnahme-Disziplin & Auto-Merge (Chris, 24.11.2026)
+
+Verbindlich aus `ops/SYSTEM_SSOT.json` → `governance.acceptance` / `governance.autoMerge` und `AGENTS.md` §16. Regulärer Baustein: `node ops/qa/showcase-release-gate.mjs` (`tests/showcase-release-gate.test.mjs`), fail-closed.
+
+**Ein Showcase wird Chris erst gemeldet, wenn gleichzeitig bewiesen ist:**
+
+1. Alle **4 Crew-Bots** stehen nachweislich auf der Bühnen-Y-Höhe (`ops/qa/show-spec.tanzshow.json`, harter `move_player`-Beweis gemäß `ops/WORLD_INVARIANTS.md`).
+2. Das Item-Ritual (`mob_equipment → Sichtkontakt → useBlock`) findet im direkten Sichtfeld der Zuschauer statt — Observer-Proof + freier 3D-ViewPort-Raycast, keine Selbstaussage.
+3. Der **3-Welten-Beweis** auf `19134` ist grün: `N ≥ 3` unterschiedliche Zufalls-Seeds, jeweils Blockdaten + freier Raycast + bequeme Erreichbarkeit, inklusive `WorldMemory`-Fallback ohne Behavior-Pack.
+
+Der Gate verhindert eine Einladung vor Grün; Chris' Tor in §6 Punkt 4 (finale Live-Präsentation) bleibt unangetastet. Der Merge nach `main` erfolgt ausschließlich nach abgeschlossenem Review und nur bei: komplett grünem `npm run verify` (0 Fehler, inklusive Worker-Orchestrierungs-Guard), **4/4** Observer-Punkten (`ops/runtime/latest-observer-proof.json`), **0** Negativlisten-Treffern und JS-freier Pages-Ausgabe `voxelcrew-pages` **< 175 KB**. `BP-000` bleibt `status: entwurf` / `freigabe: manual`; dieser Task verändert weder Freigabemodus noch Dispatch-Status.
+
+## 8. Ereignisprotokoll (Baupläne)
 
 Maschinenlesezone von `ops/wissenanalyse/handbuch-sync.mjs`; von Hand nicht verändern.
 
