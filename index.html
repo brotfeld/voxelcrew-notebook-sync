@@ -22,7 +22,7 @@
 <body>
   <header>
     <h1>VoxelCrew — Gesamtspezifikation</h1>
-    <p class="meta">Exportiert am 2026-11-24T08:56:28.078Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
+    <p class="meta">Exportiert am 2026-11-24T10:26:24.642Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
     <p class="meta">Leitstelle: brotfeld/mc-bot-leitstelle · Mirror: brotfeld/voxelcrew-notebook-sync · Pages: https://github.io</p>
     <nav aria-label="Inhalt">
       <a href="#abschnitt-1">Post-Spülgang-Inventur</a>
@@ -863,6 +863,24 @@ und seiner Blickrichtung (`yaw`, `pitch`):
 * „Röntgenblick&quot; ist nicht erlaubt: Ein Bot hinter einer Wand ist auch dann
   nicht sichtbar, wenn seine Koordinaten im ViewPort lägen.
 
+## 2b. Harter Bühnen-Höhenbeweis (T-238)
+
+Zusätzlich zu den vier Observer-Punkten gilt für die Tanzshow auf `19133`:
+
+* Die Soll-Liste `actors_expected` allein ist **kein** Beweis. Der observer
+  protokolliert fremde `move_player`-Broadcasts als `actors_observed`
+  (Actor-Name aus echten `add_player`/`player_list`-Paketen, Fusshöhe via
+  `toFeetPosition`, Zeitmarke `ts`).
+* `checkActorStageHeight()` in `ops/qa/world-invariants.mjs` verlangt für alle
+  vier Bots (`Crew-1`..`Crew-4`) eine Position innerhalb von
+  `stage_height.tolerance` um `stage_height.y` und ein gemeinsames Zeitfenster
+  (`stage_height.window_ms`, Regieplan `ops/qa/show-plan.json`).
+* Fehlt ein Actor, liegt er am Hang oder stammen die Positionen nicht aus
+  `move_player`, ist der Proof **rot** — auch bei `intent.exceptions.exit_stage`.
+  Der Abgang darf den Beweis nicht nachträglich entschärfen oder ersetzen.
+* Der Offline-Plan-Check des Builder ist mit `capture.source = &quot;show-plan&quot;`
+  und `mode: &quot;plan&quot;` gekennzeichnet und gilt **nicht** als Live-Beweis.
+
 ## 3. Produktions-Invarianten und Regie-Intention
 
 Defaults bei Umsetzung **und** Prüfung:
@@ -934,12 +952,14 @@ Stand: 2026-11-24 (Mastermind/Resident-Agent). Zweck: verhindert blindes Raten u
 - Vollständige Regie auf 19133: Kulisse/Bühne/Jukebox/Beleuchtung, 4 Crew-Bots, Choreografie, Verbeugung, geordneter Abgang; Freigabe erst bei grünem `observer`-Proof **und** grünem 3D-ViewPort-Check. (T-216 Task, PRAESENTATION, WORLD_INVARIANTS)
 - 4 Gate-Punkte (WORLD_INVARIANTS/AGENTS §10.2 + Q-T216-04): (1) observer + alle 4 Bots bei y≈69 nach korrekter Chunk/Spawn-Init, keine Limbo y≈32769; (2) echte `update_block`/`mob_equipment` Pakete; (3) 3D-ViewPort/Raycast mit Bühne/Crew grün; (4) korrekte Server-Identität/Port (ShowWorld/erwarteter Kontext).
 - Trigger: Chat `!show`/`!tanzshow` (PRAESENTATION) als System-Trigger; Abnahme programmatisch über `POST /api/show/run` bzw. `npm run show:accept` (AGENTS.md §11, kein manueller Chris-Klick). Bot-Antwort definiert.
+- T-238 (Nachbesserung): Bühne auf massivem Fundament (y=60..68) mit vier echten Treppen (Stand-Y 65→70), Jukebox (11,70,10) auf 1-Block-Podest, beleuchtete VIP-Loge (10,71,16), Idle-Status `BEREIT` mit `!show reset` und Restdauer, harter Bühnen-Höhenbeweis aus echten `move_player`-Paketen aller vier Crew-Bots.
 
 **Ist:**
 - Regieplan: `ops/qa/show-plan.json`, Spec: `ops/qa/show-spec.tanzshow.json`, Builder/Tests: `ops/qa/show-spec.builder.mjs`, `tests/tanzshow-plan.test.js`.
 - Ausführung: `app/backend/show/ShowDirector.js`, `app/backend/show/show-world.js`; Anbindung in `app/backend/index.js` (lädt Plan, `onShowCommand` triggert `showDirector.run()` auf Port 19133).
 - Bot-Stack: `app/backend/bots/BotManager.js`, `app/backend/bedrock/BedrockConnector.js` (mit Q-T216-04-Fixes in Worktree-Stand: `request_chunk_radius`, `set_local_player_as_initialized` für Bots; observer-proof ebenfalls gepatcht).
 - Präsentations-Start: `ops/scripts/start-presentation.ps1`, Config `ops/config.presentation.yaml`.
+- T-238 umgesetzt: `ShowDirector.getStatus()/reset()` + gemeinsame `showAction()` in `index.js` (Chat &amp; HTTP), `GET /api/show/status`, `POST /api/show/reset`; `show-world.js::buildFillRanges()/buildIndividualBlocks()` für Fundament/Rampen/Loge, `BedrockConnector.fillRange()`, `walkTo(..., {requireHeight:true})` und `waitForStageHeight()` als Regie-Gate; `observer-proof.mjs` protokolliert fremde `move_player`-Broadcasts als `actors_observed`, `world-invariants.mjs::checkActorStageHeight()` wertet sie im gemeinsamen Zeitfenster aus (ohne `intent`-Ausnahme).
 
 **Ist (Stand Abschluss T-216):**
 - **Regulärer, programmatischer Auftraggeber-Baustein vorhanden:** `ops/scripts/run-show-acceptance.mjs` führt die vollständige User-Journey autonom aus — Backend-/Crew-Preflight (Reconnect getrennter Bots über `/api/control`), spawn-aware Observer-Platzierung (`tp observer …` erst nach `Player Spawned`, Erfolg im BDS-Log bestätigt), wiederverholbarer Bühnen-/Requisiten-Reset (127 Blöcke + hotbar 0 → air), Show-Trigger per `POST /api/show/run`, observer-proof mit voller Vorlaufzeit, Auswertung der 4 Gates und optional `verify:show`. Kein menschlicher Chat-Klick nötig.
@@ -976,7 +996,10 @@ Enthält verifizierte Low-Level-Funktionen (Bedrock sendChat/sendEmote/useBlock/
 | `stage.reset` (BDS-Konsole) | `app/backend/server/ServerManager.js::sendConsoleCommand`, genutzt in `run-show-acceptance.mjs` | BDS-Log `set_build_done`, `Replaced slot … with Air` | Backlog |
 | `observer.proof` (Paketbeweis + ViewPort) | `ops/qa/observer-proof.mjs`, `ops/qa/world-invariants.mjs` | `ops/runtime/latest-observer-proof.json`, `npm run verify:show` | Backlog |
 | `qa.acceptance` (Auftraggeber/Orchestrator) | `ops/scripts/run-show-acceptance.mjs`, `npm run show:accept` | 4 Gate-Punkte grün | Backlog (stabiler Aufrufpfad vorhanden) |
-| `bedrock.holdItemBroadcast` | `app/backend/bedrock/BedrockConnector.js::holdItem()` (mob_equipment-Handauswahl) | `latest-observer-proof.json`: `mob_equipment` für `Crew-Jukebox`/`minecraft:music_disc_cat` | Backlog (`bedrock.holdItem` registriert) |
+| `bedrock.holdItemBroadcast` | `app/backend/bedrock/BedrockConnector.js::holdItem()` (mob_equipment-Handauswahl) | `latest-observer-proof.json`: `mob_equipment` für `Crew-1`/`minecraft:music_disc_cat` | Backlog (`bedrock.holdItem` registriert) |
+| `show.statusReset` (Idle BEREIT, Restdauer, Reset) | `ShowDirector.getStatus()/reset()`, `index.js::showAction()`, `WebServer.js` `/api/show/status` + `/api/show/reset` | `tests/presentation-show.test.js`, Chat-Antwort „BEREIT …“, `!show reset` startet nicht | ✅ registriert (T-238) |
+| `bedrock.fillRange` (Fundament/Rampen/Loge) | `BedrockConnector.fillRange()`, `show-world.js::buildFillRanges()` | `tests/tanzshow-plan.test.js` (fill + setBlock), `npm run show:accept` | ✅ registriert (T-238) |
+| `observer.stageHeight` (harter Höhenbeweis) | `observer-proof.mjs` (`actors_observed` aus move_player), `world-invariants.mjs::checkActorStageHeight()` | `tests/world-invariants.test.js` Negativfälle (Hang/fehlend/Zeitfenster/exit_stage), Live-Proof `checks.stageHeight` | ✅ registriert (T-238) |
 
 Weitere nicht registrierte Betriebsbausteine: Präsentations-Startskripte, `verify:show` als eigene Capability, Prozess-Supervision (run-watch).
 
@@ -1111,6 +1134,8 @@ Cache-/Transport-Lücke aus Abschnitt 1 und die Backlog-Einträge aus Abschnitt 
 6. **Regie erleben:** Bühne/Jukebox/Beleuchtung, 4 Bots aus 4 Richtungen, Choreografie, `music_disc_cat` in der Hand, Verbeugung, Abgang. → Ist: ShowDirector-Marker im BDS-Log, `show_end`.
 7. **Observer-Beweis:** echter Paketstrom (`update_block`, `mob_equipment`), 3D-ViewPort/Raycast, Server-Identität `ShowWorld`/19133. → Ist: `latest-observer-proof.json` `result.ok=true`, 254 `update_block` + 1 `mob_equipment` (`Crew-Jukebox`/`minecraft:music_disc_cat`), 4 Gates grün.
 8. **Hartes Gate + Bericht:** `npm run verify:show` (Observer-Gate grün), `npm run verify -- --out ops/results/T-216.verify.json`, Ergebnisdatei + Board/Log. → Ist: `verify:show` Observer-Gate grün; globaler `verify` durch außerhalb liegenden Vault-Hygiene-Blocker (Abschnitt 3) rot — dokumentiert, kein Show-Gate.
+
+**T-238 (UAT-Nachbesserung, Journey-Spezifikation):** Reset → `POST /api/show/reset` → Status `BEREIT` (kein Auto-Start) → `!show`/`POST /api/show/run` → Fundament/Rampen/Loge per `fill` → vier Crew-Bots (`Crew-1`..`Crew-4`) laufen über echte Stufen auf y=70 → `waitForStageHeight()` gate → Jukebox-Ritual mit sichtbarer Disc → Observer protokolliert `actors_observed` aus fremden `move_player`-Paketen → `checkActorStageHeight()` im gemeinsamen Zeitfenster → `npm run verify` → Report. Der Zuschauer landet per `/tp @s 10 71 16` in der beleuchteten Loge; kein menschlicher Test-Klick.
 
 ## 10) Widersprüche &amp; verbindliche Auflösung
 
@@ -1773,12 +1798,71 @@ Sichtbarkeitsänderung, keine finale Live-Einladung.
       &quot;id&quot;: &quot;show.run&quot;,
       &quot;modul&quot;: &quot;app/backend/show/ShowDirector.js&quot;,
       &quot;funktion&quot;: &quot;run&quot;,
-      &quot;zeile&quot;: 195,
+      &quot;zeile&quot;: 287,
       &quot;parameter&quot;: [],
       &quot;block_states&quot;: [],
       &quot;doku&quot;: &quot;ops/SPEC_MAPPING.md (Abschnitt 2: Show-/Tanzshow-Fluss)&quot;,
       &quot;verified&quot;: true,
-      &quot;beleg&quot;: &quot;ops/runtime/latest-observer-proof.json (result.ok=true, 254 update_block + 1 mob_equipment), npm run verify:show (Observer-Gate gruen), npm run show:accept (Auftraggeber/Orchestrator)&quot;
+      &quot;beleg&quot;: &quot;ops/runtime/latest-observer-proof.json (result.ok=true), npm run verify:show (Observer-Gate gruen), npm run show:accept (Auftraggeber/Orchestrator)&quot;
+    },
+    {
+      &quot;id&quot;: &quot;show.statusReset&quot;,
+      &quot;modul&quot;: &quot;app/backend/show/ShowDirector.js&quot;,
+      &quot;funktion&quot;: &quot;getStatus/reset&quot;,
+      &quot;zeile&quot;: 64,
+      &quot;parameter&quot;: [],
+      &quot;block_states&quot;: [],
+      &quot;doku&quot;: &quot;ops/PRAESENTATION.md (Status BEREIT, !show reset), ops/SPEC_MAPPING.md Abschnitt 2&quot;,
+      &quot;verified&quot;: true,
+      &quot;beleg&quot;: &quot;tests/presentation-show.test.js (!show reset wird als Reset durchgereicht), ShowDirector.getStatus() -&gt; state BEREIT/remainingMs, GET /api/show/status + POST /api/show/reset&quot;
+    },
+    {
+      &quot;id&quot;: &quot;bedrock.fillRange&quot;,
+      &quot;modul&quot;: &quot;app/backend/bedrock/BedrockConnector.js&quot;,
+      &quot;funktion&quot;: &quot;fillRange&quot;,
+      &quot;zeile&quot;: 2248,
+      &quot;parameter&quot;: [
+        {
+          &quot;name&quot;: &quot;from&quot;,
+          &quot;typ&quot;: &quot;{x:number, y:number, z:number}&quot;,
+          &quot;pflicht&quot;: true,
+          &quot;beschreibung&quot;: &quot;Untere Ecke des zu fuellenden Bereichs&quot;
+        },
+        {
+          &quot;name&quot;: &quot;to&quot;,
+          &quot;typ&quot;: &quot;{x:number, y:number, z:number}&quot;,
+          &quot;pflicht&quot;: true,
+          &quot;beschreibung&quot;: &quot;Obere Ecke des zu fuellenden Bereichs&quot;
+        },
+        {
+          &quot;name&quot;: &quot;blockName&quot;,
+          &quot;typ&quot;: &quot;string (z. B. minecraft:stone_bricks|air)&quot;,
+          &quot;pflicht&quot;: true,
+          &quot;beschreibung&quot;: &quot;Block-Name fuer das gesamte Volumen&quot;
+        }
+      ],
+      &quot;block_states&quot;: [],
+      &quot;doku&quot;: &quot;app/backend/show/show-world.js::buildFillRanges (kanonische Volumen)&quot;,
+      &quot;verified&quot;: true,
+      &quot;beleg&quot;: &quot;tests/tanzshow-plan.test.js (fill je Bereich + setBlock nur fuer uebrige Bloecke), run-show-acceptance.mjs resetStage nutzt fill air&quot;
+    },
+    {
+      &quot;id&quot;: &quot;observer.stageHeight&quot;,
+      &quot;modul&quot;: &quot;ops/qa/world-invariants.mjs&quot;,
+      &quot;funktion&quot;: &quot;checkActorStageHeight&quot;,
+      &quot;zeile&quot;: 213,
+      &quot;parameter&quot;: [
+        {
+          &quot;name&quot;: &quot;proof&quot;,
+          &quot;typ&quot;: &quot;object (observer-proof mit actors_observed aus move_player)&quot;,
+          &quot;pflicht&quot;: true,
+          &quot;beschreibung&quot;: &quot;Proof-Datei mit stage_height, actors_expected und echten Fremd-Positionen&quot;
+        }
+      ],
+      &quot;block_states&quot;: [],
+      &quot;doku&quot;: &quot;ops/WORLD_INVARIANTS.md (harte Buehnen-Hoehe, gemeinsames Zeitfenster, keine intent-Ausnahme)&quot;,
+      &quot;verified&quot;: true,
+      &quot;beleg&quot;: &quot;tests/world-invariants.test.js (Negativfaelle Hang/fehlend/Zeitfenster/exit_stage/live-plan), observer-proof.mjs actors_observed aus echten move_player-Paketen&quot;
     },
     {
       &quot;id&quot;: &quot;bds.manager&quot;,
@@ -2677,9 +2761,11 @@ Sichtbarkeitsänderung, keine finale Live-Einladung.
     &quot;observerPunkte&quot;: 4,
     &quot;observerBelege&quot;: [
       &quot;observer auf 19133 mit level_name=ShowWorld, target_port=19133, y-nahe Oberfläche (kein y≈32769)&quot;,
+      &quot;massives Fundament y=60..68, vier Treppen-Rampen mit Stand-Y 65→70, Jukebox (11,70,10) auf 1-Block-Podest, beleuchtete VIP-Loge y=70&quot;,
       &quot;alle vier SHOW_ACTOR sichtbar, on_surface und in der Bühnen-Bounding-Box (Ausnahme nur intent.exceptions exit_stage)&quot;,
       &quot;update_block für Bühne/Jukebox und mob_equipment für minecraft:music_disc_cat am DJ-Bot&quot;,
-      &quot;3D-ViewPort/Raycast grün für Bühne, Jukebox und alle vier Bots auf Fuß-/Rumpf-/Kopfhöhe&quot;
+      &quot;3D-ViewPort/Raycast grün für Bühne, Jukebox und alle vier Bots auf Fuß-/Rumpf-/Kopfhöhe&quot;,
+      &quot;T-238 harter Zusatzbeweis: actors_observed aus echten move_player-Paketen — alle vier Crew-Bots (Crew-1..Crew-4) im gemeinsamen Zeitfenster auf Bühnen-Y=70&quot;
     ],
     &quot;viewPort&quot;: {
       &quot;augenhoeheOffset&quot;: 1.62,
@@ -2696,7 +2782,7 @@ Sichtbarkeitsänderung, keine finale Live-Einladung.
     &quot;showcasePort&quot;: 19133,
     &quot;e2ePort&quot;: 19134,
     &quot;belege&quot;: [
-      &quot;ops/runtime/latest-observer-proof.json (Erfolgsbeleg aus SPEC_MAPPING: 254 update_block + 1 mob_equipment)&quot;,
+      &quot;ops/runtime/latest-observer-proof.json (echter Observer-Lauf: 2566 update_block + 1 mob_equipment + 7587 move_player)&quot;,
       &quot;npm run verify:show&quot;,
       &quot;npm run show:accept&quot;
     ]
@@ -2708,22 +2794,22 @@ Sichtbarkeitsänderung, keine finale Live-Einladung.
     &quot;19132/UDP 7551 nie berühren.&quot;
   ],
   &quot;abnahme&quot;: {
-    &quot;technisch&quot;: &quot;review grün — T-237 (BP-003 (Meilenstein 1: Crew-Bot-Tanzshow (Showcase 19133) — Finale &amp; Abnahme)); volle Journey M1–M3 per npm run show:accept auf 19133&quot;,
+    &quot;technisch&quot;: &quot;review grün — T-238 (BP-003 (UAT-Nachbesserung — Bühne, Aufgang, Jukebox &amp; Chat-Start)); volle Journey M1–M3 per npm run show:accept auf 19133 mit massivem Fundament, vier Rampen, Jukebox-Podest, VIP-Loge, BEREIT-Status und hartem Höhenbeweis&quot;,
     &quot;observerPunkte&quot;: 4,
     &quot;belege&quot;: [
-      &quot;ops/results/T-237.md&quot;,
-      &quot;ops/results/T-237.verify.json&quot;,
-      &quot;ops/runtime/latest-observer-proof.json (2026-11-24T08:03:44.672Z, target_port 19133, ShowWorld, ok=true, openrouter_calls=0)&quot;,
-      &quot;npm run verify:show 55/55, npm run verify 55/55&quot;
+      &quot;ops/results/T-238.md&quot;,
+      &quot;ops/results/T-238.verify.json&quot;,
+      &quot;ops/runtime/latest-observer-proof.json (2026-11-24T10:14:27.469Z, target_port 19133, ShowWorld, ok=true, stageHeight.matched=4, openrouter_calls=0, wrong_server=false)&quot;,
+      &quot;npm run show:accept: ALLE GATES GRÜN; npm run verify 55/55&quot;
     ],
-    &quot;hinweis&quot;: &quot;Technisch abgenommen; Chris entscheidet in der Werkbank (7070). status und freigabe bleiben bis zu seinem Tor unverändert.&quot;
+    &quot;hinweis&quot;: &quot;Technisch abgenommen; die vier UAT-Mängel sind behoben und der harte Bühnen-Höhenbeweis aller vier Crew-Bots ist grün. Chris entscheidet in der Werkbank (7070). status und freigabe bleiben bis zu seinem Tor unverändert.&quot;
   },
   &quot;freigabe&quot;: &quot;manual&quot;,
   &quot;id&quot;: &quot;BP-003&quot;,
   &quot;status&quot;: &quot;entwurf&quot;,
   &quot;version&quot;: 1,
   &quot;erstelltAm&quot;: &quot;2026-11-23T00:48:40.400Z&quot;,
-  &quot;geaendertAm&quot;: &quot;2026-11-24T08:10:00.000Z&quot;
+  &quot;geaendertAm&quot;: &quot;2026-11-24T10:25:00.000Z&quot;
 }</code></pre>
     </article>
     <article class="abschnitt" id="abschnitt-13">
