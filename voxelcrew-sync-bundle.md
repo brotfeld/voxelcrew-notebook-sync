@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-24T01:40:03.643Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-24T01:51:05.352Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -261,7 +261,7 @@
       "Live-Bots (WaechterBot, BauBot, SWARM_BOT) dürfen niemals auf 19133/19134 eingeloggt werden.",
       "Auf 19133/19134 laufen ausschließlich SHOW_ACTOR- und OBSERVER-Profile.",
       "Umgekehrt dürfen SHOW_ACTOR/OBSERVER niemals auf 19132 eingeloggt werden.",
-      "Die Prüfung erfolgt zentral in ops/lib/actor-profile-guard.mjs vor jedem Verbindungsaufbau."
+      "Die Prüfung erfolgt zentral in ops/lib/actor-profile-guard.cjs vor jedem Verbindungsaufbau."
     ],
     "live": [
       "WaechterBot",
@@ -1176,6 +1176,36 @@ Pages-Veröffentlichung hängt weiterhin vom Workflow-Lauf auf `main` und dem Do
 Der Reset betrifft ausschließlich die E2E-Welt `E2EWorld` auf `19134`; der geschützte Live-BDS
 `19132` (PID 18356) wurde nur attachiert und nie angesprochen. Keine finale Einladung zur
 Live-Präsentation.
+
+## 17) REFAC-001 — Deprecation & Code-Bereinigung WaechterBot / BauBot (Soll → Ist)
+
+**User Journey ohne manuelle Klicks:** Supervisor-Briefing nennt zwei alt klingende Live-Profilnamen
+→ der Resident-Agent inventarisiert zuerst `app/backend/`, `ops/scripts/` und `legacy/`
+→ Befund: keine Treffer in Code-Pfaden, `legacy/` existiert seit dem Rebuild nicht mehr, die
+Namen leben ausschließlich in SSOT, Guard, Config und Tests und bleiben dort legitime Live-Profile
+→ zwei tatsächlich ungenutzte Alt-Connectoren werden entfernt → vier Regressionstests in der
+bestehenden Verify-Suite sichern Namens-, Modul-, Capability- und Guard-Invariante →
+`npm run verify` liefert den 53/53-Beleg, Chris muss nichts eintippen; `19132`, Vault, Auth und
+Firewall bleiben unberührt.
+
+| Soll aus REFAC-001 | Ist | Beleg |
+| --- | --- | --- |
+| M1 lückenlose Inventur in `app/backend/`, `ops/scripts/`, `legacy/` | 0 Treffer in den Code-Pfaden; fehlendes `legacy/` als Befund dokumentiert; geschützte Namensdeklarationen bleiben in SSOT/Guard/Tests | `ops/results/REFAC-001.md`, Test „REFAC-001: Code-Pfade enthalten keine Live-Profil-Namen" in `tests/task-hygiene.test.js` |
+| M2 Alt-Direktaufrufe auf verifizierte Capabilities umstellen | Keine solchen Aufrufe vorhanden — dokumentierter Negativbefund statt Scheinumbau; `bedrock.walkTo`, `bedrock.holdItem`, `show.run` bleiben `verified: true` | `ops/capabilities.json`, Test „REFAC-001: die drei verifizierten Capabilities bleiben registriert" |
+| M2 ungenutzte Alt-Skripte restlos entfernen | `app/backend/core/BedrockConnector.js` und `app/backend/minecraft/BedrockConnector.js` (Debug-Connector mit Default-Port `19132`) gelöscht; aktiver Connector ist `app/backend/bedrock/BedrockConnector.js` | `git rm` im Commit, `ops/runtime/system-inventur.md` (datiert korrigiert), `ops/plan/T-053-parallele-bds-testumgebungen.md` (historisch markiert) |
+| M3 Akteurs-Isolation unverändert hart | `LIVE` nur `19132`, `SHOW_ACTOR`/`OBSERVER` nur `19133`/`19134`, `throw` bei Verstoß; Guard-Datei selbst nicht verändert | `ops/lib/actor-profile-guard.cjs`, `tests/rebuild-process-guard.test.mjs`, Test „REFAC-001: Akteurs-Isolation bleibt hart …" |
+| Verifizierbarer Gesamtnachweis | Neue Tests liegen in der bestehenden Verify-Suite, daher unverändert 53 Suites; Ergebnis und 0 Negativlisten-Treffer im Result | `ops/results/REFAC-001.md`, `ops/results/REFAC-001.verify.json` |
+
+**Neue wiederverwendbare Bausteine:** keine — die vier Prüfungen sind Teil des regulären
+Hygiene-Bausteins `tests/task-hygiene.test.js` und damit dauerhaft in `npm run verify` verankert;
+es entsteht kein `_dbg`- oder Einmal-Skript.
+
+**Gaps / Risiken / Backlog:** Kein offener Backlog aus diesem Task. Die Archive unter
+`ops/_archiv/**` bleiben absichtlich unangetastet (Datenverlust-Verbot); historische
+Dateipfade dort sind keine aktiven Referenzen. In `ops/SYSTEM_SSOT.json` wurde nur der
+veraltete Guard-Dateisuffix-Verweis `.mjs` → `.cjs` richtiggestellt; die Regel selbst und alle
+Port-/Akteurswerte sind unverändert. Live-`19132` wurde nicht kontaktiert, keine finale
+Einladung zur Live-Präsentation.
 ```
 
 ## ops/capabilities.json
