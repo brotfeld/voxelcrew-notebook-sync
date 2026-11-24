@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-24T07:21:16.939Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-24T08:12:10.651Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -2659,12 +2659,23 @@ Sichtbarkeitsänderung, keine finale Live-Einladung.
     "Vision/Screenshot nur optional nach grünem Stufe-1-Gate; ohne Freigabe kein Screengrab.",
     "19132/UDP 7551 nie berühren."
   ],
+  "abnahme": {
+    "technisch": "review grün — T-237 (BP-003 (Meilenstein 1: Crew-Bot-Tanzshow (Showcase 19133) — Finale & Abnahme)); volle Journey M1–M3 per npm run show:accept auf 19133",
+    "observerPunkte": 4,
+    "belege": [
+      "ops/results/T-237.md",
+      "ops/results/T-237.verify.json",
+      "ops/runtime/latest-observer-proof.json (2026-11-24T08:03:44.672Z, target_port 19133, ShowWorld, ok=true, openrouter_calls=0)",
+      "npm run verify:show 55/55, npm run verify 55/55"
+    ],
+    "hinweis": "Technisch abgenommen; Chris entscheidet in der Werkbank (7070). status und freigabe bleiben bis zu seinem Tor unverändert."
+  },
   "freigabe": "manual",
   "id": "BP-003",
   "status": "entwurf",
   "version": 1,
   "erstelltAm": "2026-11-23T00:48:40.400Z",
-  "geaendertAm": "2026-11-23T00:48:40.400Z"
+  "geaendertAm": "2026-11-24T08:10:00.000Z"
 }
 ```
 
