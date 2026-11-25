@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-25T18:29:37.223Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-25T19:20:58.766Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -1853,14 +1853,15 @@ sind reviewt und gemergt, die UI-Welle bleibt bewusst offen.
 | Roter „Bot-Hilfe"-Knopf ersetzt durch „System-Diagnose kopieren" (secret-frei); Showcase nur `category === 'showcase'`, Reset/Seed-Gate; Schaltzentrale mit echten Balken, stdout, Aktionen | Alter roter Knopf und pauschale Showcase-Liste vorhanden; RAM/CPU-Anzeige ohne Registry-Beweis | `ui.aktuell` ⬜ `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` / kilo2 |
 | Handbuch lädt dynamisch alle `vault/handbuch/*.md`; Querschnittsmodule heißen „System-Baustein (übergreifend)" | Sieben Fixture-Kapitel, Produktivpfad relativ falsch; keine Querschnittskennzeichnung | `ui.handbuchKarte` ⬜ `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` / kilo2 |
 | Stufe 4: Playwright klickt jeden Tab/Dialog/Button, legt Test-Provider an, lädt alle Kapitel, 0 Browser-/API-Fehler, 0 kaputte Platzhalter, Screenshot-Plausibilität | Bestehender Werkbank-Browsertest prüft die alten sechs Tabs; dynamische Neue-Journey fehlt | `qa.stufe4Werkbank` ⬜ `T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))` / kilo1 |
-| Alle registrierten Pages JS-frei, < 175 KB, 0 Negativliste-Treffer, auch nach neuen Kapiteln | Guard auf vier feste Seiten; eine `index.html` im Zielrepo; dynamische Registrierung fehlt | `pages.guardDynamisch` ⬜ `T-279 (BP-006-W2-FINAL (Pages-Guard: JS-frei, <175 KB, Negativliste))` / kilo5 |
+| Alle registrierten Pages JS-frei, < 175 KB, 0 Negativliste-Treffer, auch nach neuen Kapiteln | `ops/config/pages-config.json` registriert HTML-Seiten, Zusatzdateien und Budgets; `ops/qa/pages-guard.mjs` und `ops/scripts/export-notebook-sync.mjs` lesen daraus; neue Seite wird automatisch geprüft (24/24 Guard-Prüfungen, 74/74 Verify) | `pages.guardDynamisch` ✅ `T-279 (BP-006-W2-FINAL (Pages-Guard: JS-frei, <175 KB, Negativliste))` / kilo5 |
 | Review, komplett grünes Verify und Merge erst nach allen Belegen | Kapitäns-Review steht aus; `T-271 (BP-006-W2-FINAL (Dekomposition, Capability-Mapping & Board))` angelegt | `governance.reviewWerkbank` ⬜ `T-280 (BP-006-W2-FINAL (Kapitäns-Review & Abnahme-Gate))` / Kapitän |
 
 **Neue wiederverwendbare Bausteine (geplant, `verified:false` bis Testbeleg):**
 `ops/config/provider-adapters.mjs`, `ops/blueprints/metadaten.mjs`,
 `ops/scripts/setup-windows-terminal.ps1`, `ops/werkbank/lib/registry-ansicht.mjs`,
-`ops/qa/pages-guard.mjs` (dynamisch). Kein `_dbg`-Skript; alle bekommen einen
-regulären Aufrufpfad und Capability-Eintrag vor dem Review in
+`ops/qa/pages-guard.mjs` (dynamisch, bei `T-279 (BP-006-W2-FINAL (Pages-Guard: JS-frei, <175 KB, Negativliste))`
+mit Capability `pages.guardDynamisch` und Testbeleg verifiziert). Kein `_dbg`-Skript;
+die übrigen Bausteine bekommen ihren Capability-Eintrag vor dem Review in
 `T-280 (BP-006-W2-FINAL (Kapitäns-Review & Abnahme-Gate))`.
 
 **Trennlinie / Gaps:** Fundament und Setup zuerst — `T-271 (BP-006-W2-FINAL (Dekomposition, Capability-Mapping & Board))`
@@ -2608,13 +2609,13 @@ bleiben `manual`.
           "name": "seiten",
           "typ": "Record<string,string>|Array<{name:string,inhalt:string}>",
           "pflicht": true,
-          "beschreibung": "Dateiname→Inhalt der zu prüfenden Seiten (exakt vier HTML + stand.json + .nojekyll)"
+          "beschreibung": "Dateiname→Inhalt der zu prüfenden Seiten (registrierte HTML-Seiten + stand.json + .nojekyll aus ops/config/pages-config.json)"
         }
       ],
       "block_states": [],
-      "doku": ".github/workflows/notebook-pages.yml, ops/tasks/T-268.md, ops/SPEC_MAPPING.md §23",
+      "doku": ".github/workflows/notebook-pages.yml, ops/tasks/T-268.md, ops/config/pages-config.json, ops/SPEC_MAPPING.md §23 und §24",
       "verified": true,
-      "beleg": "tests/pages-guard.test.mjs: 23 Prüfungen (3 Positivfälle + 20 Negativfälle: zu groß, <script>, on*-Handler, javascript:-Links, externe Ressourcen, Altlasten, fehlende Pflichtseite ohne Bypass, falsche pageBytes, altes indexBytes, falsche observerPunkte, .nojekyll nicht leer, fehlendes h3, Redaction Tokens/Secrets, ungültiges JSON/UTF-8, leere Seiten, fehlender Doctype, Weiterleitung); alle Dateien strikt < 179200 Byte; CLI node ops/qa/pages-guard.mjs <_site>"
+      "beleg": "tests/pages-guard.test.mjs: 24 Prüfungen (4 Positivfälle + 20 Negativfälle: zu groß, <script>, on*-Handler, javascript:-Links, externe Ressourcen, Altlasten, fehlende Pflichtseite ohne Bypass, falsche pageBytes, altes indexBytes, falsche observerPunkte, .nojekyll nicht leer, fehlendes h3, Redaction Tokens/Secrets, ungültiges JSON/UTF-8, leere Seiten, fehlender Doctype, Weiterleitung); alle Dateien strikt < 179200 Byte; CLI node ops/qa/pages-guard.mjs <_site>"
     },
     {
       "id": "qa.encodingGuard",
@@ -3571,28 +3572,20 @@ bleiben `manual`.
     {
       "id": "pages.guardDynamisch",
       "modul": "ops/qa/pages-guard.mjs",
-      "funktion": "pruefeRegistrierteSeiten",
+      "funktion": "pruefePagesGuard",
       "zeile": null,
       "parameter": [
         {
           "name": "seiten",
-          "typ": "object",
+          "typ": "Record<string,string>|Array<{name:string,inhalt:string}>",
           "pflicht": true,
-          "beschreibung": "registrierte Seiten aus der Konfiguration ohne feste Namen oder feste Anzahl"
-        },
-        {
-          "name": "grenzen",
-          "typ": "object",
-          "pflicht": true,
-          "beschreibung": "SSOT-Grenzen: 0 Skripte, 0 externe Requests, strikt unter 179200 Byte je Seite"
+          "beschreibung": "Dateiname→Inhalt aller registrierten Seiten; die Pflichtliste kommt aus ops/config/pages-config.json"
         }
       ],
-      "block_states": [
-        "handlungsbedarf"
-      ],
-      "doku": "ops/tasks/T-279.md; ops/qa/pages-guard.mjs; ops/SPEC_MAPPING.md §24",
-      "verified": false,
-      "beleg": "Backlog BP-006-W2-FINAL / T-279: bestehender Guard prüft vier feste Seiten; dynamische Registrierung und Negativfälle stehen noch aus"
+      "block_states": [],
+      "doku": "ops/config/pages-config.json, ops/scripts/export-notebook-sync.mjs, ops/SPEC_MAPPING.md §24, ops/tasks/T-279.md",
+      "verified": true,
+      "beleg": "tests/pages-guard.test.mjs 24/24 (Prüfung 24 mit Fixture-Config: neue registrierte Seite automatisch in Pflichtliste, ohne sie hartes Abbrechen), tests/notebook-pages-e2e.test.js und tests/notebook-pages-browser.test.js grün; npm run verify -- --out ops/results/T-279.verify.json 74/74, 0 Fehler; Kapitäns-Review nach max-rounds von kilo5"
     },
     {
       "id": "governance.reviewWerkbank",
