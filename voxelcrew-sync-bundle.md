@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-25T09:46:02.915Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-25T10:09:07.285Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -102,7 +102,13 @@
       "modell": "kilo-auto/free",
       "host": "hauptrechner",
       "phase": 1,
-      "label": "Kilo1 — kilo-auto/free (gateway)"
+      "label": "Kilo1 — kilo-auto/free (gateway)",
+      "tags": [
+        "vision",
+        "playwright",
+        "pure-code",
+        "static-qa"
+      ]
     },
     {
       "name": "kilo2",
@@ -111,7 +117,12 @@
       "host": "hauptrechner",
       "phase": 1,
       "label": "Kilo2 — OpenRouter mit Fallback-Kette",
-      "kiloAutoFinalTry": false
+      "kiloAutoFinalTry": false,
+      "tags": [
+        "vision",
+        "pure-code",
+        "static-qa"
+      ]
     },
     {
       "name": "kilo3",
@@ -119,7 +130,12 @@
       "modell": "kilo-auto/free",
       "host": "feldbuch",
       "phase": 1,
-      "label": "Kilo3 — kilo-auto/free (gateway, FELDBOOK)"
+      "label": "Kilo3 — kilo-auto/free (gateway, FELDBOOK)",
+      "tags": [
+        "playwright",
+        "pure-code",
+        "static-qa"
+      ]
     },
     {
       "name": "kilo4",
@@ -127,7 +143,12 @@
       "modell": "kilo-auto/free",
       "host": "feldbuch",
       "phase": 1,
-      "label": "Kilo4 — kilo-auto/free (gateway, FELDBOOK)"
+      "label": "Kilo4 — kilo-auto/free (gateway, FELDBOOK)",
+      "tags": [
+        "playwright",
+        "pure-code",
+        "static-qa"
+      ]
     },
     {
       "name": "kilo5",
@@ -135,9 +156,54 @@
       "modell": "kilo-auto/free",
       "host": "hauptrechner",
       "phase": 1,
-      "label": "Kilo5 — kilo-auto/free (gateway)"
+      "label": "Kilo5 — kilo-auto/free (gateway)",
+      "tags": [
+        "vision",
+        "playwright",
+        "pure-code",
+        "static-qa"
+      ]
     }
   ],
+  "capabilityTags": {
+    "stand": "2026-11-25",
+    "quelle": "T-253 / BP-000-W1; AGENTS.md §9 Worker-Regeln",
+    "beschreibung": "Jede Arbeit wird genau einer Faehigkeitsklasse zugeordnet; der Dispatcher waehlt Worker, die diese Klasse abdecken. Tags werden ausschliesslich hier verankert und von node ops/scripts/system-config-sync.mjs nach ops/workers.json generiert.",
+    "tags": [
+      {
+        "id": "vision",
+        "label": "Vision (Bild-/Screenshot-Siegel)",
+        "kostenpflichtig": false,
+        "budget": "max 1/Meilenstein, max 3/Tag (ops/kilo-handler/vision-budget.mjs)"
+      },
+      {
+        "id": "playwright",
+        "label": "Playwright (echter Browser-E2E)",
+        "kostenpflichtig": false,
+        "browser": "headless-chromium"
+      },
+      {
+        "id": "pure-code",
+        "label": "Reiner Code (keine externen Effekte)",
+        "kostenpflichtig": false
+      },
+      {
+        "id": "static-qa",
+        "label": "Statische QA (Lint/Verify ohne Laufzeit)",
+        "kostenpflichtig": false
+      }
+    ]
+  },
+  "gracefulDegradation": {
+    "stand": "2026-11-25",
+    "quelle": "T-253 / BP-000-W1",
+    "beschreibung": "Fallen Maschinen 2/3/4 offline aus oder dauert das Aufwecken (WoL) laenger als 45 s, laeuft der Hauptrechner unterbrechungsfrei weiter. Nachweis mit injizierter Uhr und Registry, keine echten WoL-Pakete/Netzwerkaktionen.",
+    "primaerMaschine": "hauptrechner",
+    "sekundaerMaschinen": [
+      "feldbuch"
+    ],
+    "wolTimeoutSekunden": 45
+  },
   "kosten": {
     "standardpfad": "kilo-auto/free (0 €)",
     "erlaubt": [
@@ -1490,6 +1556,133 @@ Supervisor als Kapitän ohne umfangreichen Produktivcode; atomare `T-xxx`-Subtas
 **User Journey ohne manuelle Klicks:** Chris erteilt eine Governance-Vorgabe → der Kapitän zerlegt sie in atomare Tasks im Board → der Guard prüft bei jedem Verify die SSOT gegen generierte Configs und aktiven Code → der OBSERVER liefert Paketbeweise für Item-Haltung, Blickfeld und Interaktion → der Freigabegate verweigert Einladung und Merge, solange ein Seed, ein Paket oder ein Beleg fehlt → erst nach grünem Gesamturteil geht der Task ins Review und der Kapitän mergt. Chris tippt nichts; die finale Live-Einladung bleibt sein Tor.
 
 **Gaps / Risiken / Backlog:** Die echte Abnahme-Kette hat derzeit **kein** `use_block`-Paket und **keine** `N ≥ 3`-Seed-Evidenz; beide Gates sind deshalb bewusst rot und dürfen nicht durch Spec-Seeding oder Bot-Selbstaussagen grün gemacht werden. Der Multi-Seed-Baustein aus `BP-012`/`BP-014` bleibt Backlog. `ops/runner.stop` ist aktiv; `BP-000` bleibt `status: entwurf` / `freigabe: manual`. Live-`19132`/UDP 7551, Weltdaten, Auth, Firewall, kostenpflichtige API-Calls und Vision-Calls blieben unberührt; keine finale Live-Einladung.
+
+## 19) BP-000-W1 — Worker-Audit, Vision-Queue, Maschinen-Telemetrie, 9-Fälle-E2E (Soll → Ist → Backlog, 24.11.2026)
+
+**User Journey ohne manuelle Klicks (§11):** Chris erteilt den Supervisor-Auftrag `BP-000-W1` → der Kapitän gleicht Vault, Referenzanlagen, Codebase, Board und SSOT gegen `ops/capabilities.json` und dieses Mapping ab und legt die Lücken zuerst als Backlog-Capabilities an → er zerlegt den Auftrag in atomare `T-240`–`T-250` und delegiert die Umsetzung an `kilo1`–`kilo5` → der Dispatcher wählt ein freies, zum Task-Typ passendes Modell und hält einen Vision-Task bei 429 mit `resumeAt` im Wartestand → Werkbank und Board zeigen denselben ehrlichen Zustand samt echtem `stdout` und echter Maschinen-Ampel → `npm run verify:workers` beweist neun Fälle → Review, Verify und Merge laufen automatisiert; Chris tippt nichts und erhält erst nach Grün eine Einladung.
+
+| Soll aus `BP-000-W1` | Ist (24.11.2026, vor der Umsetzung) | Backlog / Task |
+| --- | --- | --- |
+| Free-Modell je Aufgabentyp, Vision über kilo2/T-199 | Keine Typ-Routung: Gateway fix `kilo/kilo-auto/free`, OpenRouter 3 Primary + 1 Fallback aus `openrouter-preset.json`; `modellSpezialitaetenFreeTier` nur SSOT-Text | `orchestration.visionAuditRouting`, T-241/T-242 |
+| 429 RPM/h + RPD → `WAITING_RATE_LIMIT` + `resumeAt` + Auto-Resume | **T-243 umgesetzt:** `ops/kilo-handler/rate-limit-wait.mjs` berechnet `resumeAt`/`fenster`/`grund` aus RPM/h- und RPD-Headern (Epoch-ms, Epoch-Sekunden, `retry-after`, sicherer Default); der Handler schreibt `zustand: waiting_rate_limit` in Task-Status/Summary, beendet den Lauf nicht als `FAILED` und lässt die Kette/Quota-Cooldowns intakt; `nextAutoResumeAt`/`autoResumeDue` lesen `resumeAt`. T-244 ergänzt Feed/Board/Auto-Resume-Kette | `orchestration.rateLimitQueue` (`verified: true`), T-243 erledigt, T-244 offen |
+| Echter Worker-Status (Zustand, Task, BP, Modell, PID, Laufzeit, stdout) | Werkbank-Fixtures `T-901`/`T-902`, `WATCH-START`, PIDs 4121/5311; echte Quellen liegen in `worker-status.json`, `T-XXX.status.json`, `pids.json` | `orchestration.liveWorkerStatus`, T-245 |
+| Dynamische Maschinen-Registry, ehrliche Ampel | `ops/runtime/machine-registry.mjs` (register/list/snapshot, `letztesSignal` echter Zeitstempel, `verified: true` mit Testbeleg T-246); `localMachineSnapshot()` berechnet `lastSeenSeconds = Date.now() - letztesSignal`, `ram/cpu` bei fehlendem Eintrag `null` | `maschinen.registry` ✅ T-246; `maschinen.ehrlicheAmpel` ⬜ T-247 |
+| `npm run verify:workers`, 9 Fälle, in `npm run verify` verankert | **T-248 umgesetzt:** `ops/qa/worker-scenario-harness.mjs` (`runWorkerScenario({ fall, deps })`, neun feste Fälle, In-Memory-Board/SSE/FS, injizierte Uhr, fail-closed, 0 kostenpflichtige Calls, 0 echte Dateizugriffe; `tests/worker-scenario-harness.test.mjs` 51/51 grün). Die neun Fälle selbst und `verify:workers` folgen in T-249/T-250 | `qa.workersE2E` (⬜ T-249/T-250), `qa.workerScenarioHarness` ✅ T-248 |
+
+**Neue wiederverwendbare Bausteine (geplant, `verified:false` bis Testbeleg):** `ops/kilo-handler/task-type-router.mjs`, `ops/kilo-handler/rate-limit-wait.mjs`, `ops/qa/worker-scenario-harness.mjs` — kein `_dbg`-Skript als Dauerlösung; alle werden über `ops/capabilities.json` und einen regulären Aufrufpfad dokumentiert. `ops/runtime/machine-registry.mjs` ist mit T-246 umgesetzt und verifiziert; `ops/qa/worker-scenario-harness.mjs` ist mit T-248 umgesetzt und verifiziert (`qa.workerScenarioHarness`, 51/51), die darauf aufbauende 9-Fälle-Suite `verify:workers` bleibt T-249/T-250.
+
+**Gaps / Risiken / Backlog:** Die Reihenfolge-Divergenz SSOT (`openrouter → gateway → mastermind`) vs. Code/Guard (`gateway → openrouter`) bleibt unverändert und wird nicht nebenbei „repariert". Werkbank und Ampel teilen `ops/werkbank/server.mjs`/`public/app.js`; Integration deshalb T-245 vor T-247. Vision-Calls bleiben hart gedeckelt (1/Meilenstein, 3/Tag); die 429-Fälle werden simuliert. Kein Eingriff in `19132`/UDP 7551, Weltdaten, Auth, Firewall oder Öffentlichkeit; `BP-000-W1` und `BP-000` bleiben `freigabe: manual`. Keine finale Live-Einladung.
+
+### Fortsetzung ab `eed2799` (25.11.2026, Supervisor-Festlegung)
+
+| Soll (Rest-Delta) | Ist | Backlog / Task |
+| --- | --- | --- |
+| `vision_audit` über kilo2 mit 2 OpenRouter-Keys, 2 Kilo-, 2 `agy`-Profile (`Lock = 1`), 429 → `WAITING_RATE_LIMIT` im Feed, keine veraltete CLI | `ops/kilo-handler/account-profiles.mjs` mit sechs Profilen (nur Namen), `getVisionAuditConfig()` in der aktiven Route (kilo2, `OPENROUTER_KEY_1/2`, T-199), `agy` Lock = 1 fail-closed; 429 → `WAITING_RATE_LIMIT` + `resumeAt`/`grund` im Feed (T-243/T-244); veraltete CLI aus aktivem Code und Doku entfernt | `orchestration.accountProfiles` ✅ `tests/account-profiles.test.mjs` 28/28; `T-251 (BP-000-W1 (Vision-Audit-Profile, 6 Accounts & WAITING_RATE_LIMIT-Feed))` / Kapitän |
+| n8n-verarbeitbare Exit-Codes `SUCCESS`, `RETRYABLE_EMPTY_OR_TIMEOUT` (3s → 8s → 15s), `RATE_LIMITED`, `LOGIC_STUCK` | Status-JSON ohne Exit-Code; kein Mikro-Backoff, keine `agy`-Eskalation | `orchestration.runnerExitCodes` ⬜ `T-252 (BP-000-W1 (Runner-Exit-Codes & 3-Stufen-Mikro-Backoff für n8n))` / kilo1 |
+| Capability-Tags `vision`/`playwright`/`pure-code`/`static-qa`, 45-s-WoL-Fallback auf Hauptrechner, `verify:workers` (9 Fälle), finales Handbuch 08 | Harness grün (T-248), Tags/Fallback/Suite fehlen; Handbuch 08 ohne `agy` A/B | `maschinen.gracefulDegradation` ⬜, `qa.workersE2E` ⬜ `T-253 (BP-000-W1 (Capability-Tags, Graceful Degradation & verify:workers))` / kilo5 |
+
+**User-Journey (§11):** Supervisor-Festlegung → Kapitän mapped die drei Deltas zuerst hierher → zerlegt in genau drei atomare Tasks → `kilo2`/`kilo1`/`kilo5` liefern Status-JSONs und Exit-Codes → n8n übernimmt Makro-Stochern/Warteschlange → Werkbank zeigt 429 und Maschinen-Fallback aus echten Statusquellen → `verify:workers` beweist neun Fälle. Kein Chris-Klick, keine Live-Einladung vor Grün. Die alten `T-249`/`T-250` sind in `T-253` aufgegangen und als `entfällt` markiert.
+
+**Trennlinie:** Keine neuen Node-Cron-/Queue-/Recovery-Daemons; `infra/hybrid-stack` (n8n) liegt außerhalb dieses Repos. Node.js = reine Status-/Exit-Code-Lieferung.
+
+## 20) T-243 — BP-000-W1: WAITING_RATE_LIMIT & resumeAt im Handler (Soll → Ist, 24.11.2026)
+
+**User Journey ohne manuelle Klicks (§11):** Der Worker (Kilo2/OpenRouter oder Gateway) läuft
+`kilo run` → OpenRouter antwortet mit `429` und einem Reset-Header (RPM/h oder RPD) → der
+Handler erkennt das Limit über `isQuotaRun()` und berechnet mit
+`computeRateLimitWait({ headers, now })` aus `ops/kilo-handler/rate-limit-wait.mjs` den
+Zeitpunkt `resumeAt` → er schreibt `zustand: waiting_rate_limit`, `resumeAt` und `grund` in
+`<T-XXX>.status.json` und ins Summary, setzt den Modell-Cooldown auf `resumeAt` und beendet
+den Lauf **nicht** als `FAILED` → die bestehende Fallback-Kette schaltet sofort auf das
+nächste freie Modell; ist die Kette erschöpft, pausiert der Worker-Typ bis `resumeAt` →
+`nextAutoResumeAt()`/`autoResumeDue()` lesen genau dieses `resumeAt` → T-244 (Rate-Limit-Feed,
+Board, Auto-Resume) und T-245 (Live-Status/stdout) zeigen denselben Zustand in Werkbank und
+Ops-Center. Chris tippt nichts; die 429-Fälle laufen ausschließlich simuliert.
+
+| Soll aus T-243 | Ist | Beleg |
+| --- | --- | --- |
+| Neuer Baustein `rate-limit-wait.mjs` mit `computeRateLimitWait` | `resumeAt`, `fenster` (`rpm`/`rpd`), `grund`, `header`, `reset`, `default`, `clamped`, `quelle`; Header als Objekt/Map/Liste/Rohtext, case-insensitiv, escaped JSON | `tests/rate-limit-wait.test.mjs` 12/12 |
+| RPM/h und RPD | `x-ratelimit-reset-requests`/`-rpd`, generischer `x-ratelimit-reset`/`x-rate-limit-reset` plus `retry-after`; Fenster aus Header-Name, Fehlertext oder Reset-Abstand | Tests „RPM", „RPD", „Sekunden- und Millisekunden-Header" |
+| Sekunden- und Millisekunden-Header | 13 Ziffern = Epoch-ms, 10 Ziffern = Epoch-Sekunden × 1000, kleine Werte = relative Sekunden; `retry-after` relativ | Tests „Sekunden- und Millisekunden-Header", „retry-after", „roher 429-Fehlertext" |
+| Fehlende Header = sicherer Default | RPM 60 s, RPD 1 h, nie `NaN`/`0`, harte 24-h-Kappe | Tests „fehlende Header", „Reset jenseits von 24 h", „`$now`-Injektion" |
+| Handler setzt `zustand: waiting_rate_limit`, `resumeAt`, `grund`, kein `FAILED` | Task-Status/Summary führen `zustand`, `resumeAt`, `grund`, `rateLimit`; `stopReason` bleibt `quota-cooldown`; Worker-Ampel bleibt kompatibel `cooldown` und bekommt `resumeAt`/`grund` | Handler-Tests in `tests/rate-limit-wait.test.mjs`, `tests/kilo-handler.test.js` 57/57, `tests/kilo-auto-final-try-e2e.test.js` 10/10 |
+| Bestehende Fallback-Kette und Quota-Cooldowns intakt | Kettenwahl, `worker-quota.json`, Claim-Freigabe und `next_auto_resume_at` unverändert; nur `resumeAt` ist jetzt die Quelle | `tests/kilo-handler.test.js` (Kette A→B→free, vier Kettenglieder, Gateway-429), `tests/kilo-auto-final-try-e2e.test.js` |
+
+**Neue wiederverwendbare Bausteine:** `ops/kilo-handler/rate-limit-wait.mjs`
+(`orchestration.rateLimitQueue`, `verified: true`) als regulärer Aufrufpfad — kein `_dbg`-Skript.
+Die Suite ist in `ops/scripts/verify.mjs` als `rate-limit-wait` registriert.
+
+**Gaps / Risiken / Backlog:** Die Worker-Ampel (`worker-status.json`) behält aus
+Backward-Kompatibilität den Wert `cooldown`; der neue Zustand `waiting_rate_limit` steht in
+Task-Status/Summary und wird von T-244/T-245 in Feed und Werkbank übernommen. T-244 (Feed,
+Board, Auto-Resume) bleibt offen. Kein Sleep-/Warteprozess, kein echter API-Call, keine
+Änderung an SSOT-Reihenfolge, Preset, Guard oder Task-Frontmatter. Live-`19132`/UDP 7551,
+Weltdaten, Auth, Firewall, kostenpflichtige API-Calls und Vision-Calls blieben unberührt;
+keine finale Live-Einladung.
+## 21) T-253 — BP-000-W1: Capability-Tags, Graceful Degradation & verify:workers (Soll → Ist, 25.11.2026)
+
+**User Journey ohne manuelle Klicks:** Chris' Zusatzauftrag fordert Worker-Härtung → der Agent
+verankert vier Fähigkeits-Tags ausschliesslich in der SSOT → `system-config-sync.mjs` generiert
+sie nach `ops/workers.json` → ein Ausfall der Maschinen 2/3/4 oder WoL > 45 s lässt den
+Hauptrechner unterbrechungsfrei übernehmen (mit injizierter Uhr/Registry, keine echten Pakete) →
+`npm run verify:workers` spielt neun Szenarien aus `BP-000-W1.json` ab und ist in
+`npm run verify` registriert → Handbuch 08 und Code-Spiegel dokumentieren agy A/B (Lock = 1),
+sechs Accounts und Stocher-Logik. Chris tippt nichts; 19132, Weltdaten, Auth und Firewall bleiben
+unberührt.
+
+| Soll aus T-253 / BP-000-W1 | Ist | Beleg |
+| --- | --- | --- |
+| Capability-Tags nur in SSOT, generiert | `capabilityTags` in `ops/SYSTEM_SSOT.json`; `system-config-sync.mjs` erzeugt `tags`/`capabilityTags`/`gracefulDegradation` in `ops/workers.json`; nie manuell editiert | `tests/worker-capability-tags.test.mjs`, `tests/worker-orchestration-guard.test.mjs` (62 Prüfungen), `ops/workers.json` |
+| Graceful Degradation mit injizierter Uhr/Registry | `ops/runtime/graceful-degradation.mjs`, 45 s WoL, Hauptrechner primär; keine Sockets/Daemons | Guard-Test (62 Prüfungen), kein `net/dgram/fetch` im Modul |
+| verify:workers spielt neun Szenarien | `ops/qa/worker-capability-scenarios.mjs` über `BP-000-W1.json`; in `npm run verify` registriert; T-248-Harness unverändert | `npm run verify:workers` 9/9, `verify-workers` in Verify-Suite, Harness 51/51 |
+| 0 kostenpflichtige Calls, 0 echte Ports | Szenario W1-09 als strukturelle Invariante | Szenario-Ausgabe, BP-000-W1.json |
+| Handbuch 08 + Code-Spiegel | `vault/handbuch/08-worker-und-maschinen.md` und identischer Code-Spiegel `ops/notebook-sync/quellen/handbuch/08-worker-und-maschinen.md` (Ist-Analyse aus T-241); Finalisierung mit `agy` A/B (`Lock = 1`), sechs Accounts und Stocher-Logik im Ergänzungskapitel `08_Worker_Haertung_Capability_Tags_Graceful_Degradation.md` | Dateien im Code-Spiegel, UTF-8 ohne BOM |
+| Worker-Orchestrierungs-Guard grün | T-239-Guard unverändert (11 Checks) plus 18 T-253-Prüfungen; generierte Configs ohne Drift | `tests/worker-orchestration-guard.test.mjs` 62/62 |
+
+**Neue wiederverwendbare Bausteine:** `worker.gracefulDegradation`
+(`ops/runtime/graceful-degradation.mjs`) und `worker.capabilityScenarios`
+(`ops/qa/worker-capability-scenarios.mjs`) mit regulärem Aufrufpfad
+(`npm run verify:workers`). Der T-248-Harness
+`ops/qa/worker-scenario-harness.mjs` blieb unverändert (51 Tests, injizierte
+API `runWorkerScenario`); die Szenario-CLI wurde als eigenes Modul ergänzt,
+damit keine Testabschwächung entsteht. Kein `_dbg`-Skript.
+
+
+
+
+**Gaps / Risiken / Backlog:** Handbuch 08 liegt im Code-Spiegel; die Aufnahme in den
+Bundle-Export (Liste `VAULT_POSITIV_STUFE2.handbuch`) würde die Sieben-Kapitel-Assertions ändern
+und ist nicht Teil dieses Tasks. `BP-000` bleibt `freigabe: manual`. Migrations-Trennlinie:
+keine neuen Daemons, n8n macht Makro-Orchestrierung, kein zweiter Wartemechanismus neben
+T-243/T-244. Live-`19132`/UDP 7551, Weltdaten, Auth, Firewall und Freigabemodus `manual` bleiben
+unberührt; keine kostenpflichtigen API-Calls, keine finale Live-Einladung.
+
+
+## 22) T-251 — BP-000-W1: Vision-Audit-Profile, 6 Accounts & WAITING_RATE_LIMIT-Feed (Soll → Ist, 25.11.2026)
+
+**User Journey ohne manuelle Klicks:** Ein `vision_audit`-Task wird vom Task-Frontmatter
+erkannt → das Routing nutzt `getVisionAuditConfig()` aus `account-profiles.mjs` →
+kilo2 läuft mit `OPENROUTER_KEY_1` (Tageslimit 1.000 als Metadatum) und `OPENROUTER_KEY_2`
+als Backup, danach unverändert die T-199-Kette → bei HTTP 429 schreibt der bestehende
+Baustein `computeRateLimitWait()` `WAITING_RATE_LIMIT` mit `resumeAt`/`grund` in Task-Status
+und Werkbank-Feed (7070) → n8n entscheidet über die Fortsetzung, Node liefert nur Status.
+Ein zweiter `agy`-Slot wird fail-closed abgelehnt (`Lock = 1`). Chris tippt nichts;
+`19132`/UDP 7551, Weltdaten, Auth, Firewall und `manual` bleiben unberührt.
+
+| Soll aus T-251 / BP-000-W1 | Ist | Beleg |
+| --- | --- | --- |
+| `getVisionAuditConfig()` in aktiver Route, kilo2, Key_1/2, T-199 | `account-profiles.mjs` liefert die Kette; `task-type-router.mjs` ruft den Helper im aktiven Pfad; kein veralteter Free-Slug, T-242-Shape unverändert | `tests/account-profiles.test.mjs` 28/28, `tests/task-type-router.test.mjs` 9/9 |
+| Sechs getrennte Profile, nur Namen | 2× `KILO_ACCOUNT_1/2`, 2× `OPENROUTER_KEY_1/2`, 2× `agy` A/B; keine Werte/Tokens im Repo | `account-profiles.test.mjs`, `ops/kilo-handler/account-profiles.mjs` |
+| `agy` A/B mit `Lock = 1`, zweiter Slot fail-closed | `createAgyLock()` mit injizierbarem Halter, kein globaler Zustand, kein Timer | `account-profiles.test.mjs` (A→B ablehnbar, Freigabe nur durch Halter) |
+| 429 → `WAITING_RATE_LIMIT` + `resumeAt`/`grund` im Feed | T-243 `computeRateLimitWait()` + T-244 `worker-status.mjs`; kein `FAILED`, kein zweiter Wartemechanismus | `rate-limit-wait.test.mjs`, `waiting-rate-limit-feed.test.mjs` |
+| Veraltete CLI aus aktivem Code/Doku entfernt | 0 Treffer in aktivem Code und Doku (nur archivierte Referenzen und Task-/Result-Doku) | `git grep` ohne `_archiv`/Task-/Result-Pfade |
+| Capability-Beleg | `orchestration.accountProfiles` auf `verified: true`, Test in `npm run verify` registriert | `ops/capabilities.json`, `ops/scripts/verify.mjs` |
+
+**Gaps / Risiken / Backlog:** Die Worker-Version von `task/T-251` basierte auf altem
+`main` und enthielt eine Doppelung der 429-Logik; der Kapitän hat den Kapitäns-Stand
+chronologisch nachgemergt und die Kapitäns-Version (`computeRateLimitWait` aus T-243)
+behalten. Es gibt keine echten Keys, keine Paid-/Vision-Calls und keine Live-Berührung.
+`BP-000` bleibt `freigabe: manual`; keine finale Live-Einladung.
 ```
 
 ## ops/capabilities.json
@@ -2444,6 +2637,288 @@ Supervisor als Kapitän ohne umfangreichen Produktivcode; atomare `T-xxx`-Subtas
       "doku": "ops/SYSTEM_SSOT.json → governance.acceptance/autoMerge; AGENTS.md §16; vault/handbuch/04 §7",
       "verified": true,
       "beleg": "tests/showcase-release-gate.test.mjs: 56 Pruefungen, 11 Gate-Punkte; fehlende Seeds/useBlock/Verify-Belege/Pages-Budget rot"
+    },
+    {
+      "id": "orchestration.visionAuditRouting",
+      "modul": "ops/kilo-handler/task-type-router.mjs",
+      "funktion": "resolveTaskTypeRouting",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "typ",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Aufgabentyp aus dem Task-Frontmatter: code, test, doku, analyse oder vision_audit"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/blueprints/BP-000-W1.json M1; vault/handbuch/08-worker-und-maschinen.md; T-242",
+      "verified": false,
+      "beleg": "Backlog BP-000-W1 / T-242: Typ-Routing und Vision-Budget-Schutz noch nicht implementiert"
+    },
+    {
+      "id": "orchestration.rateLimitQueue",
+      "modul": "ops/kilo-handler/rate-limit-wait.mjs",
+      "funktion": "computeRateLimitWait",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "headers",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "429-Header (x-ratelimit-reset, x-rate-limit-reset, x-ratelimit-reset-requests/-rpd, retry-after) als Objekt oder Rohtext"
+        },
+        {
+          "name": "now",
+          "typ": "number",
+          "pflicht": false,
+          "beschreibung": "injizierter Zeitpunkt in Epoch-Millisekunden fuer deterministische Tests"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/blueprints/BP-000-W1.json M2; T-243/T-244",
+      "verified": true,
+      "beleg": "tests/rate-limit-wait.test.mjs: 12 Pruefungen (RPM/h, RPD, Sekunden/Millisekunden, retry-after, Default ohne Header, 24-h-Kappe, Handler-WAITING_RATE_LIMIT mit resumeAt); tests/kilo-handler.test.js 57/57 gruen; T-244 erweitert den Beleg um Feed/Board/Auto-Resume (tests/waiting-rate-limit-feed.test.mjs, 6/6)"
+    },
+    {
+      "id": "orchestration.rateLimitFeedBoard",
+      "modul": "ops/cockpit/lib/worker-status.mjs",
+      "funktion": "workerStatusClass/workerStatusLabel/countdownUntil",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "zustand",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Worker-Zustand incl. waiting_rate_limit"
+        },
+        {
+          "name": "resumeAt",
+          "typ": "number",
+          "pflicht": false,
+          "beschreibung": "Epoch-Millisekunden des Rate-Limit-Resets (z. B. aus worker-status.json)"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/blueprints/BP-000-W1.json M2; AGENTS.md §13; T-244",
+      "verified": true,
+      "beleg": "tests/waiting-rate-limit-feed.test.mjs (6/6): waiting_rate_limit in worker-status.mjs (ZUSTANDE, WORKER_STATUS_CLASS/LABEL, countdownUntil), Feed-Felder bp/modell/pid/resumeAt, Cockpit-Card (app.js:368-420, CSS .worker-status-waiting-rate-limit), Board-Zeile und Auto-Resume im Watcher (agent-watch.mjs: autoResumeDue/nextAutoResumeAt/autoResumableTasks)"
+    },
+    {
+      "id": "orchestration.taskFrontmatterBp",
+      "modul": "ops/scripts/agent-run.mjs",
+      "funktion": "readFrontmatter(bp)/driveJob(bp)",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "id",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Task-ID T-XXX"
+        },
+        {
+          "name": "bp",
+          "typ": "string",
+          "pflicht": false,
+          "beschreibung": "optionales Frontmatter-Feld bp: BP-000-W1"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/blueprints/BP-000-W1.json; AGENTS.md §14; T-244",
+      "verified": true,
+      "beleg": "ops/tasks/T-240-T-244.md erhalten bp: BP-000-W1; agent-run.mjs liest bp aus dem Frontmatter und uebergibt es an driveJob; handler.mjs schreibt bp in T-XXX.status.json und ins Summary"
+    },
+    {
+      "id": "orchestration.liveWorkerStatus",
+      "modul": "ops/werkbank/server.mjs",
+      "funktion": "loadWorkers",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "ssot",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "SSOT für Worker-Labels und Host-Zuordnung"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/blueprints/BP-000-W1.json M3; AGENTS.md §13 4-Stufen-UI-Prozess; T-245",
+      "verified": false,
+      "beleg": "Backlog BP-000-W1 / T-245: Werkbank zeigt noch Fixtures T-901/WATCH-START statt echter Worker-Daten"
+    },
+    {
+      "id": "maschinen.registry",
+      "modul": "ops/runtime/machine-registry.mjs",
+      "funktion": "registerMachine/listMachines/snapshotMachine",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "options",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "registryFile für Tests sowie now für injizierte Uhr"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/blueprints/BP-000-W1.json M3; ops/SYSTEM_SSOT.json → maschinen; T-246",
+      "verified": true,
+      "beleg": "tests/machine-registry.test.mjs (3 Maschinen inkl. Linux-Node, Offline-Skip, injizierte Uhr, null-Telemetrie ohne Erfindung); ops/runtime/machine-monitor.mjs nutzt letzteSignal für lastSeenSeconds"
+    },
+    {
+      "id": "maschinen.ehrlicheAmpel",
+      "modul": "ops/werkbank/server.mjs",
+      "funktion": "healthCards",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "cache",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "Maschinen-Snapshots mit echten Zeitstempeln und Telemetrie"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/blueprints/BP-000-W1.json M3; ops/SYSTEM_SSOT.json → maschinen.ram; T-247",
+      "verified": false,
+      "beleg": "Backlog BP-000-W1 / T-247: 0 s Herzschlag mit ram/cpu null wird derzeit grün angezeigt"
+    },
+    {
+      "id": "orchestration.capabilityTags",
+      "modul": "ops/runtime/graceful-degradation.mjs",
+      "funktion": "waehleWorkerFuerTag",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "workers",
+          "typ": "Array",
+          "pflicht": true,
+          "beschreibung": "generierte ops/workers.json mit host/tags aus der SSOT"
+        },
+        {
+          "name": "benoetigtTag",
+          "typ": "string (vision|playwright|pure-code|static-qa)",
+          "pflicht": true,
+          "beschreibung": "benötigte Fähigkeitsklasse"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/SYSTEM_SSOT.json → capabilityTags; ops/blueprints/BP-000-W1.json; T-253",
+      "verified": true,
+      "beleg": "tests/worker-capability-tags.test.mjs und tests/worker-orchestration-guard.test.mjs (62 Prüfungen): vier Tags nur in der SSOT, per system-config-sync.mjs generiert, Ausfallwahl bleibt auf dem Hauptrechner"
+    },
+    {
+      "id": "qa.workersE2E",
+      "modul": "ops/qa/worker-capability-scenarios.mjs",
+      "funktion": "fuehreWorkerSzenarienAus",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "blueprint",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "BP-000-W1 mit neun Szenarien W1-01..W1-09 (Default: Datei)"
+        },
+        {
+          "name": "now",
+          "typ": "number",
+          "pflicht": false,
+          "beschreibung": "injizierte Uhr in ms; kein echter Timer, kein Port"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/blueprints/BP-000-W1.json M4; npm run verify:workers in npm run verify registriert; T-248 + T-253",
+      "verified": true,
+      "beleg": "npm run verify:workers 9/9 Szenarien grün, 0 kostenpflichtige Calls, 0 echte Ports; T-248-Harness unverändert 51/51; in npm run verify als Suite verify-workers registriert"
+    },
+    {
+      "id": "qa.workerScenarioHarness",
+      "modul": "ops/qa/worker-scenario-harness.mjs",
+      "funktion": "runWorkerScenario",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "fall",
+          "typ": "string (einer der neun SCENARIO_IDS aus BP-000-W1)",
+          "pflicht": true,
+          "beschreibung": "Fall, der durchgespielt wird; ein nicht gelisteter Fall bricht hart ab"
+        },
+        {
+          "name": "deps",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "Injizierte Abhängigkeiten: uhr, slots, monitor, board, sse, fs sowie fallspezifische Wahlen"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/blueprints/BP-000-W1.json M4; AGENTS.md §11; T-248",
+      "verified": true,
+      "beleg": "tests/worker-scenario-harness.test.mjs 51 Prüfungen: neun Fälle deterministisch, Injection von Uhr/Slots/Monitor/Board/SSE, fail-closed bei unbekanntem Fall und fehlender Uhr, 0 kostenpflichtige Calls, 0 echte Dateizugriffe (kein node:fs im Harness, Gift-FS grün)"
+    },
+    {
+      "id": "orchestration.accountProfiles",
+      "modul": "ops/kilo-handler/account-profiles.mjs",
+      "funktion": "getVisionAuditConfig",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "typ",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Task-Typ; vision_audit waehlt kilo2 mit OPENROUTER_KEY_1/2 und T-199-Fallback"
+        },
+        {
+          "name": "profil",
+          "typ": "string",
+          "pflicht": false,
+          "beschreibung": "Nur env-Variablennamen: KILO_ACCOUNT_1/2, OPENROUTER_KEY_1/2, agy A/B mit Lock = 1"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/blueprints/BP-000-W1.json M1; ops/kilo-handler/task-type-router.mjs; T-251",
+      "verified": true,
+      "beleg": "tests/account-profiles.test.mjs 28/28: sechs Profile ohne Werte, Primary/Backup, Tageslimit 1000 als Metadatum, agy Lock = 1 fail-closed, aktive Route ohne veralteten Free-Slug; 429 → WAITING_RATE_LIMIT mit resumeAt/grund im Feed durch T-243/T-244"
+    },
+    {
+      "id": "orchestration.runnerExitCodes",
+      "modul": "ops/runtime/runner-exit.mjs",
+      "funktion": "resolveRunnerExit",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "ergebnis",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "Runner-Ergebnis; liefert SUCCESS, RETRYABLE_EMPTY_OR_TIMEOUT (3s/8s/15s), RATE_LIMITED (accountId/resumeAt) oder LOGIC_STUCK an agy"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/blueprints/BP-000-W1.json M2/M4; Migrations-Trennlinie n8n steuert Makro; T-252",
+      "verified": true,
+      "beleg": "tests/runner-exit.test.js 9/9; in handler.mjs/agent-run.mjs verdrahtet; Status-JSON und Summary tragen exitStatus; 429-resumeAt aus computeRateLimitWait (T-243)"
+    },
+    {
+      "id": "maschinen.gracefulDegradation",
+      "modul": "ops/runtime/graceful-degradation.mjs",
+      "funktion": "bewerteAusfallUndUebernahme",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "registry",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "Maschinen-Snapshots; offline oder WoL > 45 s wird auf den Hauptrechner zurueckgefahren"
+        },
+        {
+          "name": "now",
+          "typ": "number",
+          "pflicht": true,
+          "beschreibung": "injizierte Uhr in ms fuer deterministische 45-s-Pruefung"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/blueprints/BP-000-W1.json M3; ops/SYSTEM_SSOT.json → gracefulDegradation; T-253",
+      "verified": true,
+      "beleg": "tests/worker-capability-tags.test.mjs und worker-orchestration-guard.test.mjs: WoL 60 s > 45 s, Ausfall von FELDBOOK, Hauptrechner uebernimmt unterbrechungsfrei; kein Socket, kein Daemon"
     }
   ],
   "inventur": {
@@ -2595,6 +3070,30 @@ Supervisor als Kapitän ohne umfangreichen Produktivcode; atomare `T-xxx`-Subtas
         "soll": "SQLite-Spalten aus Schnittstelle v2, Frontier-Grenzen aus echten Blockdaten, Relay-Anbindung und Observer-Beweis mit zwei Welten",
         "bauplan": "BP-014",
         "grund": "M1-Modulgerüst und Config-Linter sind umgesetzt; M2–M4 bleiben manual/backlog, Zahlen und IDs nicht raten."
+      },
+      {
+        "bereich": "Worker-Modellwahl & Vision-Routing",
+        "soll": "Task-Typ steuert Free-Modell; vision_audit läuft über kilo2/T-199, Code/Text belasten kein Vision-Kontingent",
+        "bauplan": "BP-000-W1",
+        "grund": "Heute reine Worker-Typ-Wahl (Gateway fix kilo-auto/free, OpenRouter-Preset); SSOT modellSpezialitaetenFreeTier ist unimplementiert."
+      },
+      {
+        "bereich": "Rate-Limit-Queue",
+        "soll": "WAITING_RATE_LIMIT mit resumeAt für RPM/h und RPD, Feed-/Board-Sichtbarkeit und Auto-Resume",
+        "bauplan": "BP-000-W1",
+        "grund": "429 führt heute zu cooldown/quota, ohne task-lokalen Reset-Zeitpunkt oder Warteschleife."
+      },
+      {
+        "bereich": "Ehrliche Werkbank & Maschinen",
+        "soll": "echter Worker-Status/stdout ohne Fixtures, dynamische Registry, Ampel mit echten Zeitstempeln und null-Telemetrie als degraded",
+        "bauplan": "BP-000-W1",
+        "grund": "Werkbank liefert T-901/WATCH-START-Fixtures; localMachineSnapshot meldet immer 0 s/online, null RAM/CPU wird grün."
+      },
+      {
+        "bereich": "Worker-9-Fälle-E2E",
+        "soll": "npm run verify:workers über Dispatcher, Monitor, Slots, Board und SSE für alle neun Fälle",
+        "bauplan": "BP-000-W1",
+        "grund": "verify:workers existiert nicht; Szenario-Harness fehlt."
       }
     ]
   }
