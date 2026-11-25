@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-25T19:20:58.766Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-25T19:56:46.349Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -1849,7 +1849,7 @@ sind reviewt und gemergt, die UI-Welle bleibt bewusst offen.
 | Maschinen melden Rolle, Status, RAM/CPU und Slots selbst; `offline_migration_pending` neutral | `ops/runtime/machine-registry.mjs` mit `letztesSignal`, aber ohne Rolle/Status/Slots; RAM/CPU ohne Eintrag `null` | `maschinen.registry` ✅ `T-273 (BP-006-W2-FINAL (Maschinen-Registry: Rolle, Status, Slots, Telemetrie))` / kilo1 |
 | Baupläne mit `category`, `status`, `zielPort`, verknüpften Tasks; datengetriebene Gruppen und Chris-Tore | `ops/blueprints/registry.json` ohne diese Metadaten; UI zeigt pauschal „entwurf" | `blueprint.metadaten` ✅ `T-274 (BP-006-W2-FINAL (Bauplan-Metadaten & dynamische Gruppierung))` / kilo5 |
 | Zero-Terminal-Setup: `~/.tmux.conf` mit `set -g mouse on`, Windows-Terminal-Profil `VoxelCrew Supervisor` (`wsl -d Ubuntu -e tmux attach -t supervisor`) | `ensure-supervisor.sh` hält tmux; Profil und Maus-Zeile fehlen | `setup.windowsTerminal` ✅ `T-275 (BP-006-W2-FINAL (Zero-Terminal-Setup: tmux & Windows Terminal))` / kilo5 |
-| Werkbank-Backend liefert Navigation, Tore, Maschinen, Dienste, Provider, Diagnose aus Registries; Vault-Pfad korrekt aufgelöst | Bestehende Endpunkte für Ideen/Baupläne/Fragen/Handlungen/Showcase/SSE; neue Vertragsendpunkte fehlen, Vault-Pfad relativ zum CWD fehlerhaft | `ui.werkbankApi` ⬜ `T-277 (BP-006-W2-FINAL (Werkbank-Backend: Registries & Aktionen))` / kilo1 |
+| Werkbank-Backend liefert Navigation, Tore, Maschinen, Dienste, Provider, Diagnose aus Registries; Vault-Pfad korrekt aufgelöst | 13 neue plus 2 angepasste Endpunkte in `ops/werkbank/server.mjs`, Quellen in `ops/config/werkbank-ui.json` und Registries; Fixture-Test 89/89, Verify 75/75, kein Produktiv-7070 | `ui.werkbankApi` ✅ `T-277 (BP-006-W2-FINAL (Werkbank-Backend: Registries & Aktionen))` / kilo1 |
 | Roter „Bot-Hilfe"-Knopf ersetzt durch „System-Diagnose kopieren" (secret-frei); Showcase nur `category === 'showcase'`, Reset/Seed-Gate; Schaltzentrale mit echten Balken, stdout, Aktionen | Alter roter Knopf und pauschale Showcase-Liste vorhanden; RAM/CPU-Anzeige ohne Registry-Beweis | `ui.aktuell` ⬜ `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` / kilo2 |
 | Handbuch lädt dynamisch alle `vault/handbuch/*.md`; Querschnittsmodule heißen „System-Baustein (übergreifend)" | Sieben Fixture-Kapitel, Produktivpfad relativ falsch; keine Querschnittskennzeichnung | `ui.handbuchKarte` ⬜ `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` / kilo2 |
 | Stufe 4: Playwright klickt jeden Tab/Dialog/Button, legt Test-Provider an, lädt alle Kapitel, 0 Browser-/API-Fehler, 0 kaputte Platzhalter, Screenshot-Plausibilität | Bestehender Werkbank-Browsertest prüft die alten sechs Tabs; dynamische Neue-Journey fehlt | `qa.stufe4Werkbank` ⬜ `T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))` / kilo1 |
@@ -1858,9 +1858,11 @@ sind reviewt und gemergt, die UI-Welle bleibt bewusst offen.
 
 **Neue wiederverwendbare Bausteine (geplant, `verified:false` bis Testbeleg):**
 `ops/config/provider-adapters.mjs`, `ops/blueprints/metadaten.mjs`,
-`ops/scripts/setup-windows-terminal.ps1`, `ops/werkbank/lib/registry-ansicht.mjs`,
+`ops/scripts/setup-windows-terminal.ps1`, `ops/config/werkbank-ui.json`,
 `ops/qa/pages-guard.mjs` (dynamisch, bei `T-279 (BP-006-W2-FINAL (Pages-Guard: JS-frei, <175 KB, Negativliste))`
-mit Capability `pages.guardDynamisch` und Testbeleg verifiziert). Kein `_dbg`-Skript;
+mit Capability `pages.guardDynamisch` verifiziert) und `ops/config/werkbank-ui.json`
+(bei `T-277 (BP-006-W2-FINAL (Werkbank-Backend: Registries & Aktionen))` mit
+`ui.werkbankApi` verifiziert). Kein `_dbg`-Skript;
 die übrigen Bausteine bekommen ihren Capability-Eintrag vor dem Review in
 `T-280 (BP-006-W2-FINAL (Kapitäns-Review & Abnahme-Gate))`.
 
@@ -3481,9 +3483,9 @@ bleiben `manual`.
         "gefüllt",
         "handlungsbedarf"
       ],
-      "doku": "ops/tasks/T-277.md; ops/werkbank/UI_VERTRAG_BP006_W2_FINAL.md; ops/SPEC_MAPPING.md §24",
-      "verified": false,
-      "beleg": "Backlog BP-006-W2-FINAL / T-277: neue Vertragsendpunkte sind spezifiziert, aber noch nicht implementiert und nicht abgenommen"
+      "doku": "ops/results/T-277.md; ops/tasks/T-277.md; ops/werkbank/UI_VERTRAG_BP006_W2_FINAL.md; ops/SPEC_MAPPING.md §24",
+      "verified": true,
+      "beleg": "tests/werkbank-api-registries.test.mjs 89/89 und npm run verify 75/75: 13 neue plus 2 angepasste Endpunkte, Registry-/Konfigurationsquellen, Observer-Gate, echter Export, Fail-Closed-503, 0 Secrets, ephemeraler Port"
     },
     {
       "id": "ui.aktuell",
