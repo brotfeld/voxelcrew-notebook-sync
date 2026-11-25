@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-25T17:10:05.080Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-25T17:24:50.590Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -1666,8 +1666,8 @@ Supervisor als Kapitän ohne umfangreichen Produktivcode; atomare `T-xxx`-Subtas
 | --- | --- | --- |
 | Free-Modell je Aufgabentyp, Vision über kilo2/T-199 | Keine Typ-Routung: Gateway fix `kilo/kilo-auto/free`, OpenRouter 3 Primary + 1 Fallback aus `openrouter-preset.json`; `modellSpezialitaetenFreeTier` nur SSOT-Text | `orchestration.visionAuditRouting`, T-241/T-242 |
 | 429 RPM/h + RPD → `WAITING_RATE_LIMIT` + `resumeAt` + Auto-Resume | **T-243 umgesetzt:** `ops/kilo-handler/rate-limit-wait.mjs` berechnet `resumeAt`/`fenster`/`grund` aus RPM/h- und RPD-Headern (Epoch-ms, Epoch-Sekunden, `retry-after`, sicherer Default); der Handler schreibt `zustand: waiting_rate_limit` in Task-Status/Summary, beendet den Lauf nicht als `FAILED` und lässt die Kette/Quota-Cooldowns intakt; `nextAutoResumeAt`/`autoResumeDue` lesen `resumeAt`. T-244 ergänzt Feed/Board/Auto-Resume-Kette | `orchestration.rateLimitQueue` (`verified: true`), T-243 erledigt, T-244 offen |
-| Echter Worker-Status (Zustand, Task, BP, Modell, PID, Laufzeit, stdout) | Werkbank-Fixtures `T-901`/`T-902`, `WATCH-START`, PIDs 4121/5311; echte Quellen liegen in `worker-status.json`, `T-XXX.status.json`, `pids.json` | `orchestration.liveWorkerStatus`, T-245 |
-| Dynamische Maschinen-Registry, ehrliche Ampel | `ops/runtime/machine-registry.mjs` (register/list/snapshot, `letztesSignal` echter Zeitstempel, `verified: true` mit Testbeleg T-246); `localMachineSnapshot()` berechnet `lastSeenSeconds = Date.now() - letztesSignal`, `ram/cpu` bei fehlendem Eintrag `null` | `maschinen.registry` ✅ T-246; `maschinen.ehrlicheAmpel` ⬜ T-247 |
+| Echter Worker-Status (Zustand, Task, BP, Modell, PID, Laufzeit, stdout) | Werkbank-Fixtures `T-901`/`T-902`, `WATCH-START`, PIDs 4121/5311; echte Quellen liegen in `worker-status.json`, `T-XXX.status.json`, `pids.json` | `orchestration.liveWorkerStatus` ✅ `T-245 (BP-000-W1 (Echter Worker-Live-Status & stdout in der Werkbank))`; Fixtures entfernt, echte Dateien, Browser 0/0 Fehler |
+| Dynamische Maschinen-Registry, ehrliche Ampel | `ops/runtime/machine-registry.mjs` (register/list/snapshot, `letztesSignal` echter Zeitstempel, `verified: true` mit Testbeleg T-246); `localMachineSnapshot()` berechnet `lastSeenSeconds = Date.now() - letztesSignal`, `ram/cpu` bei fehlendem Eintrag `null` | `maschinen.registry` ✅ T-246; `maschinen.ehrlicheAmpel` ✅ `T-247 (BP-000-W1 (Ehrliche Maschinen-Ampel & Heartbeat-Schwellen))`, 9/9 Tabellentests, null Telemetrie → `degraded` |
 | `npm run verify:workers`, 9 Fälle, in `npm run verify` verankert | **T-248 umgesetzt:** `ops/qa/worker-scenario-harness.mjs` (`runWorkerScenario({ fall, deps })`, neun feste Fälle, In-Memory-Board/SSE/FS, injizierte Uhr, fail-closed, 0 kostenpflichtige Calls, 0 echte Dateizugriffe; `tests/worker-scenario-harness.test.mjs` 51/51 grün). Die neun Fälle selbst und `verify:workers` folgen in T-249/T-250 | `qa.workersE2E` (⬜ T-249/T-250), `qa.workerScenarioHarness` ✅ T-248 |
 
 **Neue wiederverwendbare Bausteine (geplant, `verified:false` bis Testbeleg):** `ops/kilo-handler/task-type-router.mjs`, `ops/kilo-handler/rate-limit-wait.mjs`, `ops/qa/worker-scenario-harness.mjs` — kein `_dbg`-Skript als Dauerlösung; alle werden über `ops/capabilities.json` und einen regulären Aufrufpfad dokumentiert. `ops/runtime/machine-registry.mjs` ist mit T-246 umgesetzt und verifiziert; `ops/qa/worker-scenario-harness.mjs` ist mit T-248 umgesetzt und verifiziert (`qa.workerScenarioHarness`, 51/51), die darauf aufbauende 9-Fälle-Suite `verify:workers` bleibt T-249/T-250.
@@ -1679,8 +1679,8 @@ Supervisor als Kapitän ohne umfangreichen Produktivcode; atomare `T-xxx`-Subtas
 | Soll (Rest-Delta) | Ist | Backlog / Task |
 | --- | --- | --- |
 | `vision_audit` über kilo2 mit 2 OpenRouter-Keys, 2 Kilo-, 2 `agy`-Profile (`Lock = 1`), 429 → `WAITING_RATE_LIMIT` im Feed, keine veraltete CLI | `ops/kilo-handler/account-profiles.mjs` mit sechs Profilen (nur Namen), `getVisionAuditConfig()` in der aktiven Route (kilo2, `OPENROUTER_KEY_1/2`, T-199), `agy` Lock = 1 fail-closed; 429 → `WAITING_RATE_LIMIT` + `resumeAt`/`grund` im Feed (T-243/T-244); veraltete CLI aus aktivem Code und Doku entfernt | `orchestration.accountProfiles` ✅ `tests/account-profiles.test.mjs` 28/28; `T-251 (BP-000-W1 (Vision-Audit-Profile, 6 Accounts & WAITING_RATE_LIMIT-Feed))` / Kapitän |
-| n8n-verarbeitbare Exit-Codes `SUCCESS`, `RETRYABLE_EMPTY_OR_TIMEOUT` (3s → 8s → 15s), `RATE_LIMITED`, `LOGIC_STUCK` | Status-JSON ohne Exit-Code; kein Mikro-Backoff, keine `agy`-Eskalation | `orchestration.runnerExitCodes` ⬜ `T-252 (BP-000-W1 (Runner-Exit-Codes & 3-Stufen-Mikro-Backoff für n8n))` / kilo1 |
-| Capability-Tags `vision`/`playwright`/`pure-code`/`static-qa`, 45-s-WoL-Fallback auf Hauptrechner, `verify:workers` (9 Fälle), finales Handbuch 08 | Harness grün (T-248), Tags/Fallback/Suite fehlen; Handbuch 08 ohne `agy` A/B | `maschinen.gracefulDegradation` ⬜, `qa.workersE2E` ⬜ `T-253 (BP-000-W1 (Capability-Tags, Graceful Degradation & verify:workers))` / kilo5 |
+| n8n-verarbeitbare Exit-Codes `SUCCESS`, `RETRYABLE_EMPTY_OR_TIMEOUT` (3s → 8s → 15s), `RATE_LIMITED`, `LOGIC_STUCK` | Status-JSON ohne Exit-Code; kein Mikro-Backoff, keine `agy`-Eskalation | `orchestration.runnerExitCodes` ✅ `T-252 (BP-000-W1 (Runner-Exit-Codes & 3-Stufen-Mikro-Backoff für n8n))` / kilo1, 9/9 Tests, in Handler und Agent-Runner verdrahtet |
+| Capability-Tags `vision`/`playwright`/`pure-code`/`static-qa`, 45-s-WoL-Fallback auf Hauptrechner, `verify:workers` (9 Fälle), finales Handbuch 08 | Harness grün (T-248), Tags/Fallback/Suite fehlen; Handbuch 08 ohne `agy` A/B | `maschinen.gracefulDegradation` ✅, `qa.workersE2E` ✅ `T-253 (BP-000-W1 (Capability-Tags, Graceful Degradation & verify:workers))` / kilo5, 9/9 Szenarien, 0 Paid-Calls, 0 echte Ports |
 
 **User-Journey (§11):** Supervisor-Festlegung → Kapitän mapped die drei Deltas zuerst hierher → zerlegt in genau drei atomare Tasks → `kilo2`/`kilo1`/`kilo5` liefern Status-JSONs und Exit-Codes → n8n übernimmt Makro-Stochern/Warteschlange → Werkbank zeigt 429 und Maschinen-Fallback aus echten Statusquellen → `verify:workers` beweist neun Fälle. Kein Chris-Klick, keine Live-Einladung vor Grün. Die alten `T-249`/`T-250` sind in `T-253` aufgegangen und als `entfällt` markiert.
 
@@ -1837,13 +1837,18 @@ Fehlern und 0 Negativlisten-Treffern mergt der Kapitän nach `main`. Chris tippt
 nichts; die einzigen Tore bleiben Live-`19132`/UDP `7551`, Paid-APIs,
 Windows-System/Firewall und die finale Live-Einladung.
 
+**Stand nach `T-289 (BP-006-W2-UI-FINAL (Capability- & Mapping-Nachziehung vor der UI-Welle))`:**
+Die Spalte „Ist" bleibt als historischer Ausgangszustand vor der Umsetzung erhalten;
+die Backlog-Spalte zeigt jetzt den tatsächlichen Beweisstand. Fundament und Setup
+sind reviewt und gemergt, die UI-Welle bleibt bewusst offen.
+
 | Soll aus der Festlegung | Ist (25.11.2026, vor der Umsetzung) | Backlog / Task |
 | --- | --- | --- |
 | Vier-Stufen-Prozess und API-Vertrag vor jedem UI-Code; sechs Bereiche `Ideen`, `Baupläne & Tasks`, `Chris-Tore (N)`, `Showcase`, `Schaltzentrale`, `Handbuch & Karte` | Werkbank hat sechs alte Tabs (Ideen/Baupläne/Fragen/Handlungen/Showcase/Maschinen); `uiProzess` in der SSOT vorhanden, kein Vertrag für die neue Sechs-Aufteilung | `ui.vertrag` ✅ `T-271 (BP-006-W2-FINAL (Dekomposition, Capability-Mapping & Board))` (Kapitän) → `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` / kilo2 |
-| Beliebig viele Engines und Provider mit `api_key`, `oauth_url`, `local_cli`; kein hart codierter Name | Feste Worker-/Account-Profile; `ops/config/` noch nicht angelegt; keine generischen Auth-Typen | `engine.providerRegistry` ⬜ `T-272 (BP-006-W2-FINAL (Generische Engine-/Provider-Registry & Auth-Typen))` / kilo2 |
-| Maschinen melden Rolle, Status, RAM/CPU und Slots selbst; `offline_migration_pending` neutral | `ops/runtime/machine-registry.mjs` mit `letztesSignal`, aber ohne Rolle/Status/Slots; RAM/CPU ohne Eintrag `null` | `maschinen.registry` ⬜ `T-273 (BP-006-W2-FINAL (Maschinen-Registry: Rolle, Status, Slots, Telemetrie))` / kilo1 |
-| Baupläne mit `category`, `status`, `zielPort`, verknüpften Tasks; datengetriebene Gruppen und Chris-Tore | `ops/blueprints/registry.json` ohne diese Metadaten; UI zeigt pauschal „entwurf" | `blueprint.metadaten` ⬜ `T-274 (BP-006-W2-FINAL (Bauplan-Metadaten & dynamische Gruppierung))` / kilo5 |
-| Zero-Terminal-Setup: `~/.tmux.conf` mit `set -g mouse on`, Windows-Terminal-Profil `VoxelCrew Supervisor` (`wsl -d Ubuntu -e tmux attach -t supervisor`) | `ensure-supervisor.sh` hält tmux; Profil und Maus-Zeile fehlen | `setup.windowsTerminal` ⬜ `T-275 (BP-006-W2-FINAL (Zero-Terminal-Setup: tmux & Windows Terminal))` / kilo5 |
+| Beliebig viele Engines und Provider mit `api_key`, `oauth_url`, `local_cli`; kein hart codierter Name | Feste Worker-/Account-Profile; `ops/config/` noch nicht angelegt; keine generischen Auth-Typen | `engine.providerRegistry` ✅ `T-272 (BP-006-W2-FINAL (Generische Engine-/Provider-Registry & Auth-Typen))` / kilo2 |
+| Maschinen melden Rolle, Status, RAM/CPU und Slots selbst; `offline_migration_pending` neutral | `ops/runtime/machine-registry.mjs` mit `letztesSignal`, aber ohne Rolle/Status/Slots; RAM/CPU ohne Eintrag `null` | `maschinen.registry` ✅ `T-273 (BP-006-W2-FINAL (Maschinen-Registry: Rolle, Status, Slots, Telemetrie))` / kilo1 |
+| Baupläne mit `category`, `status`, `zielPort`, verknüpften Tasks; datengetriebene Gruppen und Chris-Tore | `ops/blueprints/registry.json` ohne diese Metadaten; UI zeigt pauschal „entwurf" | `blueprint.metadaten` ✅ `T-274 (BP-006-W2-FINAL (Bauplan-Metadaten & dynamische Gruppierung))` / kilo5 |
+| Zero-Terminal-Setup: `~/.tmux.conf` mit `set -g mouse on`, Windows-Terminal-Profil `VoxelCrew Supervisor` (`wsl -d Ubuntu -e tmux attach -t supervisor`) | `ensure-supervisor.sh` hält tmux; Profil und Maus-Zeile fehlen | `setup.windowsTerminal` ✅ `T-275 (BP-006-W2-FINAL (Zero-Terminal-Setup: tmux & Windows Terminal))` / kilo5 |
 | Werkbank-Backend liefert Navigation, Tore, Maschinen, Dienste, Provider, Diagnose aus Registries; Vault-Pfad korrekt aufgelöst | Bestehende Endpunkte für Ideen/Baupläne/Fragen/Handlungen/Showcase/SSE; neue Vertragsendpunkte fehlen, Vault-Pfad relativ zum CWD fehlerhaft | `ui.werkbankApi` ⬜ `T-277 (BP-006-W2-FINAL (Werkbank-Backend: Registries & Aktionen))` / kilo1 |
 | Roter „Bot-Hilfe"-Knopf ersetzt durch „System-Diagnose kopieren" (secret-frei); Showcase nur `category === 'showcase'`, Reset/Seed-Gate; Schaltzentrale mit echten Balken, stdout, Aktionen | Alter roter Knopf und pauschale Showcase-Liste vorhanden; RAM/CPU-Anzeige ohne Registry-Beweis | `ui.aktuell` ⬜ `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` / kilo2 |
 | Handbuch lädt dynamisch alle `vault/handbuch/*.md`; Querschnittsmodule heißen „System-Baustein (übergreifend)" | Sieben Fixture-Kapitel, Produktivpfad relativ falsch; keine Querschnittskennzeichnung | `ui.handbuchKarte` ⬜ `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` / kilo2 |
@@ -1866,6 +1871,39 @@ Kein echter Provider-Call, kein OAuth, kein `.env`-Zugriff, kein WoL,
 kein echter Windows-Terminal-Schreibzugriff ohne Chris, kein `19132`/UDP `7551`,
 keine Weltdaten-, Firewall- oder Auth-Änderung. Alle Baupläne bleiben `manual`;
 keine finale Live-Einladung.
+
+## 25) BP-006-W2-UI-FINAL — Neun Invarianten, Pages-Sync, Selbstheilung (Soll → Ist → Backlog, 25.11.2026)
+
+**User Journey ohne manuelle Klicks (§11):** Chris legt die neun Dauerregeln und
+den verifizierten Pages-Push fest → der Kapitän mappt die Festlegung hierher,
+zerlegt sie in atomare Tasks und delegiert an `kilo1`/`kilo2`/`kilo5` → die
+Werkbank erkennt ihre Umgebung selbst, heilt verwaiste Locks und wählt Worker
+nach Capability-Tag und Token-Gesundheit → der Pages-Baustein veröffentlicht
+nach Guard und beweist die exakten Bytezahlen → erst nach vollständig grünem
+Verify und Review mergt der Kapitän; Chris tippt nichts und erhält erst nach
+allen Gate-Punkten eine Einladung.
+
+| Soll aus der Festlegung | Ist (nach `T-289 (BP-006-W2-UI-FINAL (Capability- & Mapping-Nachziehung vor der UI-Welle))`) | Backlog / Task |
+| --- | --- | --- |
+| Lückenlose Dekomposition mit Capability-Mapping und Board | Neun Invarianten namentlich in `AGENTS.md` §17 und `ops/LESSONS_LEARNED.md`; Wellenplan und Tasks im Board | `T-281 (BP-006-W2-UI-FINAL (Dekomposition, Capability-Mapping & Board))` ✅ |
+| Pages-Sync mit echtem Zielrepo-Push und Byte-Gegenprobe | `ops/scripts/pages-publish.mjs` mit `--dry-run`/`--verify-only`; Push `65e7f62f`, 4/4 HTTP 200, 0 Skripte | `pages.publishVerifiziert` ✅ `T-282 (BP-006-W2-UI-FINAL (Pages-Sync-Fix & verifizierter Zielrepo-Push))` |
+| Neun System-Invarianten und MCP-Bereinigung ohne Start-Popup | Invarianten in `AGENTS.md` §17 / `LESSONS_LEARNED.md`; Agentenpfad `agent-run.mjs`, Browser `npx playwright`, nur `kilohandler` aktiv | `T-283 (BP-006-W2-UI-FINAL (Neun System-Invarianten & MCP-Bereinigung))` ✅ |
+| UTF-8-/Mojibake-Guard vor jedem Worktree-Merge | `ops/qa/encoding-guard.mjs` in `npm run verify` und `task-worktree.mjs guard <ID>`; 9/9 inkl. UTF-16-Fall | `qa.encodingGuard` ✅ `T-284 (BP-006-W2-UI-FINAL (UTF-8-/Mojibake-Guard vor Worktree-Merge))` |
+| Zero-Terminal: Store-Pfad und WSL2-`tmux.conf` | Wird im laufenden Worker-Lauf geprüft; noch kein reviewtes Result | `T-285 (BP-006-W2-UI-FINAL (Zero-Terminal: Store-Pfad & WSL2-tmux))` ⬜ |
+| Supervisor-Staffelstab und Doppel-Instanz-Lock | Wird im laufenden Korrektur-Lauf geprüft; echte Inspektions-/Queue-Modus-Integration steht aus | `T-286 (BP-006-W2-UI-FINAL (Supervisor-Staffelstab & Doppel-Instanz-Lock))` ⬜ |
+| Pre-Wave-Hygiene mit Dry-Run und Log-Rotation | Task ist vorbereitet und wartet auf einen freien Hauptrechner-Slot | `T-287 (BP-006-W2-UI-FINAL (Pre-Wave-Hygiene & Log-Rotation))` ⬜ |
+| Capability-Routing und Token-Gesundheitswächter | `ops/runtime/capability-router.mjs`: Round-Robin, Host-/Capability-Sperren, `resumeAt` aus Telemetrie; 14/14, Verify 73/73 | `orchestration.capabilityRouter` ✅ `T-288 (BP-006-W2-UI-FINAL (Capability-Routing & Token-Gesundheitswächter))` |
+| Capability- und Mapping-Nachziehung vor der UI-Welle | Dieser Abschnitt plus `ops/capabilities.json` mit echten Belegen; offene UI-Bausteine bleiben ausdrücklich offen | `T-289 (BP-006-W2-UI-FINAL (Capability- & Mapping-Nachziehung vor der UI-Welle))` ✅ |
+
+**Trennlinie / Gaps:** Die UI-Welle `T-277 (BP-006-W2-FINAL (Werkbank-Backend: Registries & Aktionen))`,
+`T-279 (BP-006-W2-FINAL (Pages-Guard: JS-frei, <175 KB, Negativliste))`,
+`T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))`,
+`T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))` und
+`T-280 (BP-006-W2-FINAL (Kapitäns-Review & Abnahme-Gate))` bleibt nach dem
+Mapping bewusst offen. Kein Capability-Eintrag wird ohne Testbeleg auf
+`verified: true` gesetzt; kein Live-`19132`/UDP `7551`, kein Paid-/Vision-Call,
+keine Windows-/Firewall-Änderung, keine finale Live-Einladung, alle Baupläne
+bleiben `manual`.
 ```
 
 ## ops/capabilities.json
@@ -2968,8 +3006,8 @@ keine finale Live-Einladung.
       ],
       "block_states": [],
       "doku": "ops/blueprints/BP-000-W1.json M3; AGENTS.md §13 4-Stufen-UI-Prozess; T-245",
-      "verified": false,
-      "beleg": "Backlog BP-000-W1 / T-245: Werkbank zeigt noch Fixtures T-901/WATCH-START statt echter Worker-Daten"
+      "verified": true,
+      "beleg": "ops/results/T-245.md:Fixture-Fixtures entfernt, /api/workers und /api/console/:worker lesen echte Status-/Logdateien; Chromium 0/0 Fehler, Verify 63/63"
     },
     {
       "id": "maschinen.registry",
@@ -3004,8 +3042,8 @@ keine finale Live-Einladung.
       ],
       "block_states": [],
       "doku": "ops/blueprints/BP-000-W1.json M3; ops/SYSTEM_SSOT.json → maschinen.ram; T-247",
-      "verified": false,
-      "beleg": "Backlog BP-000-W1 / T-247: 0 s Herzschlag mit ram/cpu null wird derzeit grün angezeigt"
+      "verified": true,
+      "beleg": "ops/results/T-247.md:healthCards() mit injizierter Uhr, 9/9 Tabellentests; fehlende Telemetrie ist degraded/null, RAM-Schwellen 80/90 und 85/90 aus der SSOT"
     },
     {
       "id": "orchestration.capabilityTags",
@@ -3284,6 +3322,328 @@ keine finale Live-Einladung.
       "doku": "ops/blueprints/BP-000-W1.json M3; ops/SYSTEM_SSOT.json → gracefulDegradation; T-253",
       "verified": true,
       "beleg": "tests/worker-capability-tags.test.mjs und worker-orchestration-guard.test.mjs: WoL 60 s > 45 s, Ausfall von FELDBOOK, Hauptrechner uebernimmt unterbrechungsfrei; kein Socket, kein Daemon"
+    },
+    {
+      "id": "ui.vertrag",
+      "modul": "ops/werkbank/UI_VERTRAG_BP006_W2_FINAL.md",
+      "funktion": "definiereVierStufenUndApiVertrag",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "bereich",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Name des Werkbank-Bereichs mit Job-to-be-Done und vier Zuständen"
+        },
+        {
+          "name": "endpunkt",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "API-/IPC-Vertrag mit Methode, Request, Response und Fehlercode"
+        }
+      ],
+      "block_states": [
+        "leer",
+        "lädt",
+        "gefüllt",
+        "handlungsbedarf"
+      ],
+      "doku": "ops/results/T-271.md; AGENTS.md §13; ops/SPEC_MAPPING.md §24",
+      "verified": true,
+      "beleg": "ops/results/T-271.md: sechs Job-to-be-Done-Sätze, Vier-Zustands-Vertrag mit Beweisquellen, ASCII-Wireframe mit Klickzielen und exakter API-Vertrag vor jedem UI-Code"
+    },
+    {
+      "id": "engine.providerRegistry",
+      "modul": "ops/config/provider-adapters.mjs",
+      "funktion": "loeseAuthTyp",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "eintrag",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "Provider-Eintrag aus ops/config/provider-pools.json mit einem der drei Auth-Typen"
+        },
+        {
+          "name": "session",
+          "typ": "string",
+          "pflicht": false,
+          "beschreibung": "vorhandene lokale CLI-Session; ohne Session entsteht handlungsbedarf"
+        }
+      ],
+      "block_states": [
+        "handlungsbedarf"
+      ],
+      "doku": "ops/results/T-272.md; ops/config/provider-pools.json; ops/SPEC_MAPPING.md §24",
+      "verified": true,
+      "beleg": "tests/provider-adapters.test.mjs 8/8: neuer Provider nur per Eintrag, OAuth-URL ohne Zeilenumbrüche, Key nie im Response, unbekannter Auth-Typ fail-closed"
+    },
+    {
+      "id": "blueprint.metadaten",
+      "modul": "ops/blueprints/metadaten.mjs",
+      "funktion": "erweitereRegistryEintraege",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "registry",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "Bauplan-Registry aus ops/blueprints/registry.json"
+        },
+        {
+          "name": "ssot",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "Port-Rollen aus ops/SYSTEM_SSOT.json für die dynamische zielPort-Auflösung"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/results/T-274.md; ops/blueprints/metadaten.json; ops/SPEC_MAPPING.md §24",
+      "verified": true,
+      "beleg": "tests/blueprint-metadaten.test.mjs 8/8: Kategorien, Gruppen, Showcase-Filter, Chris-Tore aus Daten und neuer Bauplan ohne Code-Deploy"
+    },
+    {
+      "id": "setup.windowsTerminal",
+      "modul": "ops/scripts/setup-windows-terminal.ps1",
+      "funktion": "richteTerminalUndTmuxEin",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "-DryRun",
+          "typ": "flag",
+          "pflicht": false,
+          "beschreibung": "Standard: nur prüfen, keine Datei schreibt"
+        },
+        {
+          "name": "-Apply",
+          "typ": "flag",
+          "pflicht": false,
+          "beschreibung": "Opt-in: tmux-Mauszeile und Windows-Terminal-Profil in übergebenen Fixture-Pfaden schreiben"
+        }
+      ],
+      "block_states": [
+        "handlungsbedarf"
+      ],
+      "doku": "ops/results/T-275.md; AGENTS.md §2; ops/SPEC_MAPPING.md §24",
+      "verified": true,
+      "beleg": "tests/setup-windows-terminal.test.mjs 10/10: Dry-Run Default, -Apply nur in temporärer Fixture, Idempotenz, fail-closed bei fehlerhaften Pfaden/JSON, 0 Treffer auf 19132/7551"
+    },
+    {
+      "id": "ui.werkbankApi",
+      "modul": "ops/werkbank/server.mjs",
+      "funktion": "liefereRegistriesEndpunkte",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "registries",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "Maschinen-, Provider-, Bauplan- und Navigationsregister als Datenquelle"
+        },
+        {
+          "name": "vaultRoot",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "konfigurierter Vault-Root für Handbuchpfade statt relativem Arbeitsverzeichnis"
+        }
+      ],
+      "block_states": [
+        "leer",
+        "lädt",
+        "gefüllt",
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-277.md; ops/werkbank/UI_VERTRAG_BP006_W2_FINAL.md; ops/SPEC_MAPPING.md §24",
+      "verified": false,
+      "beleg": "Backlog BP-006-W2-FINAL / T-277: neue Vertragsendpunkte sind spezifiziert, aber noch nicht implementiert und nicht abgenommen"
+    },
+    {
+      "id": "ui.aktuell",
+      "modul": "ops/werkbank/public/app.js",
+      "funktion": "renderSechsBereiche",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "navigation",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "Bereiche und Badges aus /api/navigation ohne hart codierte Namen oder Zahlen"
+        },
+        {
+          "name": "tore",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "Chris-Tore und Leer-Zustand aus /api/chris-tore"
+        }
+      ],
+      "block_states": [
+        "leer",
+        "lädt",
+        "gefüllt",
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-276.md; ops/werkbank/UI_VERTRAG_BP006_W2_FINAL.md; ops/SPEC_MAPPING.md §24",
+      "verified": false,
+      "beleg": "Backlog BP-006-W2-FINAL / T-276: sechs neue Bereiche, Diagnose-Knopf, Showcase-Gate und Schaltzentrale sind vertraglich festgelegt, aber noch nicht umgesetzt"
+    },
+    {
+      "id": "ui.handbuchKarte",
+      "modul": "ops/werkbank/public/app.js",
+      "funktion": "ladeHandbuchKapitel",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "vaultRoot",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "konfigurierter Vault-Root für vault/handbuch/*.md"
+        },
+        {
+          "name": "systemMap",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "System-Landkarte mit Querschnittskennzeichnung"
+        }
+      ],
+      "block_states": [
+        "leer",
+        "lädt",
+        "gefüllt",
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-276.md; ops/werkbank/UI_VERTRAG_BP006_W2_FINAL.md; ops/SPEC_MAPPING.md §24",
+      "verified": false,
+      "beleg": "Backlog BP-006-W2-FINAL / T-276: dynamisches Laden aller Handbuchkapitel und das Label 'System-Baustein (übergreifend)' sind noch nicht im UI verdrahtet"
+    },
+    {
+      "id": "qa.stufe4Werkbank",
+      "modul": "ops/scripts/verify.mjs",
+      "funktion": "registriereStufe4Suite",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "suite",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Name der Stufe-4-Browsersuite im regulären Verify-Lauf"
+        },
+        {
+          "name": "fixtureServer",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "ephemeraler Fixture-Server statt Produktiv-Port 7070"
+        }
+      ],
+      "block_states": [
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-278.md; AGENTS.md §13; ops/SPEC_MAPPING.md §24",
+      "verified": false,
+      "beleg": "Backlog BP-006-W2-FINAL / T-278: dynamischer Stufe-4-Durchlauf über sechs Bereiche, Dialoge und Buttons ist noch nicht abgenommen"
+    },
+    {
+      "id": "pages.guardDynamisch",
+      "modul": "ops/qa/pages-guard.mjs",
+      "funktion": "pruefeRegistrierteSeiten",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "seiten",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "registrierte Seiten aus der Konfiguration ohne feste Namen oder feste Anzahl"
+        },
+        {
+          "name": "grenzen",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "SSOT-Grenzen: 0 Skripte, 0 externe Requests, strikt unter 179200 Byte je Seite"
+        }
+      ],
+      "block_states": [
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-279.md; ops/qa/pages-guard.mjs; ops/SPEC_MAPPING.md §24",
+      "verified": false,
+      "beleg": "Backlog BP-006-W2-FINAL / T-279: bestehender Guard prüft vier feste Seiten; dynamische Registrierung und Negativfälle stehen noch aus"
+    },
+    {
+      "id": "governance.reviewWerkbank",
+      "modul": "ops/scripts/verify.mjs",
+      "funktion": "pruefeWerkbankFreigabe",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "resultate",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "reviewte Resultate der Werkbank-Festlegung mit echten Commit-Hashes und Testbelegen"
+        },
+        {
+          "name": "verify",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "vollständig grüner Verify-Report ohne Fehler"
+        }
+      ],
+      "block_states": [
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-280.md; AGENTS.md §14/§16; ops/SPEC_MAPPING.md §24",
+      "verified": false,
+      "beleg": "Backlog BP-006-W2-FINAL / T-280: Kapitäns-Review und Merge erfolgen erst nach allen grünen Belegen; finale Live-Einladung bleibt Chris' Tor"
+    },
+    {
+      "id": "pages.publishVerifiziert",
+      "modul": "ops/scripts/pages-publish.mjs",
+      "funktion": "publishUndVerify",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "--dry-run",
+          "typ": "flag",
+          "pflicht": false,
+          "beschreibung": "nur lokaler Guard ohne Push"
+        },
+        {
+          "name": "--verify-only",
+          "typ": "flag",
+          "pflicht": false,
+          "beschreibung": "exakte Byte-Gegenprobe der veröffentlichten Seiten ohne Schreiben"
+        }
+      ],
+      "block_states": [
+        "handlungsbedarf"
+      ],
+      "doku": "ops/results/T-282.md; package.json → notebook:publish; ops/SPEC_MAPPING.md §25",
+      "verified": true,
+      "beleg": "ops/results/T-282.md: echter Push nach brotfeld/voxelcrew-pages @ 65e7f62f mit vier HTML-Seiten, stand.json und .nojekyll; Live-Verify 4/4 HTTP 200, 0 Skripte, jede Seite < 179200 Byte, kein Token im Repo/Log/URL"
+    },
+    {
+      "id": "orchestration.capabilityRouter",
+      "modul": "ops/runtime/capability-router.mjs",
+      "funktion": "liefereVerfuegbareWorker",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "tag",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Capability-Tag aus der SSOT: vision, playwright, pure-code oder static-qa"
+        },
+        {
+          "name": "rotation",
+          "typ": "number",
+          "pflicht": false,
+          "beschreibung": "vom Dispatcher vorgegebener Round-Robin-Zähler; ohne Wert startet die Auswahl beim ersten Kandidaten"
+        }
+      ],
+      "block_states": [
+        "handlungsbedarf"
+      ],
+      "doku": "ops/results/T-288.md; ops/SPEC_MAPPING.md §25; AGENTS.md §15",
+      "verified": true,
+      "beleg": "tests/capability-router.test.mjs 14/14: deterministisches Round-Robin, Capability-/Host-Sperren aus graceful-degradation, Token-Telemetrie mit echtem resumeAt, 0 Calls/Sockets; Verify 73/73"
     }
   ],
   "inventur": {
