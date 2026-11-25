@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-25T14:36:47.422Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-25T14:57:56.883Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -1739,7 +1739,7 @@ finale Einladung.
 | Windows-Watchdog: Systemstart + 60 s für tmux, Werkbank `7070`, Heartbeat `POST :5678/webhook/node-telemetry`; `19132` tabu | `localMachineSnapshot({ webhookUrl })` mit injizierbarer URL; Watchdog-Skripte fehlen | `infra.watchdog` ⬜ `T-257 (Infra-Hybrid (Windows-Watchdog & Scheduled Tasks))` / kilo5 |
 | `npm run doctor:env`: `.env`, API-Key-Präsenz ohne Klartext, n8n `5678`, Gitea `3001`, Postgres `5432`, Werkbank `7070`, tmux | `.env.example` + `docker-compose.yml` im Hybrid-Stack; Diagnose-Baustein fehlt | `infra.doctorEnv` ⬜ `T-258 (Infra-Hybrid (doctor:env ohne Secret-Leak))` / kilo2 |
 | Beliebig viele Accounts je Provider (Kilo, agy, OpenRouter, Nokia, Requesty 200/Tag) + künftige, per Config erweiterbar | Sechs feste Profile in `account-profiles.mjs` + Requesty-Fallbackrollen; keine generality-fähige Pool-Config | `infra.providerPools` ⬜ `T-259 (Infra-Hybrid (Provider-Pool-Registry & Schema))` / kilo2 |
-| Telemetrie pro Aufruf/Rate-Limit/`resumeAt`-Countdown/Cooldown/Rest in SSOT-Zeiger + Werkbank-API | `ops/runtime/provider-telemetry.mjs` (T-260) mit `recordCall`/`recordRateLimit`/`recordCooldown`/`snapshot`/`writeSnapshot`; injizierte Uhr, `remaining` aus der Config (Requesty 200, sonst `null` mit `quelle: 'fehlt'`), Redaction ohne Secrets, Persistenz nur ueber `writeSnapshot()`; `computeRateLimitWait` aus `T-243` bleibt die einzige 429-Logik, kein zweiter Wartemechanismus | `infra.providerTelemetry` ✅ `T-260 (Infra-Hybrid (Provider-Telemetrie & Countdowns))` / kilo1, `tests/provider-telemetry.test.mjs` 14/14 |
+| Telemetrie pro Aufruf/Rate-Limit/`resumeAt`-Countdown/Cooldown/Rest in SSOT-Zeiger + Werkbank-API | `ops/runtime/provider-telemetry.mjs` (T-260) mit `recordCall`/`recordRateLimit`/`recordCooldown`/`snapshot`/`writeSnapshot`; injizierte Uhr, `remaining` aus der Config (Requesty 200, sonst `null` mit `quelle: 'fehlt'`), Redaction ohne Secrets, Persistenz nur ueber `writeSnapshot()`. `ops/runtime/provider-telemetry-stream.mjs` (T-261) projiziert den Snapshot ueber `providerPools.telemetryDatei` mit vier Zuständen und read-only Ephemeral-Stream; `GET /api/provider-pools` liefert `{ ok, pools, telemetry, zustand, grund }` ohne Secrets und ohne echte Calls. `computeRateLimitWait` aus `T-243` bleibt die einzige 429-Logik, kein zweiter Wartemechanismus | `infra.providerTelemetry` ✅ `T-260 (Infra-Hybrid (Provider-Telemetrie & Countdowns))` / kilo1, `tests/provider-telemetry.test.mjs` 14/14; `infra.providerTelemetryStream` ✅ `T-261 (Infra-Hybrid (Telemetrie-Stream & Werkbank-API))` / kilo5, `tests/provider-api.test.mjs` |
 | Werkbank-Ein-Pult: vier Bereiche, 4-Stufen-Prozess vor dem Coding, Stufe-4-Browser-Test 0/0 | Vier Zustände und Bot-Hilfe bereits als SSOT-Regel; UI-Vertrag für die vier neuen Bereiche fehlt | `ui.infraCockpit` ⬜ `T-262 (Infra-Hybrid (UI-Vertrag Stufen 1–3))` / kilo2 → `T-263 (Infra-Hybrid (Werkbank-Backend: Status, Log, Aktionen))` / kilo1 → `T-264 (Infra-Hybrid (Werkbank-Cockpit & Stufe-4-Gate))` / kilo2 → `T-265 (Infra-Hybrid (Capability-Belege Infrastruktur))` / kilo5 |
 | FELDBOOK erst Phase 3 Linux; Registry-Status `offline_migration_pending`, kein WoL/Alarm | SSOT-Status ab `T-254 (Infra-Hybrid (Dekomposition, Capability-Mapping & Board))` verankert; `system-config-sync.mjs` übernimmt `status`/`migration` in `ops/workers.json` und `ops/runner.feldbuch.json`, der n8n-Knoten `Evaluate Queue For WoL` filtert gesperrte Nodes hart aus (`shouldWake=false` ohne erlaubtes Ziel), Guard `ops/qa/feldbuch-migration-guard.mjs` + `tests/feldbuch-migration-guard.test.mjs` grün | `maschinen.feldbuch.status` ✅ `T-255 (Infra-Hybrid (FELDBOOK-Status & WoL-Sperre))` / kilo5 |
 | Vier JS-freie Pages unter 175 KB, Telemetrieseite unabhängig von `main` | Exporter erzeugt genau eine Seite (`T-234 (Ziel-Repo brotfeld/voxelcrew-pages auf genau eine index.html bereinigen)`); `live-telemetry.html` fehlt | `pages.mehrkanal` ⬜ `T-266 (Infra-Hybrid (Vier Pages-Quellen im Exporter))` / kilo2, `T-267 (Infra-Hybrid (Telemetrie-Sync-Trigger))` / kilo1, `T-268 (Infra-Hybrid (Pages-Guard auf vier Seiten))` / kilo5 |
@@ -3044,6 +3044,53 @@ keine finale Live-Einladung.
       "doku": "ops/blueprints/BP-000-W1.json; ops/tasks/T-260.md; ops/SPEC_MAPPING.md §23; T-243 (BP-000-W1 (WAITING_RATE_LIMIT & resumeAt im Handler)) als einzige 429-Quelle, T-259 (Infra-Hybrid (Provider-Pool-Registry & Schema)) als Pool-Config",
       "verified": true,
       "beleg": "tests/provider-telemetry.test.mjs 14/14: Zaehler pro Provider/Account, resumeAt-Countdown mit Klemme auf 0, Cooldown-Ende, Rest-Kontingent aus Config (Requesty 200 / null mit quelle fehlt), Redaction, 0 echte Calls/Sockets, kein 19132/UDP 7551, computeRateLimitWait als einzige 429-Quelle"
+    },
+    {
+      "id": "infra.providerTelemetryStream",
+      "modul": "ops/runtime/provider-telemetry-stream.mjs",
+      "funktion": "createProviderTelemetryStream / baueProviderPoolsAntwort / leseTelemetrie",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "ssot",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "Geladene SYSTEM_SSOT.json; providerPools.telemetryDatei ist der Zeiger auf die Snapshot-Datei"
+        },
+        {
+          "name": "root",
+          "typ": "string",
+          "pflicht": false,
+          "beschreibung": "Projektwurzel fuer relative SSOT-Zeiger"
+        },
+        {
+          "name": "telemetryFile",
+          "typ": "string",
+          "pflicht": false,
+          "beschreibung": "Expliziter Snapshot-Pfad (Default SSOT-Zeiger)"
+        },
+        {
+          "name": "telemetryData",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "In-Memory-Snapshot ohne Dateizugriff"
+        },
+        {
+          "name": "port",
+          "typ": "number",
+          "pflicht": false,
+          "beschreibung": "Port des lokalen Stream-Endpunkts; 0 = Ephemeral-Port"
+        }
+      ],
+      "block_states": [
+        "leer",
+        "lädt",
+        "gefüllt",
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-261.md; ops/werkbank/server.mjs GET /api/provider-pools; ops/SPEC_MAPPING.md §23",
+      "verified": true,
+      "beleg": "tests/provider-api.test.mjs: vier Zustände, SSOT-Zeiger, 0 Secrets, 0 echte Provider-Calls/Sockets, 0 Treffer auf 19132/UDP 7551, Ephemeral-Stream und read-only GET /api/provider-pools"
     },
     {
       "id": "orchestration.runnerExitCodes",
