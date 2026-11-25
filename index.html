@@ -22,7 +22,7 @@
 <body>
   <header>
     <h1>VoxelCrew — Gesamtspezifikation</h1>
-    <p class="meta">Exportiert am 2026-11-25T16:22:26.794Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
+    <p class="meta">Exportiert am 2026-11-25T16:32:45.684Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
     <p class="meta">Leitstelle: brotfeld/mc-bot-leitstelle · Mirror: brotfeld/voxelcrew-notebook-sync · Pages: https://github.io</p>
     <nav aria-label="Inhalt">
       <a href="#abschnitt-1">Post-Spülgang-Inventur</a>
@@ -770,6 +770,11 @@ Das Task-Frontmatter `repo:` bestimmt das Ziel-Repository (Standard `leitstelle`
 * Tests: `npm test`. Einzelne Datei: `node tests/&lt;datei&gt;.test.js`.
 * **UI-Änderungen an `ops/cockpit` brauchen zusätzlich den echten Browser-Test** `npm run test:browser` (Headless-Chromium gegen temporären Fixture-Server). Die Verankerung steht in §10.4.
 * Keine neuen Abhängigkeiten ohne Freigabe im Task. `playwright` ist mit Chris&#39; Freigabe vom 22.11.2026 für den Browser-Test freigegeben.
+* **Agenten- und Browser-Aufrufpfade (FESTLEGUNG BP-006-W2-UI-FINAL, 25.11.2026):**
+  Agenten laufen über `node ops/scripts/agent-run.mjs`, Browser-Tests über
+  `npx playwright`. Die MCP-Einträge `kilo_drive` (logDir-Bug) und
+  `playwright` sind in `~/.config/opencode/opencode.json` deaktiviert;
+  `kilohandler` bleibt erhalten. Kein Start-Popup durch defekte MCP-Server.
 
 ## 3. Arbeitsweise
 
@@ -1062,6 +1067,65 @@ Verbindlich ist die Fassung in `ops/SYSTEM_SSOT.json` → `governance.acceptance
 ## Verbindliche Architektur-Klarstellung: Live-BDS (19132) &amp; BDS Server Manager
 - **Kein externer Server:** Der Live-Server (19132) wird **NICHT extern** betrieben, sondern **lokal auf diesem Rechner durch unseren eigenen BDS Server Manager** gesteuert und gefahren (managedBy: &#39;bds-server-manager&#39;, ownership: &#39;local-bds-manager&#39;).
 - **Bedeutung von external: true in ServerManager.js:** Dieses interne Flag bedeutet ausschliesslich **Schreib-/Stopp-Schutz ohne Doppel-Spawn** (protected: true), niemals einen externen Betreiber. Agents duerfen niemals behaupten, 19132 laufe extern.
+
+
+## 17. Neun System-Invarianten (FESTLEGUNG BP-006-W2-UI-FINAL, 25.11.2026, verbindlich)
+
+Diese neun Dauerregeln gelten **für jeden Task, jede Oberfläche und jede Abnahme**
+im gesamten System. Sie stehen zusätzlich in `ops/LESSONS_LEARNED.md`; bei Konflikt
+gilt die strengere Regel. Quelle für alle neun Punkte: FESTLEGUNG
+`BP-006-W2-UI-FINAL` (Chris/Mastermind, 25.11.2026), dekomponiert in
+`T-283 (BP-006-W2-UI-FINAL (Neun System-Invarianten &amp; MCP-Bereinigung))`.
+
+1. **0 Hardcoding / keine festen Zählwerte** — Zahlen, Namen, Ports und Grenzen
+   kommen aus `ops/SYSTEM_SSOT.json`, `ops/capabilities.json` oder echten
+   Laufdaten, niemals aus fest im Code/UI verdrahteten Zählwerten.
+   *Begründung:* Ein hart codierter Wert wird beim nächsten Umbau zur Lüge im
+   System und damit zur falschen Abnahme.
+2. **Kontext-Wahrheit &amp; Zero-Terminal-First** — Die Wahrheit steht im realen
+   Systemkontext (Dateien, APIs, Paketbeweise), nicht in kopierten
+   Terminalausgaben; die Werkbank ist ohne Terminal bedienbar.
+   *Begründung:* Abnahmen müssen aus dem System selbst kommen, nicht aus einem
+   Bericht über das System; Chris ist kein manueller Test-Klicker (§11).
+3. **SSOT-Disziplin** — `ops/SYSTEM_SSOT.json` ist die einzige Quelle für
+   Worker-, Maschinen-, Server-, Prozess- und Freigaberegeln; generierte Dateien
+   werden nie manuell editiert.
+   *Begründung:* Zwei Wahrheiten erzeugen widersprüchliche Läufe und falsche
+   Freigaben.
+4. **Umgebungs-Gedächtnis** — Einmal geklärte Umgebung (Node-Pfad, Store-Pfad
+   von Windows Terminal, WSL2-`tmux.conf`, Maschinen, Ports, Personae) bleibt
+   über Sitzungen und Worktrees erhalten und wird nicht neu erfragt.
+   *Begründung:* Wiederholtes Neu-Einrichten kostet Kontext und erzeugt
+   unterschiedliche Setups auf derselben Maschine.
+5. **Out-of-the-Box-Lücken-Schließen** — Fehlt ein Baustein für den
+   durchgängigen Ablauf, wird er als wiederverwendbarer Plattformbaustein mit
+   Capability-Eintrag und `ops/SPEC_MAPPING.md`-Verweis ergänzt (§11 Punkt 3),
+   nie als `_dbg`-Skript.
+   *Begründung:* Ad-hoc-Skripte lösen den Einzelfall und hinterlassen die
+   Lücke beim nächsten Task erneut.
+6. **Laien-/Kind-Abnahme vor Vollzug** — Vor jeder Freigabe prüft eine
+   unprivilegierte Person ab 10 Jahren die Oberfläche in Klartext (max. 3 Klicks,
+   keine Dateipfade, keine Tech-Kürzel); die Prüfung ist automatisiert
+   dokumentiert (§13).
+   *Begründung:* Ein System, das nur Experten verstehen, ist nicht
+   auslieferbar — und der Auftraggeber darf nicht als Tester missbraucht
+   werden.
+7. **Informationsfluss-Lotse** — Jeder Schritt zeigt, woher seine Daten
+   stammen, welchen Zustand er hat (`leer`/`lädt`/`gefüllt`/`handlungsbedarf`)
+   und welches Tor als Nächstes wartet; keine stillen Sprünge.
+   *Begründung:* Ohne sichtbaren Fluss kann niemand erkennen, ob ein grünes
+   Feld echt oder erfunden ist.
+8. **Blinde-Flecken-Radar** — Vor jeder Abnahme werden aktiv die ungedeckten
+   Pfade geprüft: alle registrierten Seiten, alle Worker-Hosts, alle Tore,
+   alle Ports, alle Dateien mit Schreibzugriff — inklusive Mojibake und
+   abgeschnittener Ausgaben.
+   *Begründung:* Was nicht systematisch gesucht wird, bleibt unentdeckt und
+   wird trotzdem „grün&quot; gemeldet.
+9. **Anti-Truncate-URL-Regel** — URLs werden niemals gekürzt, mit `…`
+   fortgesetzt oder aus einer Teilzeichenkette rekonstruiert; die vollständige
+   Adresse wird unverändert angezeigt, geprüft und protokolliert.
+   *Begründung:* Eine abgeschnittene URL verweist auf eine andere Ressource
+   oder gar nicht — der Pages-Publish braucht den exakten Endpunkt.
 </code></pre>
     </article>
     <article class="abschnitt" id="abschnitt-5">
