@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-25T15:16:36.336Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-25T16:08:44.211Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -1742,13 +1742,13 @@ finale Einladung.
 | Telemetrie pro Aufruf/Rate-Limit/`resumeAt`-Countdown/Cooldown/Rest in SSOT-Zeiger + Werkbank-API | `ops/runtime/provider-telemetry.mjs` (T-260) mit `recordCall`/`recordRateLimit`/`recordCooldown`/`snapshot`/`writeSnapshot`; injizierte Uhr, `remaining` aus der Config (Requesty 200, sonst `null` mit `quelle: 'fehlt'`), Redaction ohne Secrets, Persistenz nur ueber `writeSnapshot()`. `ops/runtime/provider-telemetry-stream.mjs` (T-261) projiziert den Snapshot ueber `providerPools.telemetryDatei` mit vier Zuständen und read-only Ephemeral-Stream; `GET /api/provider-pools` liefert `{ ok, pools, telemetry, zustand, grund }` ohne Secrets und ohne echte Calls. `computeRateLimitWait` aus `T-243` bleibt die einzige 429-Logik, kein zweiter Wartemechanismus | `infra.providerTelemetry` ✅ `T-260 (Infra-Hybrid (Provider-Telemetrie & Countdowns))` / kilo1, `tests/provider-telemetry.test.mjs` 14/14; `infra.providerTelemetryStream` ✅ `T-261 (Infra-Hybrid (Telemetrie-Stream & Werkbank-API))` / kilo5, `tests/provider-api.test.mjs` |
 | Werkbank-Ein-Pult: vier Bereiche, 4-Stufen-Prozess vor dem Coding, Stufe-4-Browser-Test 0/0 | Vier Zustände und Bot-Hilfe bereits als SSOT-Regel; UI-Vertrag für die vier neuen Bereiche fehlt | `ui.infraCockpit` ⬜ `T-262 (Infra-Hybrid (UI-Vertrag Stufen 1–3))` / kilo2 → `T-263 (Infra-Hybrid (Werkbank-Backend: Status, Log, Aktionen))` / kilo1 → `T-264 (Infra-Hybrid (Werkbank-Cockpit & Stufe-4-Gate))` / kilo2 → `T-265 (Infra-Hybrid (Capability-Belege Infrastruktur))` / kilo5 |
 | FELDBOOK erst Phase 3 Linux; Registry-Status `offline_migration_pending`, kein WoL/Alarm | SSOT-Status ab `T-254 (Infra-Hybrid (Dekomposition, Capability-Mapping & Board))` verankert; `system-config-sync.mjs` übernimmt `status`/`migration` in `ops/workers.json` und `ops/runner.feldbuch.json`, der n8n-Knoten `Evaluate Queue For WoL` filtert gesperrte Nodes hart aus (`shouldWake=false` ohne erlaubtes Ziel), Guard `ops/qa/feldbuch-migration-guard.mjs` + `tests/feldbuch-migration-guard.test.mjs` grün | `maschinen.feldbuch.status` ✅ `T-255 (Infra-Hybrid (FELDBOOK-Status & WoL-Sperre))` / kilo5 |
-| Vier JS-freie Pages unter 175 KB, Telemetrieseite unabhängig von `main` | Exporter liefert vier HTML-Seiten + `stand.json` + `.nojekyll`; der Baustein `ops/scripts/telemetry-pages.mjs` ersetzt nur `live-telemetry.html` und `stand.json`, der Dispatch-Workflow `.github/workflows/telemetry-pages.yml` pusht ausschliesslich mit `DOCS_PAGES_TOKEN` in das Doku-Repo | `pages.mehrkanal` teilweise ✅ `T-266 (Infra-Hybrid (Vier Pages-Quellen im Exporter))` / kilo2 und `T-267 (Infra-Hybrid (Telemetrie-Sync-Trigger))` / kilo1; der vier-seitige Guard bleibt `T-268 (Infra-Hybrid (Pages-Guard auf vier Seiten))` / kilo5 ⬜ |
+| Vier JS-freie Pages unter 175 KB, Telemetrieseite unabhängig von `main` | Exporter liefert vier HTML-Seiten + `stand.json` + `.nojekyll`; `ops/scripts/telemetry-pages.mjs` ersetzt nur `live-telemetry.html` und `stand.json`, der Dispatch-Workflow `.github/workflows/telemetry-pages.yml` pusht ausschliesslich mit `DOCS_PAGES_TOKEN` in das Doku-Repo; der Baustein `ops/qa/pages-guard.mjs` prüft fail-closed exakt sechs Dateien (0 JS, 0 externe Requests, < 179200 Byte je Datei, Redaction, echte `pageBytes`) | `pages.mehrkanal` ✅ `T-266 (Infra-Hybrid (Vier Pages-Quellen im Exporter))` / kilo2, `T-267 (Infra-Hybrid (Telemetrie-Sync-Trigger))` / kilo1, `T-268 (Infra-Hybrid (Pages-Guard auf vier Seiten))` / kilo5 |
 | Auto-Merge origin + gitea nur bei Verify, 9/9 Workers, Browser-Test, 0 Negativliste, vier Pages | SSOT `governance.autoMerge` ab `T-254 (Infra-Hybrid (Dekomposition, Capability-Mapping & Board))` erweitert; eigener Gate-Baustein fehlt | `governance.autoMergeGate` ⬜ `T-269 (Infra-Hybrid (Auto-Merge-Gate))` / kilo5 → `T-270 (Infra-Hybrid (Kapitäns-Review & Verify-Verankerung))` / Kapitän |
 
 **Neue wiederverwendbare Bausteine (geplant, `verified:false` bis Testbeleg):**
 `ensure-supervisor.sh`, `hauptrechner-watchdog.ps1`, `doctor-env.mjs`, `provider-pools.schema.mjs`,
 `provider-telemetry.mjs`, `provider-telemetry-stream.mjs`, `infra-status.mjs`, `telemetry-pages.mjs`,
-`pages-guard.mjs`, `auto-merge-gate.mjs`. Kein `_dbg`-Skript; alle werden über
+`pages-guard.mjs` ✅, `auto-merge-gate.mjs`. Kein `_dbg`-Skript; alle werden über
 `ops/capabilities.json` und einen regulären Aufrufpfad dokumentiert (`T-265 (Infra-Hybrid (Capability-Belege Infrastruktur))`).
 
 **Trennlinie / Gaps:** `ops/runner.stop` bleibt aktiv; Direktdelegation in Wellen an `kilo1`,
@@ -2468,6 +2468,24 @@ keine finale Live-Einladung.
       "doku": ".github/workflows/notebook-pages.yml, ops/plan/BP-016-ui-prozess.md, ops/plan/T-234-eine-datei-ui-prozess.md, ops/SPEC_MAPPING.md Abschnitte 13–15",
       "verified": true,
       "beleg": "tests/notebook-pages-e2e.test.js und tests/notebook-pages-browser.test.js: genau 3 Dateien (index.html, stand.json, .nojekyll), eine URL mit 5 Blöcken/17 Bauplänen/4 Punkten direkt im DOM, index.html < 179200 Byte, 0 <script>, 0 externe Requests, stand.json mit commitSha/observerPunkte/indexBytes, sechs Altlasten mit HTTP 404, Pages-Guard bricht bei Secret/JS/Größe/altem Dateisatz hart ab"
+    },
+    {
+      "id": "qa.pagesGuard",
+      "modul": "ops/qa/pages-guard.mjs",
+      "funktion": "pruefePagesGuard",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "seiten",
+          "typ": "Record<string,string>|Array<{name:string,inhalt:string}>",
+          "pflicht": true,
+          "beschreibung": "Dateiname→Inhalt der zu prüfenden Seiten (exakt vier HTML + stand.json + .nojekyll)"
+        }
+      ],
+      "block_states": [],
+      "doku": ".github/workflows/notebook-pages.yml, ops/tasks/T-268.md, ops/SPEC_MAPPING.md §23",
+      "verified": true,
+      "beleg": "tests/pages-guard.test.mjs: 23 Prüfungen (3 Positivfälle + 20 Negativfälle: zu groß, <script>, on*-Handler, javascript:-Links, externe Ressourcen, Altlasten, fehlende Pflichtseite ohne Bypass, falsche pageBytes, altes indexBytes, falsche observerPunkte, .nojekyll nicht leer, fehlendes h3, Redaction Tokens/Secrets, ungültiges JSON/UTF-8, leere Seiten, fehlender Doctype, Weiterleitung); alle Dateien strikt < 179200 Byte; CLI node ops/qa/pages-guard.mjs <_site>"
     },
     {
       "id": "mirror.notebookPages",
