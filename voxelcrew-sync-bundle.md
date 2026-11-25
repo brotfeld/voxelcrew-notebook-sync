@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-25T14:57:56.883Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-25T15:16:36.336Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -1742,7 +1742,7 @@ finale Einladung.
 | Telemetrie pro Aufruf/Rate-Limit/`resumeAt`-Countdown/Cooldown/Rest in SSOT-Zeiger + Werkbank-API | `ops/runtime/provider-telemetry.mjs` (T-260) mit `recordCall`/`recordRateLimit`/`recordCooldown`/`snapshot`/`writeSnapshot`; injizierte Uhr, `remaining` aus der Config (Requesty 200, sonst `null` mit `quelle: 'fehlt'`), Redaction ohne Secrets, Persistenz nur ueber `writeSnapshot()`. `ops/runtime/provider-telemetry-stream.mjs` (T-261) projiziert den Snapshot ueber `providerPools.telemetryDatei` mit vier Zuständen und read-only Ephemeral-Stream; `GET /api/provider-pools` liefert `{ ok, pools, telemetry, zustand, grund }` ohne Secrets und ohne echte Calls. `computeRateLimitWait` aus `T-243` bleibt die einzige 429-Logik, kein zweiter Wartemechanismus | `infra.providerTelemetry` ✅ `T-260 (Infra-Hybrid (Provider-Telemetrie & Countdowns))` / kilo1, `tests/provider-telemetry.test.mjs` 14/14; `infra.providerTelemetryStream` ✅ `T-261 (Infra-Hybrid (Telemetrie-Stream & Werkbank-API))` / kilo5, `tests/provider-api.test.mjs` |
 | Werkbank-Ein-Pult: vier Bereiche, 4-Stufen-Prozess vor dem Coding, Stufe-4-Browser-Test 0/0 | Vier Zustände und Bot-Hilfe bereits als SSOT-Regel; UI-Vertrag für die vier neuen Bereiche fehlt | `ui.infraCockpit` ⬜ `T-262 (Infra-Hybrid (UI-Vertrag Stufen 1–3))` / kilo2 → `T-263 (Infra-Hybrid (Werkbank-Backend: Status, Log, Aktionen))` / kilo1 → `T-264 (Infra-Hybrid (Werkbank-Cockpit & Stufe-4-Gate))` / kilo2 → `T-265 (Infra-Hybrid (Capability-Belege Infrastruktur))` / kilo5 |
 | FELDBOOK erst Phase 3 Linux; Registry-Status `offline_migration_pending`, kein WoL/Alarm | SSOT-Status ab `T-254 (Infra-Hybrid (Dekomposition, Capability-Mapping & Board))` verankert; `system-config-sync.mjs` übernimmt `status`/`migration` in `ops/workers.json` und `ops/runner.feldbuch.json`, der n8n-Knoten `Evaluate Queue For WoL` filtert gesperrte Nodes hart aus (`shouldWake=false` ohne erlaubtes Ziel), Guard `ops/qa/feldbuch-migration-guard.mjs` + `tests/feldbuch-migration-guard.test.mjs` grün | `maschinen.feldbuch.status` ✅ `T-255 (Infra-Hybrid (FELDBOOK-Status & WoL-Sperre))` / kilo5 |
-| Vier JS-freie Pages unter 175 KB, Telemetrieseite unabhängig von `main` | Exporter erzeugt genau eine Seite (`T-234 (Ziel-Repo brotfeld/voxelcrew-pages auf genau eine index.html bereinigen)`); `live-telemetry.html` fehlt | `pages.mehrkanal` ⬜ `T-266 (Infra-Hybrid (Vier Pages-Quellen im Exporter))` / kilo2, `T-267 (Infra-Hybrid (Telemetrie-Sync-Trigger))` / kilo1, `T-268 (Infra-Hybrid (Pages-Guard auf vier Seiten))` / kilo5 |
+| Vier JS-freie Pages unter 175 KB, Telemetrieseite unabhängig von `main` | Exporter liefert vier HTML-Seiten + `stand.json` + `.nojekyll`; der Baustein `ops/scripts/telemetry-pages.mjs` ersetzt nur `live-telemetry.html` und `stand.json`, der Dispatch-Workflow `.github/workflows/telemetry-pages.yml` pusht ausschliesslich mit `DOCS_PAGES_TOKEN` in das Doku-Repo | `pages.mehrkanal` teilweise ✅ `T-266 (Infra-Hybrid (Vier Pages-Quellen im Exporter))` / kilo2 und `T-267 (Infra-Hybrid (Telemetrie-Sync-Trigger))` / kilo1; der vier-seitige Guard bleibt `T-268 (Infra-Hybrid (Pages-Guard auf vier Seiten))` / kilo5 ⬜ |
 | Auto-Merge origin + gitea nur bei Verify, 9/9 Workers, Browser-Test, 0 Negativliste, vier Pages | SSOT `governance.autoMerge` ab `T-254 (Infra-Hybrid (Dekomposition, Capability-Mapping & Board))` erweitert; eigener Gate-Baustein fehlt | `governance.autoMergeGate` ⬜ `T-269 (Infra-Hybrid (Auto-Merge-Gate))` / kilo5 → `T-270 (Infra-Hybrid (Kapitäns-Review & Verify-Verankerung))` / Kapitän |
 
 **Neue wiederverwendbare Bausteine (geplant, `verified:false` bis Testbeleg):**
@@ -3091,6 +3091,51 @@ keine finale Live-Einladung.
       "doku": "ops/tasks/T-261.md; ops/werkbank/server.mjs GET /api/provider-pools; ops/SPEC_MAPPING.md §23",
       "verified": true,
       "beleg": "tests/provider-api.test.mjs: vier Zustände, SSOT-Zeiger, 0 Secrets, 0 echte Provider-Calls/Sockets, 0 Treffer auf 19132/UDP 7551, Ephemeral-Stream und read-only GET /api/provider-pools"
+    },
+    {
+      "id": "infra.telemetryPages",
+      "modul": "ops/scripts/telemetry-pages.mjs",
+      "funktion": "exportTelemetryPages / pruefeTelemetrieSeiten",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "pagesDir",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Zielordner des geprüften Pages-Exports; nie die Repo-Wurzel"
+        },
+        {
+          "name": "root",
+          "typ": "string",
+          "pflicht": false,
+          "beschreibung": "Projektwurzel fuer den Export; Default Repo-Wurzel"
+        },
+        {
+          "name": "commitSha",
+          "typ": "string",
+          "pflicht": false,
+          "beschreibung": "Commit-SHA aus GITHUB_SHA fuer stand.json"
+        },
+        {
+          "name": "html",
+          "typ": "string",
+          "pflicht": false,
+          "beschreibung": "Inhalt von live-telemetry.html fuer den fail-closed Guard"
+        },
+        {
+          "name": "stand",
+          "typ": "string | object",
+          "pflicht": false,
+          "beschreibung": "Inhalt von stand.json mit redaction und pageBytes aller vier Seiten"
+        }
+      ],
+      "block_states": [
+        "selektiv",
+        "fail-closed"
+      ],
+      "doku": "ops/tasks/T-267.md; .github/workflows/telemetry-pages.yml (workflow_dispatch + repository_dispatch); ops/SPEC_MAPPING.md §23",
+      "verified": true,
+      "beleg": "tests/telemetry-pages.test.mjs: 19 Prüfungen — genau live-telemetry.html + stand.json ersetzt, andere drei Seiten und .nojekyll bitgenau bewahrt, JS-/Extern-/Netzwerk-/Secret-/Größen-/Byte-Negativfälle hart abgewiesen, 0 Live-Port-Zugriffe"
     },
     {
       "id": "orchestration.runnerExitCodes",
