@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-25T10:29:55.871Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-25T11:04:55.284Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -77,6 +77,13 @@
     },
     "feldbuch": {
       "label": "FELDBOOK (Alt-Laptop)",
+      "status": "offline_migration_pending",
+      "migration": {
+        "ziel": "linux",
+        "phase": 3,
+        "wol": false,
+        "hinweis": "Alter Laptop wird erst in Phase 3 migriert: keine Warnung, kein Alarm, kein WoL-Paket."
+      },
       "allowedWorkers": [
         "kilo3",
         "kilo4"
@@ -130,6 +137,7 @@
       "modell": "kilo-auto/free",
       "host": "feldbuch",
       "phase": 1,
+      "status": "offline_migration_pending",
       "label": "Kilo3 — kilo-auto/free (gateway, FELDBOOK)",
       "tags": [
         "playwright",
@@ -143,6 +151,7 @@
       "modell": "kilo-auto/free",
       "host": "feldbuch",
       "phase": 1,
+      "status": "offline_migration_pending",
       "label": "Kilo4 — kilo-auto/free (gateway, FELDBOOK)",
       "tags": [
         "playwright",
@@ -426,6 +435,15 @@
     "sse": true,
     "freigabeStandard": "manual"
   },
+  "providerPools": {
+    "stand": "2026-11-25",
+    "quelle": "T-254 / Chris-Festlegung 25.11.2026 (AUSBAUSTUFE INFRA-HYBRID)",
+    "konfig": "ops/config/provider-pools.json",
+    "schema": "ops/config/provider-pools.schema.mjs",
+    "telemetryDatei": "ops/runtime/provider-telemetry.json",
+    "kostenbindung": "0 EUR Free-Tier; Requesty 200 Calls/Tag kostenlos",
+    "hinweis": "SSOT speichert nur Zeiger und Regeln, keine Live-Werte und keine Secrets."
+  },
   "uiProzess": {
     "verbindlich": true,
     "quelle": "T-228; AGENTS.md §13; vault/handbuch/07_Vier_Stufen_UI_Prozess.md",
@@ -591,15 +609,30 @@
       "verifySuite": "tests/showcase-release-gate.test.mjs"
     },
     "autoMerge": {
+      "stand": "2026-11-25",
+      "quelle": "Chris-Festlegung 25.11.2026 (AUSBAUSTUFE INFRA-HYBRID), T-254/T-269",
       "nurNachReview": true,
       "verifyKomplettGruen": true,
+      "verifyWorkers": "9/9",
+      "browserTest": "npm run test:browser (0 Browser-Konsolenfehler, 0 fehlgeschlagene API-Requests)",
       "observerPunkte": 4,
       "negativlisteTreffer": 0,
+      "ziele": [
+        "origin/main",
+        "gitea/main"
+      ],
       "pages": {
         "jsFrei": true,
-        "maxBytes": 179200
+        "maxBytes": 179200,
+        "dateien": [
+          "index.html",
+          "live-telemetry.html",
+          "board-verify.html",
+          "handbuch-komplett.html"
+        ],
+        "seiten": 4
       },
-      "regel": "Merge nach main erst, wenn npm run verify 0 Fehler meldet, alle 4 Observer-Punkte auf 19133/19134 grün sind, die Negativliste 0 Treffer hat und die JS-freie Pages-Ausgabe voxelcrew-pages unter 175 KB bleibt."
+      "regel": "Merge nach main (origin + gitea) erst, wenn npm run verify 0 Fehler meldet, npm run verify:workers 9/9 ist, der Playwright-UI-Test grün ist, alle 4 Observer-Punkte auf 19133/19134 grün sind, die Negativliste 0 Treffer hat und alle vier JS-freien Pages-Dateien voxelcrew-pages strikt unter 175 KB bleiben."
     }
   },
   "bauplaene": {
@@ -1687,6 +1720,42 @@ Ein zweiter `agy`-Slot wird fail-closed abgelehnt (`Lock = 1`). Chris tippt nich
 chronologisch nachgemergt und die Kapitäns-Version (`computeRateLimitWait` aus T-243)
 behalten. Es gibt keine echten Keys, keine Paid-/Vision-Calls und keine Live-Berührung.
 `BP-000` bleibt `freigabe: manual`; keine finale Live-Einladung.
+
+## 23) AUSBAUSTUFE INFRA-HYBRID — Vier Arbeitspakete (Soll → Ist → Backlog, 25.11.2026)
+
+**User Journey ohne manuelle Klicks (§11):** Chris erlässt die Festlegung → der Kapitän mapped
+alle vier Arbeitspakete zuerst hierher und zerlegt sie in 17 einzeln benannte atomare Tasks → `kilo1`/`kilo2`/
+`kilo5` liefern Supervisor-Bremse, Watchdog, `doctor:env`, Provider-Pools, Telemetrie,
+Werkbank-Cockpit und vier Pages als wiederverwendbare Bausteine → n8n weckt nur erlaubte Nodes,
+die Werkbank zeigt echte Zustände, Pages werden bei Grün veröffentlicht → erst nach 100 % grünem
+Verify, 9/9 `verify:workers`, grünem Browser-Test, 0 Negativliste und vier JS-freien Seiten
+darunter 175 KB darf der Kapitän nach `main` (origin + Gitea) mergen. Chris tippt nichts; die
+einzigen Tore bleiben Live-`19132`/UDP `7551`, Paid-APIs, Windows-System/Firewall und die
+finale Einladung.
+
+| Soll aus der Festlegung | Ist (25.11.2026, vor der Umsetzung) | Backlog / Task |
+| --- | --- | --- |
+| WSL2-tmux `supervisor` mit PID-Lock, Restart-Loop, Zero-Token-Bremse (`/api/queue/summary` `pendingCount == 0` oder `WAITING_RATE_LIMIT`), Wake durch n8n `:5678`/Werkbank | `/api/queue/summary` mit `{ pendingCount, activeCount, offlineNodes }` vorhanden; `machine-monitor` sendet Webhook; `ensure-supervisor.sh` fehlt | `infra.supervisor` ⬜ `T-256 (Infra-Hybrid (Supervisor-Zero-Token-Bremse))` / kilo1 |
+| Windows-Watchdog: Systemstart + 60 s für tmux, Werkbank `7070`, Heartbeat `POST :5678/webhook/node-telemetry`; `19132` tabu | `localMachineSnapshot({ webhookUrl })` mit injizierbarer URL; Watchdog-Skripte fehlen | `infra.watchdog` ⬜ `T-257 (Infra-Hybrid (Windows-Watchdog & Scheduled Tasks))` / kilo5 |
+| `npm run doctor:env`: `.env`, API-Key-Präsenz ohne Klartext, n8n `5678`, Gitea `3001`, Postgres `5432`, Werkbank `7070`, tmux | `.env.example` + `docker-compose.yml` im Hybrid-Stack; Diagnose-Baustein fehlt | `infra.doctorEnv` ⬜ `T-258 (Infra-Hybrid (doctor:env ohne Secret-Leak))` / kilo2 |
+| Beliebig viele Accounts je Provider (Kilo, agy, OpenRouter, Nokia, Requesty 200/Tag) + künftige, per Config erweiterbar | Sechs feste Profile in `account-profiles.mjs` + Requesty-Fallbackrollen; keine generality-fähige Pool-Config | `infra.providerPools` ⬜ `T-259 (Infra-Hybrid (Provider-Pool-Registry & Schema))` / kilo2 |
+| Telemetrie pro Aufruf/Rate-Limit/`resumeAt`-Countdown/Cooldown/Rest in SSOT-Zeiger + Werkbank-API | `computeRateLimitWait` aus `T-243 (BP-000-W1 (WAITING_RATE_LIMIT & resumeAt im Handler))` als einzige 429-Logik; kein Telemetrie-Modul, kein `/api/provider-pools` | `infra.providerTelemetry` ⬜ `T-260 (Infra-Hybrid (Provider-Telemetrie & Countdowns))` / kilo1, `T-261 (Infra-Hybrid (Telemetrie-Stream & Werkbank-API))` / kilo5 |
+| Werkbank-Ein-Pult: vier Bereiche, 4-Stufen-Prozess vor dem Coding, Stufe-4-Browser-Test 0/0 | Vier Zustände und Bot-Hilfe bereits als SSOT-Regel; UI-Vertrag für die vier neuen Bereiche fehlt | `ui.infraCockpit` ⬜ `T-262 (Infra-Hybrid (UI-Vertrag Stufen 1–3))` / kilo2 → `T-263 (Infra-Hybrid (Werkbank-Backend: Status, Log, Aktionen))` / kilo1 → `T-264 (Infra-Hybrid (Werkbank-Cockpit & Stufe-4-Gate))` / kilo2 → `T-265 (Infra-Hybrid (Capability-Belege Infrastruktur))` / kilo5 |
+| FELDBOOK erst Phase 3 Linux; Registry-Status `offline_migration_pending`, kein WoL/Alarm | SSOT-Status ab `T-254 (Infra-Hybrid (Dekomposition, Capability-Mapping & Board))` verankert; Generator/n8n-Workflow filtern noch nicht | `maschinen.feldbuch.status` ⬜ `T-255 (Infra-Hybrid (FELDBOOK-Status & WoL-Sperre))` / kilo5 |
+| Vier JS-freie Pages unter 175 KB, Telemetrieseite unabhängig von `main` | Exporter erzeugt genau eine Seite (`T-234 (Ziel-Repo brotfeld/voxelcrew-pages auf genau eine index.html bereinigen)`); `live-telemetry.html` fehlt | `pages.mehrkanal` ⬜ `T-266 (Infra-Hybrid (Vier Pages-Quellen im Exporter))` / kilo2, `T-267 (Infra-Hybrid (Telemetrie-Sync-Trigger))` / kilo1, `T-268 (Infra-Hybrid (Pages-Guard auf vier Seiten))` / kilo5 |
+| Auto-Merge origin + gitea nur bei Verify, 9/9 Workers, Browser-Test, 0 Negativliste, vier Pages | SSOT `governance.autoMerge` ab `T-254 (Infra-Hybrid (Dekomposition, Capability-Mapping & Board))` erweitert; eigener Gate-Baustein fehlt | `governance.autoMergeGate` ⬜ `T-269 (Infra-Hybrid (Auto-Merge-Gate))` / kilo5 → `T-270 (Infra-Hybrid (Kapitäns-Review & Verify-Verankerung))` / Kapitän |
+
+**Neue wiederverwendbare Bausteine (geplant, `verified:false` bis Testbeleg):**
+`ensure-supervisor.sh`, `hauptrechner-watchdog.ps1`, `doctor-env.mjs`, `provider-pools.schema.mjs`,
+`provider-telemetry.mjs`, `provider-telemetry-stream.mjs`, `infra-status.mjs`, `telemetry-pages.mjs`,
+`pages-guard.mjs`, `auto-merge-gate.mjs`. Kein `_dbg`-Skript; alle werden über
+`ops/capabilities.json` und einen regulären Aufrufpfad dokumentiert (`T-265 (Infra-Hybrid (Capability-Belege Infrastruktur))`).
+
+**Trennlinie / Gaps:** `ops/runner.stop` bleibt aktiv; Direktdelegation in Wellen an `kilo1`,
+`kilo2`, `kilo5` (max. 2 pro Host). Kein Loader-/Daemon-Neubau, kein zweiter Wartemechanismus
+neben der bestehenden 429-Warte-/Auto-Resume-Kette, kein echtes WoL-Paket, keine echten Provider-Calls, kein Windows-System-/
+Firewall-Eingriff ohne Chris. `19132`/UDP `7551`, Weltdaten, Auth und alle Bauplan-`freigabe`
+bleiben unberührt; `manual` bleibt bestehen; keine finale Live-Einladung.
 ```
 
 ## ops/capabilities.json
