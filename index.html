@@ -22,7 +22,7 @@
 <body>
   <header>
     <h1>VoxelCrew — Gesamtspezifikation</h1>
-    <p class="meta">Exportiert am 2026-11-25T16:32:45.684Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
+    <p class="meta">Exportiert am 2026-11-25T16:57:40.443Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
     <p class="meta">Leitstelle: brotfeld/mc-bot-leitstelle · Mirror: brotfeld/voxelcrew-notebook-sync · Pages: https://github.io</p>
     <nav aria-label="Inhalt">
       <a href="#abschnitt-1">Post-Spülgang-Inventur</a>
@@ -2608,6 +2608,30 @@ keine finale Live-Einladung.
       &quot;doku&quot;: &quot;.github/workflows/notebook-pages.yml, ops/tasks/T-268.md, ops/SPEC_MAPPING.md §23&quot;,
       &quot;verified&quot;: true,
       &quot;beleg&quot;: &quot;tests/pages-guard.test.mjs: 23 Prüfungen (3 Positivfälle + 20 Negativfälle: zu groß, &lt;script&gt;, on*-Handler, javascript:-Links, externe Ressourcen, Altlasten, fehlende Pflichtseite ohne Bypass, falsche pageBytes, altes indexBytes, falsche observerPunkte, .nojekyll nicht leer, fehlendes h3, Redaction Tokens/Secrets, ungültiges JSON/UTF-8, leere Seiten, fehlender Doctype, Weiterleitung); alle Dateien strikt &lt; 179200 Byte; CLI node ops/qa/pages-guard.mjs &lt;_site&gt;&quot;
+    },
+    {
+      &quot;id&quot;: &quot;qa.encodingGuard&quot;,
+      &quot;modul&quot;: &quot;ops/qa/encoding-guard.mjs&quot;,
+      &quot;funktion&quot;: &quot;pruefeEncodingGuard&quot;,
+      &quot;zeile&quot;: null,
+      &quot;parameter&quot;: [
+        {
+          &quot;name&quot;: &quot;eingabe&quot;,
+          &quot;typ&quot;: &quot;Record&lt;string,string&gt;|Array&lt;{name:string,inhalt:string}&gt;&quot;,
+          &quot;pflicht&quot;: true,
+          &quot;beschreibung&quot;: &quot;Dateiname→Inhalt der zu prüfenden Dateien&quot;
+        },
+        {
+          &quot;name&quot;: &quot;optionen&quot;,
+          &quot;typ&quot;: &quot;object&quot;,
+          &quot;pflicht&quot;: false,
+          &quot;beschreibung&quot;: &quot;optional mit mojibakeErlaubt als Dateinamen-Liste für bewusste Test-Fixtures (nur BOM/NUL/U+FFFD-Prüfung)&quot;
+        }
+      ],
+      &quot;block_states&quot;: [],
+      &quot;doku&quot;: &quot;ops/tasks/T-284.md, ops/scripts/verify.mjs, ops/scripts/task-worktree.mjs&quot;,
+      &quot;verified&quot;: true,
+      &quot;beleg&quot;: &quot;tests/encoding-guard.test.mjs: 9 Prüfungen (positiv UTF-8 ohne BOM; negativ BOM, NUL, U+FFFD, Mojibake, UTF-16-Bruchstelle; Array-Form, erlaubte Fixture, Merge-Pfad verdrahtet); CLI node ops/qa/encoding-guard.mjs &lt;verzeichnis&gt;; Merge-Guard node ops/scripts/task-worktree.mjs guard &lt;ID&gt;&quot;
     },
     {
       &quot;id&quot;: &quot;mirror.notebookPages&quot;,

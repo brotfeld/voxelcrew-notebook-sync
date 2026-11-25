@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-25T16:32:45.684Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-25T16:57:40.443Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -2550,6 +2550,30 @@ keine finale Live-Einladung.
       "doku": ".github/workflows/notebook-pages.yml, ops/tasks/T-268.md, ops/SPEC_MAPPING.md §23",
       "verified": true,
       "beleg": "tests/pages-guard.test.mjs: 23 Prüfungen (3 Positivfälle + 20 Negativfälle: zu groß, <script>, on*-Handler, javascript:-Links, externe Ressourcen, Altlasten, fehlende Pflichtseite ohne Bypass, falsche pageBytes, altes indexBytes, falsche observerPunkte, .nojekyll nicht leer, fehlendes h3, Redaction Tokens/Secrets, ungültiges JSON/UTF-8, leere Seiten, fehlender Doctype, Weiterleitung); alle Dateien strikt < 179200 Byte; CLI node ops/qa/pages-guard.mjs <_site>"
+    },
+    {
+      "id": "qa.encodingGuard",
+      "modul": "ops/qa/encoding-guard.mjs",
+      "funktion": "pruefeEncodingGuard",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "eingabe",
+          "typ": "Record<string,string>|Array<{name:string,inhalt:string}>",
+          "pflicht": true,
+          "beschreibung": "Dateiname→Inhalt der zu prüfenden Dateien"
+        },
+        {
+          "name": "optionen",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "optional mit mojibakeErlaubt als Dateinamen-Liste für bewusste Test-Fixtures (nur BOM/NUL/U+FFFD-Prüfung)"
+        }
+      ],
+      "block_states": [],
+      "doku": "ops/tasks/T-284.md, ops/scripts/verify.mjs, ops/scripts/task-worktree.mjs",
+      "verified": true,
+      "beleg": "tests/encoding-guard.test.mjs: 9 Prüfungen (positiv UTF-8 ohne BOM; negativ BOM, NUL, U+FFFD, Mojibake, UTF-16-Bruchstelle; Array-Form, erlaubte Fixture, Merge-Pfad verdrahtet); CLI node ops/qa/encoding-guard.mjs <verzeichnis>; Merge-Guard node ops/scripts/task-worktree.mjs guard <ID>"
     },
     {
       "id": "mirror.notebookPages",
