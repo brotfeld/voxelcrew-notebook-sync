@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-25T22:41:52.192Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-25T22:51:31.651Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -1841,8 +1841,12 @@ Windows-System/Firewall und die finale Live-Einladung.
 (aufbauend auf `T-289 (BP-006-W2-UI-FINAL (Capability- & Mapping-Nachziehung vor der UI-Welle))`):
 Die Spalte „Ist" bleibt als historischer Ausgangszustand vor der Umsetzung erhalten;
 die Backlog-Spalte zeigt jetzt den tatsächlichen Beweisstand. Fundament, Setup und
-die sechs Werkbank-Bereiche sind reviewt; die Stufe-4-Browserabnahme bleibt bei
-`T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))` offen.
+die sechs Werkbank-Bereiche sind reviewt; die Stufe-4-Browserabnahme ist bei
+`T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))` grün
+und das Kapitäns-Gate bei
+`T-280 (BP-006-W2-FINAL (Kapitäns-Review & Abnahme-Gate))` abgeschlossen
+(Verify 75/75, Browser 0/0, Worker-Orchestrierungs-Guard 11/11,
+Pages-Guard 0 Treffer).
 
 | Soll aus der Festlegung | Ist (25.11.2026, vor der Umsetzung) | Backlog / Task |
 | --- | --- | --- |
@@ -1854,9 +1858,9 @@ die sechs Werkbank-Bereiche sind reviewt; die Stufe-4-Browserabnahme bleibt bei
 | Werkbank-Backend liefert Navigation, Tore, Maschinen, Dienste, Provider, Diagnose aus Registries; Vault-Pfad korrekt aufgelöst | 13 neue plus 2 angepasste Endpunkte in `ops/werkbank/server.mjs`, Quellen in `ops/config/werkbank-ui.json` und Registries; Fixture-Test 89/89, Verify 75/75, kein Produktiv-7070 | `ui.werkbankApi` ✅ `T-277 (BP-006-W2-FINAL (Werkbank-Backend: Registries & Aktionen))` / kilo1 |
 | Roter „Bot-Hilfe"-Knopf ersetzt durch „System-Diagnose kopieren" (secret-frei); Showcase nur `category === 'showcase'`, Reset/Seed-Gate; Schaltzentrale mit echten Balken, stdout, Aktionen | Alter roter Knopf und pauschale Showcase-Liste vorhanden; RAM/CPU-Anzeige ohne Registry-Beweis | `ui.aktuell` ✅ `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` / kilo5 — Code-Commit `ef0cc8d2`, `node --check` + Strukturprüfung + Verify 75/75; Stufe-4-Beleg bei `T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))` |
 | Handbuch lädt dynamisch alle `vault/handbuch/*.md`; Querschnittsmodule heißen „System-Baustein (übergreifend)" | Sieben Fixture-Kapitel, Produktivpfad relativ falsch; keine Querschnittskennzeichnung | `ui.handbuchKarte` ✅ `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` / kilo5 — `/api/handbuch` + `/api/system-map` verdrahtet, Label aus `ops/config/werkbank-ui.json`, Verify 75/75; Stufe-4-Sichtbeleg bei `T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))` |
-| Stufe 4: Playwright klickt jeden Tab/Dialog/Button, legt Test-Provider an, lädt alle Kapitel, 0 Browser-/API-Fehler, 0 kaputte Platzhalter, Screenshot-Plausibilität | Bestehender Werkbank-Browsertest prüft die alten sechs Tabs; dynamische Neue-Journey fehlt | `qa.stufe4Werkbank` ⬜ `T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))` / kilo1 |
+| Stufe 4: Playwright klickt jeden Tab/Dialog/Button, legt Test-Provider an, lädt alle Kapitel, 0 Browser-/API-Fehler, 0 kaputte Platzhalter, Screenshot-Plausibilität | Bestehender Werkbank-Browsertest prüft die alten sechs Tabs; dynamische Neue-Journey fehlt | `qa.stufe4Werkbank` ✅ `T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))` / kilo1 — 0/0 Browser-/API-Fehler, sieben 1600×1200-Screenshots, Verify 75/75; im Review von `T-280 (BP-006-W2-FINAL (Kapitäns-Review & Abnahme-Gate))` bestätigt |
 | Alle registrierten Pages JS-frei, < 175 KB, 0 Negativliste-Treffer, auch nach neuen Kapiteln | `ops/config/pages-config.json` registriert HTML-Seiten, Zusatzdateien und Budgets; `ops/qa/pages-guard.mjs` und `ops/scripts/export-notebook-sync.mjs` lesen daraus; neue Seite wird automatisch geprüft (24/24 Guard-Prüfungen, 74/74 Verify) | `pages.guardDynamisch` ✅ `T-279 (BP-006-W2-FINAL (Pages-Guard: JS-frei, <175 KB, Negativliste))` / kilo5 |
-| Review, komplett grünes Verify und Merge erst nach allen Belegen | Kapitäns-Review steht aus; `T-271 (BP-006-W2-FINAL (Dekomposition, Capability-Mapping & Board))` angelegt | `governance.reviewWerkbank` ⬜ `T-280 (BP-006-W2-FINAL (Kapitäns-Review & Abnahme-Gate))` / Kapitän |
+| Review, komplett grünes Verify und Merge erst nach allen Belegen | Kapitäns-Review abgeschlossen: alle Resultate reviewt, echte Commit-Hashes und Vorfahrenschaft auf `main` geprüft; Verify 75/75, Browser 0/0, Worker-Orchestrierungs-Guard 11/11, Pages-Guard 0 Treffer; `ops/runner.stop` und `offline_migration_pending` unverändert | `governance.reviewWerkbank` ✅ `T-280 (BP-006-W2-FINAL (Kapitäns-Review & Abnahme-Gate))` / Kapitän |
 
 **Neue wiederverwendbare Bausteine (mit Testbeleg, nicht mehr nur geplant):**
 `ops/config/provider-adapters.mjs`, `ops/blueprints/metadaten.mjs`,
@@ -1866,9 +1870,10 @@ mit Capability `pages.guardDynamisch` verifiziert). `ops/werkbank/public/app.js`
 ist bei `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` mit
 `ui.aktuell` und `ui.handbuchKarte` verifiziert; `ops/werkbank/server.mjs`
 bei `T-277 (BP-006-W2-FINAL (Werkbank-Backend: Registries & Aktionen))` mit
-`ui.werkbankApi`. Kein `_dbg`-Skript; die Stufe-4-Browser-Suite bleibt als
+`ui.werkbankApi`. Kein `_dbg`-Skript; die Stufe-4-Browser-Suite ist als
 `qa.stufe4Werkbank` bei `T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))`
-offen und wird im Review-Gate `T-280 (BP-006-W2-FINAL (Kapitäns-Review & Abnahme-Gate))` geprüft.
+grün und wurde im Review-Gate
+`T-280 (BP-006-W2-FINAL (Kapitäns-Review & Abnahme-Gate))` bestätigt.
 
 **Trennlinie / Gaps:** Fundament und Setup zuerst — `T-271 (BP-006-W2-FINAL (Dekomposition, Capability-Mapping & Board))`
 bis `T-275 (BP-006-W2-FINAL (Zero-Terminal-Setup: tmux & Windows Terminal))` —
@@ -1933,8 +1938,9 @@ weiterhin manuell bzw. über den Watcher auf; eine automatische Verknüpfung in
 `T-279 (BP-006-W2-FINAL (Pages-Guard: JS-frei, <175 KB, Negativliste))`,
 `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))`,
 `T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))` und
-`T-280 (BP-006-W2-FINAL (Kapitäns-Review & Abnahme-Gate))` bleibt nach dem
-Mapping bewusst offen. Kein Capability-Eintrag wird ohne Testbeleg auf
+`T-280 (BP-006-W2-FINAL (Kapitäns-Review & Abnahme-Gate))` war nach dem
+Mapping bewusst offen und ist mit dem grünen Kapitäns-Review abgeschlossen.
+Kein Capability-Eintrag wird ohne Testbeleg auf
 `verified: true` gesetzt; kein Live-`19132`/UDP `7551`, kein Paid-/Vision-Call,
 keine Windows-/Firewall-Änderung, keine finale Live-Einladung, alle Baupläne
 bleiben `manual`.
