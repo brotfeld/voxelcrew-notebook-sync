@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-25T10:09:07.285Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-25T10:19:23.693Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -964,6 +964,10 @@ Verbindlich ist die Fassung in `ops/SYSTEM_SSOT.json` → `governance.acceptance
 `vault/handbuch/01_Systemueberblick_und_Architektur.md` und
 `vault/handbuch/04_Bedienung_und_Ablaeufe.md`. `BP-000` bleibt `status: entwurf` /
 `freigabe: manual`.
+
+## Verbindliche Architektur-Klarstellung: Live-BDS (19132) & BDS Server Manager
+- **Kein externer Server:** Der Live-Server (19132) wird **NICHT extern** betrieben, sondern **lokal auf diesem Rechner durch unseren eigenen BDS Server Manager** gesteuert und gefahren (managedBy: 'bds-server-manager', ownership: 'local-bds-manager').
+- **Bedeutung von external: true in ServerManager.js:** Dieses interne Flag bedeutet ausschliesslich **Schreib-/Stopp-Schutz ohne Doppel-Spawn** (protected: true), niemals einen externen Betreiber. Agents duerfen niemals behaupten, 19132 laufe extern.
 ```
 
 ## ops/WORLD_INVARIANTS.md

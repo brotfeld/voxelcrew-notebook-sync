@@ -22,7 +22,7 @@
 <body>
   <header>
     <h1>VoxelCrew — Gesamtspezifikation</h1>
-    <p class="meta">Exportiert am 2026-11-25T10:09:07.285Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
+    <p class="meta">Exportiert am 2026-11-25T10:19:23.693Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
     <p class="meta">Leitstelle: brotfeld/mc-bot-leitstelle · Mirror: brotfeld/voxelcrew-notebook-sync · Pages: https://github.io</p>
     <nav aria-label="Inhalt">
       <a href="#abschnitt-1">Post-Spülgang-Inventur</a>
@@ -1025,6 +1025,10 @@ Verbindlich ist die Fassung in `ops/SYSTEM_SSOT.json` → `governance.acceptance
 `vault/handbuch/01_Systemueberblick_und_Architektur.md` und
 `vault/handbuch/04_Bedienung_und_Ablaeufe.md`. `BP-000` bleibt `status: entwurf` /
 `freigabe: manual`.
+
+## Verbindliche Architektur-Klarstellung: Live-BDS (19132) &amp; BDS Server Manager
+- **Kein externer Server:** Der Live-Server (19132) wird **NICHT extern** betrieben, sondern **lokal auf diesem Rechner durch unseren eigenen BDS Server Manager** gesteuert und gefahren (managedBy: &#39;bds-server-manager&#39;, ownership: &#39;local-bds-manager&#39;).
+- **Bedeutung von external: true in ServerManager.js:** Dieses interne Flag bedeutet ausschliesslich **Schreib-/Stopp-Schutz ohne Doppel-Spawn** (protected: true), niemals einen externen Betreiber. Agents duerfen niemals behaupten, 19132 laufe extern.
 </code></pre>
     </article>
     <article class="abschnitt" id="abschnitt-5">
