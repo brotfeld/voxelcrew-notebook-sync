@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-25T17:48:39.352Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-25T18:29:37.223Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -1889,11 +1889,38 @@ allen Gate-Punkten eine Einladung.
 | Pages-Sync mit echtem Zielrepo-Push und Byte-Gegenprobe | `ops/scripts/pages-publish.mjs` mit `--dry-run`/`--verify-only`; Push `65e7f62f`, 4/4 HTTP 200, 0 Skripte | `pages.publishVerifiziert` ✅ `T-282 (BP-006-W2-UI-FINAL (Pages-Sync-Fix & verifizierter Zielrepo-Push))` |
 | Neun System-Invarianten und MCP-Bereinigung ohne Start-Popup | Invarianten in `AGENTS.md` §17 / `LESSONS_LEARNED.md`; Agentenpfad `agent-run.mjs`, Browser `npx playwright`, nur `kilohandler` aktiv | `T-283 (BP-006-W2-UI-FINAL (Neun System-Invarianten & MCP-Bereinigung))` ✅ |
 | UTF-8-/Mojibake-Guard vor jedem Worktree-Merge | `ops/qa/encoding-guard.mjs` in `npm run verify` und `task-worktree.mjs guard <ID>`; 9/9 inkl. UTF-16-Fall | `qa.encodingGuard` ✅ `T-284 (BP-006-W2-UI-FINAL (UTF-8-/Mojibake-Guard vor Worktree-Merge))` |
-| Zero-Terminal: Store-Pfad und WSL2-`tmux.conf` | Wird im laufenden Worker-Lauf geprüft; noch kein reviewtes Result | `T-285 (BP-006-W2-UI-FINAL (Zero-Terminal: Store-Pfad & WSL2-tmux))` ⬜ |
-| Supervisor-Staffelstab und Doppel-Instanz-Lock | Wird im laufenden Korrektur-Lauf geprüft; echte Inspektions-/Queue-Modus-Integration steht aus | `T-286 (BP-006-W2-UI-FINAL (Supervisor-Staffelstab & Doppel-Instanz-Lock))` ⬜ |
-| Pre-Wave-Hygiene mit Dry-Run und Log-Rotation | Task ist vorbereitet und wartet auf einen freien Hauptrechner-Slot | `T-287 (BP-006-W2-UI-FINAL (Pre-Wave-Hygiene & Log-Rotation))` ⬜ |
+| Zero-Terminal: Store-Pfad und WSL2-`tmux.conf` | Store-Pfade sortiert, WSL-Schreiben nur mit `-Apply -ApplyWslTmux`; 16/16, Verify 73/73 | `T-285 (BP-006-W2-UI-FINAL (Zero-Terminal: Store-Pfad & WSL2-tmux))` ✓ |
+| Supervisor-Staffelstab und Doppel-Instanz-Lock | Inspektions-/Queue-Modus ohne `WORKER_CMD`; 27/27, Verify 73/73 | `T-286 (BP-006-W2-UI-FINAL (Supervisor-Staffelstab & Doppel-Instanz-Lock))` ✓ |
+| Pre-Wave-Hygiene mit Dry-Run und Log-Rotation | `ops/runtime/pre-wave-hygiene.mjs` mit Fixture-Roots, 14/14, echter Dry-Run 0/0/0 | `T-287 (BP-006-W2-UI-FINAL (Pre-Wave-Hygiene & Log-Rotation))` ✓, Abschnitt 26 |
 | Capability-Routing und Token-Gesundheitswächter | `ops/runtime/capability-router.mjs`: Round-Robin, Host-/Capability-Sperren, `resumeAt` aus Telemetrie; 14/14, Verify 73/73 | `orchestration.capabilityRouter` ✅ `T-288 (BP-006-W2-UI-FINAL (Capability-Routing & Token-Gesundheitswächter))` |
 | Capability- und Mapping-Nachziehung vor der UI-Welle | Dieser Abschnitt plus `ops/capabilities.json` mit echten Belegen; offene UI-Bausteine bleiben ausdrücklich offen | `T-289 (BP-006-W2-UI-FINAL (Capability- & Mapping-Nachziehung vor der UI-Welle))` ✅ |
+
+## 26) T-287 — Pre-Wave-Hygiene vor der UI-Welle (Soll → Ist → Backlog, 25.11.2026)
+
+**Soll:** Vor jeder Worker-Welle verwaiste Worktrees/Locks über PID-Check erkennen,
+Logs/Screenshots älter als sieben Tage in ein datiertes Archiv rotieren; Dry-Run
+Default, nur explizit freigegebene Artefakte, kein Chris-Klick (Task `T-287`,
+AGENTS.md §9/§10.1/§11/§17).
+
+**Ist (Kapitäns-Review nach Worker-`process-timeout`):**
+- `ops/runtime/pre-wave-hygiene.mjs` als registrierter, fixture-fähiger Baustein:
+  `run()` mit `--dry-run`-Default, `--apply`, `--remove-worktrees` (zusätzlich
+  nötig, nie `--force`), `--days`, `--lock-hours` und Fixture-Roots für
+  Daten/Laufzeit/Worktrees/Archiv. `pids.json` wird nur gelesen; keine Ports,
+  keine Welt-/Result-/Auth-Daten. Git-Aufrufe mit `--no-optional-locks` und
+  30-s-Timeout. Keine harten Live-Port-Werte im Skript.
+- Der Worker-Stand lief beim Modul-Import `main()` aus und versuchte mit
+  `--apply` echte Worktrees zu entfernen; der Kapitän hat CLI-Guard,
+  Worktree-Scope/Alter/Dirty-Check, doppeltes `--remove-worktrees`-Tor und alle
+  Fixture-Pfade aus dem echten Repo heraus korrigiert.
+- `tests/pre-wave-hygiene.test.mjs` 14/14 grün; echter Dry-Run am echten Repo:
+  0 verwaiste Worktrees, 0 verwaiste Locks, 0 Archivkandidaten.
+- Capability `runtime.preWaveHygiene` mit echtem Testbeleg; keine neue
+  Abhängigkeit, kein Paid-/Vision-Call, `manual` unverändert.
+
+**Backlog / Gaps:** Die eigentliche Wellen-Orchestrierung ruft den Baustein
+weiterhin manuell bzw. über den Watcher auf; eine automatische Verknüpfung in
+`ensure-supervisor.sh` bleibt bewusst offen, solange `ops/runner.stop` aktiv ist.
 
 **Trennlinie / Gaps:** Die UI-Welle `T-277 (BP-006-W2-FINAL (Werkbank-Backend: Registries & Aktionen))`,
 `T-279 (BP-006-W2-FINAL (Pages-Guard: JS-frei, <175 KB, Negativliste))`,
@@ -3644,6 +3671,46 @@ bleiben `manual`.
       "doku": "ops/results/T-288.md; ops/SPEC_MAPPING.md §25; AGENTS.md §15",
       "verified": true,
       "beleg": "tests/capability-router.test.mjs 14/14: deterministisches Round-Robin, Capability-/Host-Sperren aus graceful-degradation, Token-Telemetrie mit echtem resumeAt, 0 Calls/Sockets; Verify 73/73"
+    },
+    {
+      "id": "runtime.preWaveHygiene",
+      "modul": "ops/runtime/pre-wave-hygiene.mjs",
+      "funktion": "run",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "--apply",
+          "typ": "flag",
+          "pflicht": false,
+          "beschreibung": "echte Aenderungen; Default ist Dry-Run"
+        },
+        {
+          "name": "--remove-worktrees",
+          "typ": "flag",
+          "pflicht": false,
+          "beschreibung": "zusaetzlich verwaiste Task-Worktrees entfernen, niemals --force"
+        },
+        {
+          "name": "--days",
+          "typ": "number",
+          "pflicht": false,
+          "beschreibung": "Alter in Tagen fuer Rotation und Worktrees (Default 7)"
+        },
+        {
+          "name": "--data-root / --runtime-root / --worktree-root / --archive-root",
+          "typ": "path",
+          "pflicht": false,
+          "beschreibung": "Fixture-faehige Pfade; Tests beruehren nie echte Daten oder Locks"
+        }
+      ],
+      "block_states": [
+        "leer",
+        "gefüllt",
+        "handlungsbedarf"
+      ],
+      "doku": "ops/results/T-287.md; ops/SPEC_MAPPING.md §26; AGENTS.md §10.1/§17",
+      "verified": true,
+      "beleg": "tests/pre-wave-hygiene.test.mjs 14/14 (Dry-Run-Default, Idempotenz, PID-/Lock-Check, datiertes Archiv, pids.json unveraendert, 0 echte Writes); echter Dry-Run 0/0/0; Verify 74/74"
     }
   ],
   "inventur": {
