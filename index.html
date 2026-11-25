@@ -22,7 +22,7 @@
 <body>
   <header>
     <h1>VoxelCrew — Gesamtspezifikation</h1>
-    <p class="meta">Exportiert am 2026-11-25T11:30:09.273Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
+    <p class="meta">Exportiert am 2026-11-25T11:57:09.239Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
     <p class="meta">Leitstelle: brotfeld/mc-bot-leitstelle · Mirror: brotfeld/voxelcrew-notebook-sync · Pages: https://github.io</p>
     <nav aria-label="Inhalt">
       <a href="#abschnitt-1">Post-Spülgang-Inventur</a>
@@ -1815,6 +1815,52 @@ finale Einladung.
 neben der bestehenden 429-Warte-/Auto-Resume-Kette, kein echtes WoL-Paket, keine echten Provider-Calls, kein Windows-System-/
 Firewall-Eingriff ohne Chris. `19132`/UDP `7551`, Weltdaten, Auth und alle Bauplan-`freigabe`
 bleiben unberührt; `manual` bleibt bestehen; keine finale Live-Einladung.
+
+## 24) BP-006-W2-FINAL — Generische Werkbank (Soll → Ist → Backlog, 25.11.2026)
+
+**User Journey ohne manuelle Klicks (§11):** Chris legt fest, dass die Werkbank auf
+`127.0.0.1:7070` ohne Terminal bedienbar und selbsterklärend sein muss → der Kapitän
+mappt die Festlegung zuerst hierher, schreibt den 4-Stufen-/API-Vertrag
+`ops/werkbank/UI_VERTRAG_BP006_W2_FINAL.md` und zerlegt sie in neun atomare Tasks
+`T-271 (BP-006-W2-FINAL (Dekomposition, Capability-Mapping &amp; Board))` bis
+`T-280 (BP-006-W2-FINAL (Kapitäns-Review &amp; Abnahme-Gate))` → `kilo1`/`kilo2`/`kilo5`
+liefern Registries, Setup, Backend und UI als wiederverwendbare Bausteine → die
+Stufe-4-Playwright-Journey klickt jeden Bereich und jeden Button, legt einen
+Test-Provider an und lädt alle Handbuchkapitel → der Pages-Guard prüft alle
+registrierten Seiten → erst bei komplett grünem `npm run verify`, 0 Browser-/API-
+Fehlern und 0 Negativlisten-Treffern mergt der Kapitän nach `main`. Chris tippt
+nichts; die einzigen Tore bleiben Live-`19132`/UDP `7551`, Paid-APIs,
+Windows-System/Firewall und die finale Live-Einladung.
+
+| Soll aus der Festlegung | Ist (25.11.2026, vor der Umsetzung) | Backlog / Task |
+| --- | --- | --- |
+| Vier-Stufen-Prozess und API-Vertrag vor jedem UI-Code; sechs Bereiche `Ideen`, `Baupläne &amp; Tasks`, `Chris-Tore (N)`, `Showcase`, `Schaltzentrale`, `Handbuch &amp; Karte` | Werkbank hat sechs alte Tabs (Ideen/Baupläne/Fragen/Handlungen/Showcase/Maschinen); `uiProzess` in der SSOT vorhanden, kein Vertrag für die neue Sechs-Aufteilung | `ui.vertrag` ✅ `T-271 (BP-006-W2-FINAL (Dekomposition, Capability-Mapping &amp; Board))` (Kapitän) → `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche &amp; Karten))` / kilo2 |
+| Beliebig viele Engines und Provider mit `api_key`, `oauth_url`, `local_cli`; kein hart codierter Name | Feste Worker-/Account-Profile; `ops/config/` noch nicht angelegt; keine generischen Auth-Typen | `engine.providerRegistry` ⬜ `T-272 (BP-006-W2-FINAL (Generische Engine-/Provider-Registry &amp; Auth-Typen))` / kilo2 |
+| Maschinen melden Rolle, Status, RAM/CPU und Slots selbst; `offline_migration_pending` neutral | `ops/runtime/machine-registry.mjs` mit `letztesSignal`, aber ohne Rolle/Status/Slots; RAM/CPU ohne Eintrag `null` | `maschinen.registry` ⬜ `T-273 (BP-006-W2-FINAL (Maschinen-Registry: Rolle, Status, Slots, Telemetrie))` / kilo1 |
+| Baupläne mit `category`, `status`, `zielPort`, verknüpften Tasks; datengetriebene Gruppen und Chris-Tore | `ops/blueprints/registry.json` ohne diese Metadaten; UI zeigt pauschal „entwurf&quot; | `blueprint.metadaten` ⬜ `T-274 (BP-006-W2-FINAL (Bauplan-Metadaten &amp; dynamische Gruppierung))` / kilo5 |
+| Zero-Terminal-Setup: `~/.tmux.conf` mit `set -g mouse on`, Windows-Terminal-Profil `VoxelCrew Supervisor` (`wsl -d Ubuntu -e tmux attach -t supervisor`) | `ensure-supervisor.sh` hält tmux; Profil und Maus-Zeile fehlen | `setup.windowsTerminal` ⬜ `T-275 (BP-006-W2-FINAL (Zero-Terminal-Setup: tmux &amp; Windows Terminal))` / kilo5 |
+| Werkbank-Backend liefert Navigation, Tore, Maschinen, Dienste, Provider, Diagnose aus Registries; Vault-Pfad korrekt aufgelöst | Bestehende Endpunkte für Ideen/Baupläne/Fragen/Handlungen/Showcase/SSE; neue Vertragsendpunkte fehlen, Vault-Pfad relativ zum CWD fehlerhaft | `ui.werkbankApi` ⬜ `T-277 (BP-006-W2-FINAL (Werkbank-Backend: Registries &amp; Aktionen))` / kilo1 |
+| Roter „Bot-Hilfe&quot;-Knopf ersetzt durch „System-Diagnose kopieren&quot; (secret-frei); Showcase nur `category === &#39;showcase&#39;`, Reset/Seed-Gate; Schaltzentrale mit echten Balken, stdout, Aktionen | Alter roter Knopf und pauschale Showcase-Liste vorhanden; RAM/CPU-Anzeige ohne Registry-Beweis | `ui.aktuell` ⬜ `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche &amp; Karten))` / kilo2 |
+| Handbuch lädt dynamisch alle `vault/handbuch/*.md`; Querschnittsmodule heißen „System-Baustein (übergreifend)&quot; | Sieben Fixture-Kapitel, Produktivpfad relativ falsch; keine Querschnittskennzeichnung | `ui.handbuchKarte` ⬜ `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche &amp; Karten))` / kilo2 |
+| Stufe 4: Playwright klickt jeden Tab/Dialog/Button, legt Test-Provider an, lädt alle Kapitel, 0 Browser-/API-Fehler, 0 kaputte Platzhalter, Screenshot-Plausibilität | Bestehender Werkbank-Browsertest prüft die alten sechs Tabs; dynamische Neue-Journey fehlt | `qa.stufe4Werkbank` ⬜ `T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme &amp; Vision-Plausibilität))` / kilo1 |
+| Alle registrierten Pages JS-frei, &lt; 175 KB, 0 Negativliste-Treffer, auch nach neuen Kapiteln | Guard auf vier feste Seiten; eine `index.html` im Zielrepo; dynamische Registrierung fehlt | `pages.guardDynamisch` ⬜ `T-279 (BP-006-W2-FINAL (Pages-Guard: JS-frei, &lt;175 KB, Negativliste))` / kilo5 |
+| Review, komplett grünes Verify und Merge erst nach allen Belegen | Kapitäns-Review steht aus; `T-271 (BP-006-W2-FINAL (Dekomposition, Capability-Mapping &amp; Board))` angelegt | `governance.reviewWerkbank` ⬜ `T-280 (BP-006-W2-FINAL (Kapitäns-Review &amp; Abnahme-Gate))` / Kapitän |
+
+**Neue wiederverwendbare Bausteine (geplant, `verified:false` bis Testbeleg):**
+`ops/config/provider-adapters.mjs`, `ops/blueprints/metadaten.mjs`,
+`ops/scripts/setup-windows-terminal.ps1`, `ops/werkbank/lib/registry-ansicht.mjs`,
+`ops/qa/pages-guard.mjs` (dynamisch). Kein `_dbg`-Skript; alle bekommen einen
+regulären Aufrufpfad und Capability-Eintrag vor dem Review in
+`T-280 (BP-006-W2-FINAL (Kapitäns-Review &amp; Abnahme-Gate))`.
+
+**Trennlinie / Gaps:** Fundament und Setup zuerst — `T-271 (BP-006-W2-FINAL (Dekomposition, Capability-Mapping &amp; Board))`
+bis `T-275 (BP-006-W2-FINAL (Zero-Terminal-Setup: tmux &amp; Windows Terminal))` —
+danach Pause zur Freigabe der UI-Umstellung. `ops/runner.stop` bleibt aktiv;
+Direktdelegation in Wellen an `kilo1`/`kilo2`/`kilo5` (max. 2 parallel pro Host).
+Kein echter Provider-Call, kein OAuth, kein `.env`-Zugriff, kein WoL,
+kein echter Windows-Terminal-Schreibzugriff ohne Chris, kein `19132`/UDP `7551`,
+keine Weltdaten-, Firewall- oder Auth-Änderung. Alle Baupläne bleiben `manual`;
+keine finale Live-Einladung.
 </code></pre>
     </article>
     <article class="abschnitt" id="abschnitt-7">
