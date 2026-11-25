@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-25T19:56:46.349Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-25T20:50:00.727Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -1837,34 +1837,38 @@ Fehlern und 0 Negativlisten-Treffern mergt der Kapitän nach `main`. Chris tippt
 nichts; die einzigen Tore bleiben Live-`19132`/UDP `7551`, Paid-APIs,
 Windows-System/Firewall und die finale Live-Einladung.
 
-**Stand nach `T-289 (BP-006-W2-UI-FINAL (Capability- & Mapping-Nachziehung vor der UI-Welle))`:**
+**Stand nach `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))`**
+(aufbauend auf `T-289 (BP-006-W2-UI-FINAL (Capability- & Mapping-Nachziehung vor der UI-Welle))`):
 Die Spalte „Ist" bleibt als historischer Ausgangszustand vor der Umsetzung erhalten;
-die Backlog-Spalte zeigt jetzt den tatsächlichen Beweisstand. Fundament und Setup
-sind reviewt und gemergt, die UI-Welle bleibt bewusst offen.
+die Backlog-Spalte zeigt jetzt den tatsächlichen Beweisstand. Fundament, Setup und
+die sechs Werkbank-Bereiche sind reviewt; die Stufe-4-Browserabnahme bleibt bei
+`T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))` offen.
 
 | Soll aus der Festlegung | Ist (25.11.2026, vor der Umsetzung) | Backlog / Task |
 | --- | --- | --- |
-| Vier-Stufen-Prozess und API-Vertrag vor jedem UI-Code; sechs Bereiche `Ideen`, `Baupläne & Tasks`, `Chris-Tore (N)`, `Showcase`, `Schaltzentrale`, `Handbuch & Karte` | Werkbank hat sechs alte Tabs (Ideen/Baupläne/Fragen/Handlungen/Showcase/Maschinen); `uiProzess` in der SSOT vorhanden, kein Vertrag für die neue Sechs-Aufteilung | `ui.vertrag` ✅ `T-271 (BP-006-W2-FINAL (Dekomposition, Capability-Mapping & Board))` (Kapitän) → `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` / kilo2 |
+| Vier-Stufen-Prozess und API-Vertrag vor jedem UI-Code; sechs Bereiche `Ideen`, `Baupläne & Tasks`, `Chris-Tore (N)`, `Showcase`, `Schaltzentrale`, `Handbuch & Karte` | Werkbank hat sechs alte Tabs (Ideen/Baupläne/Fragen/Handlungen/Showcase/Maschinen); `uiProzess` in der SSOT vorhanden, kein Vertrag für die neue Sechs-Aufteilung | `ui.vertrag` ✅ `T-271 (BP-006-W2-FINAL (Dekomposition, Capability-Mapping & Board))` (Kapitän) → `ui.aktuell` ✅ `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` / kilo5 (Review, Stufe 4 in `T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))`) |
 | Beliebig viele Engines und Provider mit `api_key`, `oauth_url`, `local_cli`; kein hart codierter Name | Feste Worker-/Account-Profile; `ops/config/` noch nicht angelegt; keine generischen Auth-Typen | `engine.providerRegistry` ✅ `T-272 (BP-006-W2-FINAL (Generische Engine-/Provider-Registry & Auth-Typen))` / kilo2 |
 | Maschinen melden Rolle, Status, RAM/CPU und Slots selbst; `offline_migration_pending` neutral | `ops/runtime/machine-registry.mjs` mit `letztesSignal`, aber ohne Rolle/Status/Slots; RAM/CPU ohne Eintrag `null` | `maschinen.registry` ✅ `T-273 (BP-006-W2-FINAL (Maschinen-Registry: Rolle, Status, Slots, Telemetrie))` / kilo1 |
 | Baupläne mit `category`, `status`, `zielPort`, verknüpften Tasks; datengetriebene Gruppen und Chris-Tore | `ops/blueprints/registry.json` ohne diese Metadaten; UI zeigt pauschal „entwurf" | `blueprint.metadaten` ✅ `T-274 (BP-006-W2-FINAL (Bauplan-Metadaten & dynamische Gruppierung))` / kilo5 |
 | Zero-Terminal-Setup: `~/.tmux.conf` mit `set -g mouse on`, Windows-Terminal-Profil `VoxelCrew Supervisor` (`wsl -d Ubuntu -e tmux attach -t supervisor`) | `ensure-supervisor.sh` hält tmux; Profil und Maus-Zeile fehlen | `setup.windowsTerminal` ✅ `T-275 (BP-006-W2-FINAL (Zero-Terminal-Setup: tmux & Windows Terminal))` / kilo5 |
 | Werkbank-Backend liefert Navigation, Tore, Maschinen, Dienste, Provider, Diagnose aus Registries; Vault-Pfad korrekt aufgelöst | 13 neue plus 2 angepasste Endpunkte in `ops/werkbank/server.mjs`, Quellen in `ops/config/werkbank-ui.json` und Registries; Fixture-Test 89/89, Verify 75/75, kein Produktiv-7070 | `ui.werkbankApi` ✅ `T-277 (BP-006-W2-FINAL (Werkbank-Backend: Registries & Aktionen))` / kilo1 |
-| Roter „Bot-Hilfe"-Knopf ersetzt durch „System-Diagnose kopieren" (secret-frei); Showcase nur `category === 'showcase'`, Reset/Seed-Gate; Schaltzentrale mit echten Balken, stdout, Aktionen | Alter roter Knopf und pauschale Showcase-Liste vorhanden; RAM/CPU-Anzeige ohne Registry-Beweis | `ui.aktuell` ⬜ `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` / kilo2 |
-| Handbuch lädt dynamisch alle `vault/handbuch/*.md`; Querschnittsmodule heißen „System-Baustein (übergreifend)" | Sieben Fixture-Kapitel, Produktivpfad relativ falsch; keine Querschnittskennzeichnung | `ui.handbuchKarte` ⬜ `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` / kilo2 |
+| Roter „Bot-Hilfe"-Knopf ersetzt durch „System-Diagnose kopieren" (secret-frei); Showcase nur `category === 'showcase'`, Reset/Seed-Gate; Schaltzentrale mit echten Balken, stdout, Aktionen | Alter roter Knopf und pauschale Showcase-Liste vorhanden; RAM/CPU-Anzeige ohne Registry-Beweis | `ui.aktuell` ✅ `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` / kilo5 — Code-Commit `ef0cc8d2`, `node --check` + Strukturprüfung + Verify 75/75; Stufe-4-Beleg bei `T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))` |
+| Handbuch lädt dynamisch alle `vault/handbuch/*.md`; Querschnittsmodule heißen „System-Baustein (übergreifend)" | Sieben Fixture-Kapitel, Produktivpfad relativ falsch; keine Querschnittskennzeichnung | `ui.handbuchKarte` ✅ `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` / kilo5 — `/api/handbuch` + `/api/system-map` verdrahtet, Label aus `ops/config/werkbank-ui.json`, Verify 75/75; Stufe-4-Sichtbeleg bei `T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))` |
 | Stufe 4: Playwright klickt jeden Tab/Dialog/Button, legt Test-Provider an, lädt alle Kapitel, 0 Browser-/API-Fehler, 0 kaputte Platzhalter, Screenshot-Plausibilität | Bestehender Werkbank-Browsertest prüft die alten sechs Tabs; dynamische Neue-Journey fehlt | `qa.stufe4Werkbank` ⬜ `T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))` / kilo1 |
 | Alle registrierten Pages JS-frei, < 175 KB, 0 Negativliste-Treffer, auch nach neuen Kapiteln | `ops/config/pages-config.json` registriert HTML-Seiten, Zusatzdateien und Budgets; `ops/qa/pages-guard.mjs` und `ops/scripts/export-notebook-sync.mjs` lesen daraus; neue Seite wird automatisch geprüft (24/24 Guard-Prüfungen, 74/74 Verify) | `pages.guardDynamisch` ✅ `T-279 (BP-006-W2-FINAL (Pages-Guard: JS-frei, <175 KB, Negativliste))` / kilo5 |
 | Review, komplett grünes Verify und Merge erst nach allen Belegen | Kapitäns-Review steht aus; `T-271 (BP-006-W2-FINAL (Dekomposition, Capability-Mapping & Board))` angelegt | `governance.reviewWerkbank` ⬜ `T-280 (BP-006-W2-FINAL (Kapitäns-Review & Abnahme-Gate))` / Kapitän |
 
-**Neue wiederverwendbare Bausteine (geplant, `verified:false` bis Testbeleg):**
+**Neue wiederverwendbare Bausteine (mit Testbeleg, nicht mehr nur geplant):**
 `ops/config/provider-adapters.mjs`, `ops/blueprints/metadaten.mjs`,
-`ops/scripts/setup-windows-terminal.ps1`, `ops/config/werkbank-ui.json`,
+`ops/scripts/setup-windows-terminal.ps1`, `ops/config/werkbank-ui.json` und
 `ops/qa/pages-guard.mjs` (dynamisch, bei `T-279 (BP-006-W2-FINAL (Pages-Guard: JS-frei, <175 KB, Negativliste))`
-mit Capability `pages.guardDynamisch` verifiziert) und `ops/config/werkbank-ui.json`
-(bei `T-277 (BP-006-W2-FINAL (Werkbank-Backend: Registries & Aktionen))` mit
-`ui.werkbankApi` verifiziert). Kein `_dbg`-Skript;
-die übrigen Bausteine bekommen ihren Capability-Eintrag vor dem Review in
-`T-280 (BP-006-W2-FINAL (Kapitäns-Review & Abnahme-Gate))`.
+mit Capability `pages.guardDynamisch` verifiziert). `ops/werkbank/public/app.js`
+ist bei `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten))` mit
+`ui.aktuell` und `ui.handbuchKarte` verifiziert; `ops/werkbank/server.mjs`
+bei `T-277 (BP-006-W2-FINAL (Werkbank-Backend: Registries & Aktionen))` mit
+`ui.werkbankApi`. Kein `_dbg`-Skript; die Stufe-4-Browser-Suite bleibt als
+`qa.stufe4Werkbank` bei `T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))`
+offen und wird im Review-Gate `T-280 (BP-006-W2-FINAL (Kapitäns-Review & Abnahme-Gate))` geprüft.
 
 **Trennlinie / Gaps:** Fundament und Setup zuerst — `T-271 (BP-006-W2-FINAL (Dekomposition, Capability-Mapping & Board))`
 bis `T-275 (BP-006-W2-FINAL (Zero-Terminal-Setup: tmux & Windows Terminal))` —
@@ -3512,9 +3516,9 @@ bleiben `manual`.
         "gefüllt",
         "handlungsbedarf"
       ],
-      "doku": "ops/tasks/T-276.md; ops/werkbank/UI_VERTRAG_BP006_W2_FINAL.md; ops/SPEC_MAPPING.md §24",
-      "verified": false,
-      "beleg": "Backlog BP-006-W2-FINAL / T-276: sechs neue Bereiche, Diagnose-Knopf, Showcase-Gate und Schaltzentrale sind vertraglich festgelegt, aber noch nicht umgesetzt"
+      "doku": "ops/results/T-276.md; ops/tasks/T-276.md; ops/werkbank/UI_VERTRAG_BP006_W2_FINAL.md; ops/SPEC_MAPPING.md §24",
+      "verified": true,
+      "beleg": "T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten)) Code-Commit ef0cc8d2: node --check app.js grün, index.html-Strukturprüfung 6 Tabs/6 Panels und 0 doppelte IDs, echte Endpunkte verdrahtet, npm run verify -- --out ops/results/T-276.verify.json 75/75, 0 Fehler; Stufe-4-Browserbeleg läuft in T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))"
     },
     {
       "id": "ui.handbuchKarte",
@@ -3541,9 +3545,9 @@ bleiben `manual`.
         "gefüllt",
         "handlungsbedarf"
       ],
-      "doku": "ops/tasks/T-276.md; ops/werkbank/UI_VERTRAG_BP006_W2_FINAL.md; ops/SPEC_MAPPING.md §24",
-      "verified": false,
-      "beleg": "Backlog BP-006-W2-FINAL / T-276: dynamisches Laden aller Handbuchkapitel und das Label 'System-Baustein (übergreifend)' sind noch nicht im UI verdrahtet"
+      "doku": "ops/results/T-276.md; ops/tasks/T-276.md; ops/werkbank/UI_VERTRAG_BP006_W2_FINAL.md; ops/SPEC_MAPPING.md §24",
+      "verified": true,
+      "beleg": "T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche & Karten)) Code-Commit ef0cc8d2: ladeHandbuchUndKarte() ruft /api/handbuch und /api/system-map; ops/werkbank/server.mjs setzt das Querschnittslabel aus ops/config/werkbank-ui.json und renderLandkarteDetail() zeigt es als Pill; node --check und Strukturprüfung grün, npm run verify 75/75, 0 Fehler; Stufe-4-Sichtbeleg in T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme & Vision-Plausibilität))"
     },
     {
       "id": "qa.stufe4Werkbank",
