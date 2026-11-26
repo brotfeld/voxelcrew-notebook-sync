@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-26T09:19:14.528Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-26T09:21:10.050Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -2024,7 +2024,7 @@ nicht erfunden.
 | `.env.example` mit genau acht benannten API-Key-Slots, `.env` gitignoriert, keine Secrets im Repo | `.env`/`.env.*` sind gitignoriert und `!.env.example` ist gesetzt; `.env.example` fehlt | `infra.accountsRegistry` (neu, `verified: false`) → `T-309 (BP-000-ACCOUNTS-AND-REALTEST (.env.example & 12-Account-Registry))` |
 | 12 Free-Tier-Slots: Kilo/Antigravity OAuth, OpenRouter/NIM/Requesty/Groq je zwei API-Key-Slots mit `costCap: 0`, Antigravity strikt `concurrency: 1` | `provider-pools.json` hat sechs Provider und sieben Accounts; das Zod-Schema ist strict und erlaubt `concurrency`/`costCap`/`keyEnv`/`modelFilter` noch nicht; `provider-pools.test.mjs:102` verbietet aktuell ausdrücklich genau 12 Accounts | `T-309`; Test mit 12er-Zahl nachziehen, keine feste Zählwerte im Code |
 | `npm run verify:accounts-real` mit `--account`, `--dry-status` und ehrlichem Report; fehlende Credentials `MISSING_CREDENTIALS` | Skript und npm-Script fehlen; `ops/scripts/verify.mjs` registriert Suiten explizit | `qa.accountsReal` (neu, `verified: false`) → `T-310 (BP-000-ACCOUNTS-AND-REALTEST (Realbetriebs-Suite: Dry-Status & ehrlicher Report))` |
-| Vier echte OAuth-Mini-Subtasks im Temp-Worktree, Concurrency-1-Beweis | `account-profiles.mjs` kennt eine harte Lock-1 für `agy`; `task-scope-guard.mjs` begrenzt Scope/Laufzeit aus der SSOT | `T-311 (BP-000-ACCOUNTS-AND-REALTEST (Kilo-/Antigravity-Mini-Subtask & Concurrency-1))` |
+| Vier echte OAuth-Mini-Subtasks im Temp-Worktree, Concurrency-1-Beweis | `account-profiles.mjs` (createAgyLock, Lock = 1) + `task-scope-guard.mjs` (Scope/Laufzeit aus SSOT); `test-accounts-real.mjs` erzwingt Concurrency 1 für antigravity-1/2 aus der Registry, zweiter paralleler Lauf wird fail-closed abgelehnt; Temp-Worktree-Mini-Subtask mit echtem Beleg | `T-311 (BP-000-ACCOUNTS-AND-REALTEST (Kilo-/Antigravity-Mini-Subtask & Concurrency-1))` ✅ `tests/accounts-real.test.mjs` 10/10, `qa.accountsReal` verified: true |
 | Acht echte Free-Tier-API-Calls, Paid-Modell hart blockiert | `isFreeModel()`/`STRICT_FREE_CHAIN` und `free-model-check.mjs` vorhanden; kein Account-Probenträger | `T-312 (BP-000-ACCOUNTS-AND-REALTEST (Free-Tier-API-Probes & Cost-Guard))` |
 | Vision-Probe gegen `T-302-belege`, Groq-Fast-Triage < 4K, 429 → `WAITING_RATE_LIMIT`/`resumeAt` + Failover | `vision-budget.mjs` (1/Meilenstein, 3/Tag), `computeRateLimitWait()` und `provider-telemetry.mjs` vorhanden; `vision-analyze.mjs` umgeht den Budget-Guard | `T-313 (BP-000-ACCOUNTS-AND-REALTEST (Spezial-Probes: Vision, Triage, Failover))`; Budget-Guard bleibt maßgeblich |
 | Säule A: `live-telemetry.html`/`board-verify.html` mit Board, 12-Account-Status, `STEVE`/`ALEX`/`NOOR`/`MAKENA`, Gates, n8n-Hook | Beide Seiten sind in `pages-config.json`/`export-notebook-sync.mjs` verdrahtet, aber ohne Account-Report und n8n-Status | `export.zweiSaeulenSsot` (neu, `verified: false`) → `T-314 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Betrieb))` |
@@ -4211,9 +4211,9 @@ unangetastet; die UI-Neuentwicklung läuft später im Dual-Client-Prozess.
       "block_states": [
         "handlungsbedarf"
       ],
-      "doku": "ops/tasks/T-310 (BP-000-ACCOUNTS-AND-REALTEST (Realbetriebs-Suite: Dry-Status & ehrlicher Report)).md, ops/SPEC_MAPPING.md §28",
-      "verified": false,
-      "beleg": "Backlog T-310 bis T-313: ehrliche Ampel mit MISSING_CREDENTIALS, Free-Guard, Vision-Budget und WAITING_RATE_LIMIT; Beleg folgt aus Suite und Tests."
+      "doku": "ops/tasks/T-310 (BP-000-ACCOUNTS-AND-REALTEST (Realbetriebs-Suite: Dry-Status & ehrlicher Report)).md, ops/tasks/T-311 (BP-000-ACCOUNTS-AND-REALTEST (Kilo-/Antigravity-Mini-Subtask & Concurrency-1)).md, ops/SPEC_MAPPING.md §28",
+      "verified": true,
+      "beleg": "T-310: ops/qa/test-accounts-real.mjs exportiert pruefeAccountsReal() mit injiziertem Env/Fetch/Runner; 12 Slots, MISSING_CREDENTIALS/TROCKENBEFUND/BEREIT/HANDLUNGSBEDARF, 0 echte Calls. T-311: agySperre (createAgyLock, Lock = 1) erzwingt Concurrency 1 für antigravity-1/2 aus provider-pools.json; zweiter paralleler Lauf wird fail-closed abgelehnt; Temp-Worktree-Mini-Subtask mit echtem Beleg; tests/accounts-real.test.mjs 10/10 grün (0 echte Ports, 0 Secrets), npm run verify:workers 9/9, worker-orchestration-guard 11/11."
     },
     {
       "id": "export.zweiSaeulenSsot",
