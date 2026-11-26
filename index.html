@@ -22,7 +22,7 @@
 <body>
   <header>
     <h1>VoxelCrew — Gesamtspezifikation</h1>
-    <p class="meta">Exportiert am 2026-11-26T10:28:06.550Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
+    <p class="meta">Exportiert am 2026-11-26T10:51:22.993Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
     <p class="meta">Leitstelle: brotfeld/mc-bot-leitstelle · Mirror: brotfeld/voxelcrew-notebook-sync · Pages: https://github.io</p>
     <nav aria-label="Inhalt">
       <a href="#abschnitt-1">Post-Spülgang-Inventur</a>
@@ -53,14 +53,14 @@
       <a href="#abschnitt-26">ops/blueprints/BP-014.json</a>
       <a href="#abschnitt-27">ops/blueprints/BP-015.json</a>
       <a href="#abschnitt-28">ops/blueprints/BP-016.json</a>
-      <a href="#abschnitt-29">vault/handbuch/01_Systemueberblick_und_Architektur.md</a>
-      <a href="#abschnitt-30">vault/handbuch/02_Server_Welten_und_Akteure.md</a>
-      <a href="#abschnitt-31">vault/handbuch/03_Faehigkeiten_und_Bauplan_Katalog.md</a>
-      <a href="#abschnitt-32">vault/handbuch/04_Bedienung_und_Ablaeufe.md</a>
-      <a href="#abschnitt-33">vault/handbuch/05_Autonome_Weltanpassung_und_Regie.md</a>
-      <a href="#abschnitt-34">vault/handbuch/06_Gesamt_Entwicklungsplan_und_Meilensteine.md</a>
-      <a href="#abschnitt-35">vault/handbuch/07_Vier_Stufen_UI_Prozess.md</a>
-      <a href="#abschnitt-36">vault/handbuch/08-worker-und-maschinen.md</a>
+      <a href="#abschnitt-29">vault/handbuch/handbuch/01_Systemueberblick_und_Architektur.md</a>
+      <a href="#abschnitt-30">vault/handbuch/handbuch/02_Server_Welten_und_Akteure.md</a>
+      <a href="#abschnitt-31">vault/handbuch/handbuch/03_Faehigkeiten_und_Bauplan_Katalog.md</a>
+      <a href="#abschnitt-32">vault/handbuch/handbuch/04_Bedienung_und_Ablaeufe.md</a>
+      <a href="#abschnitt-33">vault/handbuch/handbuch/05_Autonome_Weltanpassung_und_Regie.md</a>
+      <a href="#abschnitt-34">vault/handbuch/handbuch/06_Gesamt_Entwicklungsplan_und_Meilensteine.md</a>
+      <a href="#abschnitt-35">vault/handbuch/handbuch/07_Vier_Stufen_UI_Prozess.md</a>
+      <a href="#abschnitt-36">vault/handbuch/handbuch/08-worker-und-maschinen.md</a>
       <a href="#abschnitt-37">vault/konzept/00_README_KONZEPT_INDEX.md</a>
       <a href="#abschnitt-38">vault/konzept/01_architektur-briefing-multi-bot-bedrock-v14.md</a>
       <a href="#abschnitt-39">vault/konzept/02_ui-ux-architektur-briefing-leitstelle-v2.md</a>
@@ -747,7 +747,9 @@
     </article>
     <article class="abschnitt" id="abschnitt-4">
       <h2>AGENTS.md</h2>
-      <pre><code class="language-text"># AGENTS.md — Spielregeln für Agenten
+      <pre><code class="language-text">[ROLLE: OPENCODE-SUPERVISOR &amp; REPO-WORKER — NICHT FÜR NOTEBOOK-COPILOT]
+
+# AGENTS.md — Spielregeln für Agenten
 
 Dieses Repository ist die Leitstelle für Minecraft-Bedrock-Bots. Du bist der Resident-Agent und arbeitest die Tasks aus `ops/BOARD.md` ab. Chris gibt frei und testet als Mensch; der Mastermind schreibt Tasks, prüft und mergt. **Chris hat am 2026-11-18 bestätigt: Du (der Resident-Agent) bist der Mastermind.**
 
@@ -2107,13 +2109,39 @@ keine Windows-/Firewall-Änderung, keine finale Live-Einladung.
 UI-Neuentwicklung läuft später im Dual-Client-Prozess. Ein eigener
 Dual-Client-UI-Blueprint existiert weiterhin nicht und ist eine ehrlich
 benannte, offene Lücke — keine erfundene Blueprint-ID.
+
+## 29) BP-000-AGENTS-BOUNDARY — saubere Domänen-Trennung &amp; Export-Hygiene (Soll → Ist → Backlog, 26.11.2026)
+
+**User Journey ohne manuelle Klicks (§11):** Chris erteilt den Supervisorauftrag
+→ der Kapitän mappt ihn hierher und zerlegt ihn in
+`T-317 (BP-000-AGENTS-BOUNDARY (Rollenmarker &amp; Prompt-Isolation))`,
+`T-318 (BP-000-AGENTS-BOUNDARY (Terminal- &amp; Dienst-SSOT))` und
+`T-319 (BP-000-AGENTS-BOUNDARY (Finale Gates &amp; Kapitäns-Review))`
+→ der Worker setzt Rollenmarker und Prompt-Isolation in den vorhandenen Guards
+um → der Export erzeugt vier JS-freie Seiten mit `[SSOT-FAKTEN]` → der Kapitän
+prüft Verify, Pages-Guard und Publish-Trockenlauf; ohne Chris-Tor gibt es
+keinen Publish und keine Live-Einladung.
+
+| Soll aus dem Supervisorauftrag | Ist vor `T-317 (BP-000-AGENTS-BOUNDARY (Rollenmarker &amp; Prompt-Isolation))` | Backlog / Task |
+| --- | --- | --- |
+| `AGENTS.md` ist ausschließlich die Handlungsanweisung für OpenCode-Supervisor und Repo-Worker | Datei beginnt mit `# AGENTS.md`; kein Rollenmarker im Kopf | `export.promptIsolation` → `T-317` umgesetzt; exakter Marker `[ROLLE: OPENCODE-SUPERVISOR &amp; REPO-WORKER — NICHT FÜR NOTEBOOK-COPILOT]` in Zeile 1, UTF-8 ohne BOM |
+| Vier Pages enthalten neutrale Fakten in der dritten Person, keine imperativen Prompts | `pages-guard.mjs` prüft JS, Redaction, Budgets und Struktur, aber keine Prompt-Isolation; `seitenRahmen()` hatte keinen SSOT-Kennzeichner | `export.promptIsolation` → `T-317` umgesetzt; zentraler Guard verlangt `[SSOT-FAKTEN]` je HTML-Seite und weist `Du`/`Deine`/`[ROLLE: …]`/Imperative ab; `tests/pages-guard.test.mjs` 28/28, `tests/notebook-pages-e2e.test.js` 0 Treffer |
+| Exportierte Handbuchquellen werden vor dem Write geprüft | `ladeQuellen()` nahm Handbuchdateien ungeprüft auf | `T-317` umgesetzt; `pruefePromptIsolation()` läuft über alle `HANDBUCH_DATEIEN` vor `hinzufuegen()`; ein „Stell dir …&quot;-Satz im Spiegel wurde neutral in die dritte Person formuliert |
+| Bestehende Bausteine werden geschärft, kein neues Ad-hoc-Skript | Zwei getrennte Pages-Guard-Implementierungen mit doppelter Regelmenge | `T-317` umgesetzt; `export-notebook-sync.mjs` ruft den zentralen Guard aus `ops/qa/pages-guard.mjs` und verdichtet `index.html` nur noch vorab |
+
+**Offene Punkte aus diesem Mapping:**
+`T-318 (BP-000-AGENTS-BOUNDARY (Terminal- &amp; Dienst-SSOT))` und
+`T-319 (BP-000-AGENTS-BOUNDARY (Finale Gates &amp; Kapitäns-Review))` bleiben
+Backlog; bis zum Review von `T-319` ist kein Publish, kein kostenpflichtiger
+Provider-/OAuth-/Vision-Call, kein `19132`/UDP `7551`, keine Windows-/Firewall-
+Änderung und keine finale Live-Einladung freigegeben.
 </code></pre>
     </article>
     <article class="abschnitt" id="abschnitt-7">
       <h2>ops/capabilities.json</h2>
       <pre><code class="language-json">{
   &quot;schema&quot;: &quot;capability-registry.v1&quot;,
-  &quot;stand&quot;: &quot;2026-11-24&quot;,
+  &quot;stand&quot;: &quot;2026-11-26&quot;,
   &quot;capabilities&quot;: [
     {
       &quot;id&quot;: &quot;bedrock.sendChat&quot;,
@@ -4323,6 +4351,32 @@ benannte, offene Lücke — keine erfundene Blueprint-ID.
       &quot;doku&quot;: &quot;ops/tasks/T-314 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Betrieb)).md, ops/tasks/T-315 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Planung &amp; Architektur)).md, ops/SPEC_MAPPING.md §28&quot;,
       &quot;verified&quot;: true,
       &quot;beleg&quot;: &quot;T-314 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Betrieb)), T-315 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Planung &amp; Architektur)), T-316 (BP-000-ACCOUNTS-AND-REALTEST (Auto-Merge-Gate &amp; Kapitäns-Review)): Säule A (live-telemetry.html/board-verify.html) zeigt 12-Account-Pool-Status, Maschinen-Steckbriefe, n8n-Hook-Status, laufende Tasks und Verify-Gates aus echten Quellen; Säule B (index.html/handbuch-komplett.html) bündelt BP-000–BP-016, DECISIONS/IDEAS/LESSONS und acht Handbuchkapitel. tests/telemetry-pages.test.mjs 30 Prüfungen, tests/notebook-pages-e2e.test.js 6 Dateien/4 Seiten/0 Altlasten, notebook-pages-browser 0 Konsolenfehler/0 fehlgeschlagene Requests, Seiten JS-frei und &lt; 179200 Byte, Negativliste 0 Treffer. Offene Lücke: ein eigener Dual-Client-UI-Blueprint existiert nicht und wird nicht erfunden; ops/werkbank/public/** bleibt eingefroren.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;export.promptIsolation&quot;,
+      &quot;modul&quot;: &quot;ops/qa/pages-guard.mjs&quot;,
+      &quot;funktion&quot;: &quot;pruefePromptIsolation&quot;,
+      &quot;zeile&quot;: null,
+      &quot;parameter&quot;: [
+        {
+          &quot;name&quot;: &quot;quellen&quot;,
+          &quot;typ&quot;: &quot;Array&lt;{name:string,inhalt:string}&gt;|Record&lt;string,string&gt;&quot;,
+          &quot;pflicht&quot;: true,
+          &quot;beschreibung&quot;: &quot;Fertige HTML-Seiten oder exportierte Handbuchquellen; bei markerPflicht=true muss jede HTML-Seite [SSOT-FAKTEN] tragen&quot;
+        },
+        {
+          &quot;name&quot;: &quot;optionen&quot;,
+          &quot;typ&quot;: &quot;object&quot;,
+          &quot;pflicht&quot;: false,
+          &quot;beschreibung&quot;: &quot;markerPflicht schaltet die Marker-Anforderung für HTML-Seiten ein&quot;
+        }
+      ],
+      &quot;block_states&quot;: [
+        &quot;handlungsbedarf&quot;
+      ],
+      &quot;doku&quot;: &quot;ops/tasks/T-317 (BP-000-AGENTS-BOUNDARY (Rollenmarker &amp; Prompt-Isolation)).md, ops/SPEC_MAPPING.md §29&quot;,
+      &quot;verified&quot;: true,
+      &quot;beleg&quot;: &quot;T-317: ops/qa/pages-guard.mjs prüft fail-closed direkte Anrede (Du/Deine/…), [ROLLE: OPENCODE]-Marker und Agenten-Imperative; export-notebook-sync.mjs nutzt denselben Baustein für Handbuchquellen und fertige Seiten. tests/pages-guard.test.mjs 28/28 inkl. Negativfälle fehlender [SSOT-FAKTEN]-Marker, &#39;Du musst&#39; und &#39;Deine Rolle&#39;; AGENTS.md trägt den exakten Rollenmarker ohne BOM; tests/notebook-pages-e2e.test.js 6 Dateien/4 Seiten, 0 direkte Anrede, 0 Rollenmarker, Guard grün.&quot;
     }
   ],
   &quot;inventur&quot;: {
@@ -6354,7 +6408,7 @@ Ausführliche Fassung in `AGENTS.md` §17. Quelle für alle neun Punkte: FESTLEG
 }</code></pre>
     </article>
     <article class="abschnitt" id="abschnitt-29">
-      <h2>vault/handbuch/01_Systemueberblick_und_Architektur.md</h2>
+      <h2>vault/handbuch/handbuch/01_Systemueberblick_und_Architektur.md</h2>
       <pre><code class="language-text">---
 typ: handbuch
 stand: 2026-11-24
@@ -6439,7 +6493,7 @@ Die drei Guard-Bausteine unter `ops/qa/` sind wiederverwendbare Plattformkompone
 </code></pre>
     </article>
     <article class="abschnitt" id="abschnitt-30">
-      <h2>vault/handbuch/02_Server_Welten_und_Akteure.md</h2>
+      <h2>vault/handbuch/handbuch/02_Server_Welten_und_Akteure.md</h2>
       <pre><code class="language-text">---
 typ: handbuch
 stand: 2026-11-23
@@ -6501,7 +6555,7 @@ Selbstnoten durch Befehlssenden zählen nicht. Wer nicht aus `observer`-Sicht un
 </code></pre>
     </article>
     <article class="abschnitt" id="abschnitt-31">
-      <h2>vault/handbuch/03_Faehigkeiten_und_Bauplan_Katalog.md</h2>
+      <h2>vault/handbuch/handbuch/03_Faehigkeiten_und_Bauplan_Katalog.md</h2>
       <pre><code class="language-text">---
 typ: handbuch
 stand: 2026-11-24
@@ -6566,7 +6620,7 @@ Die drei `governance.*`-Bausteine aus `T-239 (BP-000 (Governance — Kapitäns-R
 </code></pre>
     </article>
     <article class="abschnitt" id="abschnitt-32">
-      <h2>vault/handbuch/04_Bedienung_und_Ablaeufe.md</h2>
+      <h2>vault/handbuch/handbuch/04_Bedienung_und_Ablaeufe.md</h2>
       <pre><code class="language-text">---
 typ: handbuch
 stand: 2026-11-24
@@ -6653,7 +6707,7 @@ Maschinenlesezone von `ops/wissenanalyse/handbuch-sync.mjs`; von Hand nicht ver�
 </code></pre>
     </article>
     <article class="abschnitt" id="abschnitt-33">
-      <h2>vault/handbuch/05_Autonome_Weltanpassung_und_Regie.md</h2>
+      <h2>vault/handbuch/handbuch/05_Autonome_Weltanpassung_und_Regie.md</h2>
       <pre><code class="language-text">---
 typ: handbuch
 stand: 2026-11-23
@@ -6720,7 +6774,7 @@ Seit BDS 1.26.63.1 nutzen **alle drei** Server `transport=nethernet`; `19133`/`1
 </code></pre>
     </article>
     <article class="abschnitt" id="abschnitt-34">
-      <h2>vault/handbuch/06_Gesamt_Entwicklungsplan_und_Meilensteine.md</h2>
+      <h2>vault/handbuch/handbuch/06_Gesamt_Entwicklungsplan_und_Meilensteine.md</h2>
       <pre><code class="language-text">---
 typ: handbuch
 stand: 2026-11-23
@@ -6742,7 +6796,7 @@ Dieses Kapitel ist die menschenlesbare Gesamtübersicht des VoxelCrew-Plans. Es 
 
 ## 1. Wie das Ganze zusammenpasst
 
-Stell dir eine kleine Theatertruppe vor. Die Bots sind die Schauspieler, die Werkbank ist der Regietisch und das Weltgedächtnis ist das Buch, in dem steht, was schon gebaut wurde.
+Die Bots sind wie eine kleine Theatertruppe: Sie sind die Schauspieler, die Werkbank ist der Regietisch und das Weltgedächtnis ist das Buch, in dem steht, was schon gebaut wurde.
 
 1. **Wahrnehmen:** Ein Bot schaut sich um und sieht jede halbe Sekunde ein kleines Bild der Welt vor sich (64×36 Punkte). Dazu erkennt er Winken, Klatschen und „Folge mir&quot;.
 2. **Denken und Handeln:** Er macht einen Schritt, schaut nach, ob es geklappt hat, und erst dann den nächsten. Sieben Arten von Handlungen stehen ihm bereit.
@@ -6874,7 +6928,7 @@ Oben rechts bleibt der **Not-Aus**; er pausiert nur die Anzeige des Worker-Dispa
 </code></pre>
     </article>
     <article class="abschnitt" id="abschnitt-35">
-      <h2>vault/handbuch/07_Vier_Stufen_UI_Prozess.md</h2>
+      <h2>vault/handbuch/handbuch/07_Vier_Stufen_UI_Prozess.md</h2>
       <pre><code class="language-text">---
 typ: handbuch
 stand: 2026-11-23
@@ -7006,7 +7060,7 @@ Der Baustein `ops/runtime/bot-hilfe.mjs` ist **eine** wiederverwendbare Plattfor
 </code></pre>
     </article>
     <article class="abschnitt" id="abschnitt-36">
-      <h2>vault/handbuch/08-worker-und-maschinen.md</h2>
+      <h2>vault/handbuch/handbuch/08-worker-und-maschinen.md</h2>
       <pre><code class="language-text">---
 status: aktiv
 quelle: T-305 (BP-000-SSOT-SYNC (Handbuch 08: Worker, Maschinen &amp; Laienbedienung))
