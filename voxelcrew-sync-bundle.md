@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-26T12:25:30.745Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-26T12:34:48.292Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -505,13 +505,39 @@
     "freigabeStandard": "manual"
   },
   "providerPools": {
-    "stand": "2026-11-25",
-    "quelle": "T-254 / Chris-Festlegung 25.11.2026 (AUSBAUSTUFE INFRA-HYBRID)",
+    "stand": "2026-11-26",
+    "quelle": "T-254 / Chris-Festlegung 25.11.2026 (AUSBAUSTUFE INFRA-HYBRID); T-320 (BP-000-OAUTH-PROFILES-SSOT (Ist-Pfade & OAuth-Profile im SSOT))",
     "konfig": "ops/config/provider-pools.json",
     "schema": "ops/config/provider-pools.schema.mjs",
     "telemetryDatei": "ops/runtime/provider-telemetry.json",
     "kostenbindung": "0 EUR Free-Tier; Requesty 200 Calls/Tag kostenlos",
-    "hinweis": "SSOT speichert nur Zeiger und Regeln, keine Live-Werte und keine Secrets."
+    "hinweis": "SSOT speichert nur Zeiger und Regeln, keine Live-Werte und keine Secrets.",
+    "oauthProfile": [
+      {
+        "id": "kilo-1",
+        "runtime": "wsl",
+        "binPath": "/usr/local/bin/kilo",
+        "profileDir": "~/.voxelcrew-profiles/kilo-1"
+      },
+      {
+        "id": "kilo-2",
+        "runtime": "wsl",
+        "binPath": "/usr/local/bin/kilo",
+        "profileDir": "~/.voxelcrew-profiles/kilo-2"
+      },
+      {
+        "id": "antigravity-1",
+        "runtime": "windows",
+        "binPath": "C:\\Users\\chris\\AppData\\Local\\agy\\bin\\agy.exe",
+        "profileDir": "C:\\Users\\chris"
+      },
+      {
+        "id": "antigravity-2",
+        "runtime": "wsl",
+        "binPath": "/home/chris/.local/bin/agy",
+        "profileDir": "~/.voxelcrew-profiles/antigravity-2"
+      }
+    ]
   },
   "uiProzess": {
     "verbindlich": true,
@@ -2182,8 +2208,8 @@ keinem Testschritt gebeten; nur die vier harten Tore bleiben bei ihm.
 
 | Soll aus dem Auftrag | Ist vor der Dekomposition | Backlog / Ist danach |
 | --- | --- | --- |
-| Vier isolierte OAuth-Profile ohne Secrets als SSOT-Fakten | `provider-pools.json` kannte Auth-Typen und Accounts, aber keine Laufzeitprofile | `T-320 (BP-000-OAUTH-PROFILES-SSOT (Ist-Pfade & OAuth-Profile im SSOT))` — `oauthProfile` in SSOT + Registry, strict Schema gegen Secrets/Runtime |
-| `--real` ohne Mock: echter, minimaler CLI-Probe im profil-eigenen Verzeichnis | Injizierte Runner bzw. echte API-Keys; kein OAuth-CLI-Beleg | `T-321 (BP-000-OAUTH-PROFILES-SSOT (Echter non-interaktiver CLI-Smoke-Probe))` — `wsl -d Ubuntu -e … --version` / Windows-`execFileSync`, `agySperre`, 20 s, `BEREIT` nur bei Exit 0 + Antwort |
+| Vier isolierte OAuth-Profile ohne Secrets als SSOT-Fakten | `provider-pools.json` kannte Auth-Typen und Accounts, aber keine Laufzeitprofile | `T-320 (BP-000-OAUTH-PROFILES-SSOT (Ist-Pfade & OAuth-Profile im SSOT))` ✅ — `oauthProfile` in SSOT + Registry, strict Schema gegen Secrets/Runtime, 18/18 Tests, `lint:config` OK |
+| `--real` ohne Mock: echter, minimaler CLI-Probe im profil-eigenen Verzeichnis | Injizierte Runner bzw. echte API-Keys; kein OAuth-CLI-Beleg | `T-321 (BP-000-OAUTH-PROFILES-SSOT (Echter non-interaktiver CLI-Smoke-Probe))` — `wsl -d Ubuntu -e <binPath> --version` / Windows-`execFileSync`, `agySperre`, 20 s, `BEREIT` nur bei Exit 0 + Antwort |
 | Echter 12-Account-Befund auf `live-telemetry.html` **und** `index.html` | Report lag als Trockenbefund (`modus: dry`) vor | `T-322 (BP-000-OAUTH-PROFILES-SSOT (Real-Lauf, Pages-Export & Final-Gates))` — direkter `--real`-Lauf, Export auf beiden Seiten |
 | Final-Gates, echter Publish und Merge/Push nach `main` | Publish war in `T-319 (BP-000-AGENTS-BOUNDARY (Finale Gates & Kapitäns-Review))` nicht freigegeben | `T-322 (BP-000-OAUTH-PROFILES-SSOT (Real-Lauf, Pages-Export & Final-Gates))` mit ausdrücklicher Publish-Freigabe, `pages-guard` < 175 KB / 0 `<script>`, kein Force-Push |
 
@@ -2191,6 +2217,13 @@ keinem Testschritt gebeten; nur die vier harten Tore bleiben bei ihm.
 einzige echte Aufruf ist der freigegebene `--version`-Smoke-Probe.
 `ops/werkbank/public/**` bleibt unverändert, `19132`/UDP 7551 tabu, keine
 Windows-/Firewall-Änderung und keine finale Live-Einladung.
+
+**Stand nach T-320 (BP-000-OAUTH-PROFILES-SSOT (Ist-Pfade & OAuth-Profile im SSOT)):**
+`infra.oauthProfileSsot` ist mit 18/18 `provider-pools`-Prüfungen und
+`npm run lint:config` belegt `verified: true`. SSOT und Registry tragen exakt
+dieselben vier Profile; die Capability ist ein wiederverwendbarer Baustein,
+kein Ad-hoc-Skript. Es wurde noch kein CLI-Probe ausgeführt — das liegt bei
+`T-321 (BP-000-OAUTH-PROFILES-SSOT (Echter non-interaktiver CLI-Smoke-Probe))`.
 ```
 
 ## ops/capabilities.json
@@ -4348,6 +4381,26 @@ Windows-/Firewall-Änderung und keine finale Live-Einladung.
       "doku": "ops/tasks/T-309 (BP-000-ACCOUNTS-AND-REALTEST (.env.example & 12-Account-Registry)).md, ops/SPEC_MAPPING.md §28",
       "verified": true,
       "beleg": "T-309 (BP-000-ACCOUNTS-AND-REALTEST (.env.example & 12-Account-Registry)): .env.example mit genau den acht benannten API-Key-Slots, .env gitignoriert; ops/config/provider-pools.json mit genau 12 Slots (kilo-1/2, antigravity-1/2 mit oauth_device und concurrency 1, openrouter-1/2, nvidia-nim-1/2, requesty-1/2, groq-1/2 mit api_key, costCap 0 und :free wo zutreffend). tests/provider-pools.test.mjs 16/16 grün, Schema strict gegen unbekannte Felder und Key-Werte; npm run verify:workers 9/9, npm run verify 80/80 (T-316 (BP-000-ACCOUNTS-AND-REALTEST (Auto-Merge-Gate & Kapitäns-Review))). Keine Secrets im Repo, keine echten Provider-Calls."
+    },
+    {
+      "id": "infra.oauthProfileSsot",
+      "modul": "ops/config/provider-pools.schema.mjs",
+      "funktion": "validateProviderPools",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "pools",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "oauthProfile mit den vier realen, isolierten Laufzeitprofilen (runtime wsl/windows, binPath, profileDir) aus SSOT und Registry; keine Secrets"
+        }
+      ],
+      "block_states": [
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-320 (BP-000-OAUTH-PROFILES-SSOT (Ist-Pfade & OAuth-Profile im SSOT)).md, ops/SPEC_MAPPING.md §32",
+      "verified": true,
+      "beleg": "T-320: ops/SYSTEM_SSOT.json → providerPools.oauthProfile und ops/config/provider-pools.json spiegeln exakt dieselben vier Ist-Profile (kilo-1/kilo-2 WSL /usr/local/bin/kilo, antigravity-1 Windows agy.exe, antigravity-2 WSL /home/chris/.local/bin/agy). Schema strict gegen unbekannte Felder, fremde Runtime, leere Pfade, doppelte IDs, Profil ohne Account und oauth_device ohne Profil; globale Secret-Erkennung bleibt aktiv. tests/provider-pools.test.mjs 18/18 grün, npm run lint:config OK. Kein echter CLI-Aufruf, kein Secret im Repo."
     },
     {
       "id": "qa.accountsReal",
