@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-26T01:14:30.679Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-26T01:21:23.933Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -3880,8 +3880,8 @@ Firewall-Änderung, keine finale Live-Einladung, alle Baupläne bleiben `manual`
         "handlungsbedarf"
       ],
       "doku": "ops/tasks/T-295 (BP-000-SSOT-SYNC (Vision-Audit: OpenRouter-Modell & Fallback-Kette)).md, ops/SPEC_MAPPING.md §27, T-199 (OpenRouter-Modellausfall: Preset prüfen und freigeben)",
-      "verified": false,
-      "beleg": "Backlog BP-000-SSOT-SYNC / T-295 (BP-000-SSOT-SYNC (Vision-Audit: OpenRouter-Modell & Fallback-Kette)): getVisionAuditConfig liefert heute kein model-Feld; Testbeleg mit WAITING_RATE_LIMIT steht aus."
+      "verified": true,
+      "beleg": "tests/task-type-router.test.mjs 9/9 + tests/account-profiles.test.mjs 34 Prüfungen: getVisionAuditConfig/model.primar aus T-199-Preset inkl. Fallback-Glied, kein openrouter/free, WAITING_RATE_LIMIT mit resumeAt (T-244) unverändert."
     },
     {
       "id": "ui.werkbankKindModus",
