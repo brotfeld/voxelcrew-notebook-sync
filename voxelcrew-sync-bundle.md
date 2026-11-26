@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-26T10:51:22.993Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-26T11:04:16.830Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -329,6 +329,58 @@
       "19132": "server",
       "19133": "C:/ProgramData/MCBot/presentation-server",
       "19134": "C:/ProgramData/MCBot/e2e-server"
+    }
+  },
+  "terminalUndDienste": {
+    "stand": "2026-11-26",
+    "quelle": "T-318 / BP-000-AGENTS-BOUNDARY (Terminal- & Dienst-SSOT)",
+    "zweck": "Einzige Quelle für das Windows-Terminal-Profil und die ehrlich belegten Restart-Pfade. Der Export zeigt Fakten und führt keinen Befehl aus.",
+    "terminalProfil": {
+      "name": "VoxelCrew Supervisor",
+      "skript": "ops/scripts/setup-windows-terminal.ps1",
+      "kommandoMuster": "wsl -d <Distro> -e tmux new-session -A -s supervisor -c <Repo-Verzeichnis als WSL-Pfad>",
+      "arbeitsverzeichnis": "dynamisch aus dem Skriptpfad abgeleitet (ops/scripts -> Repo-Wurzel -> /mnt/<laufwerk>/...)",
+      "tmuxSession": "supervisor",
+      "zustand": "gefüllt"
+    },
+    "dienste": [
+      {
+        "name": "Werkbank",
+        "port": 7070,
+        "zustand": "gefüllt",
+        "restartBefehl": "node ops/werkbank/server.mjs",
+        "restartSignal": "C:/ProgramData/MCBot/reload/cockpit.flag",
+        "quelle": "package.json (Script werkbank); ops/scripts/run-service.ps1 (-Service cockpit)",
+        "hinweis": "Neustart nur über das registrierte Reload-Signal des Supervisors — kein Doppelstart."
+      },
+      {
+        "name": "Gitea",
+        "port": 3001,
+        "zustand": "handlungsbedarf",
+        "restartBefehl": null,
+        "quelle": "infra/hybrid-stack/README_PHASE1.md",
+        "hinweis": "Kein registrierter Restart-Befehl im Repo; ohne Beleg wird kein Befehl erfunden."
+      },
+      {
+        "name": "Showcase-BDS",
+        "port": 19133,
+        "zustand": "gefüllt",
+        "restartBefehl": "node ops/runtime/bds-manager-registry.mjs start 19133",
+        "quelle": "ops/runtime/bds-manager-registry.mjs (CLI start)",
+        "hinweis": "Start ausschließlich über den BDS-Manager; Show-Beginn per Ingame-Chatbefehl !show."
+      },
+      {
+        "name": "E2E-BDS",
+        "port": 19134,
+        "zustand": "gefüllt",
+        "restartBefehl": "node ops/runtime/bds-manager-registry.mjs start 19134",
+        "quelle": "ops/runtime/bds-manager-registry.mjs (CLI start)",
+        "hinweis": "Start ausschließlich über den BDS-Manager; kein Eingriff in Weltdaten."
+      }
+    ],
+    "ausgeschlossen": {
+      "port": 19132,
+      "grund": "Live-Welt: attach-only, kein Restart-Befehl, kein Start/Stopp/Reconnect, UDP 7551 exklusiv. Bewusst kein Eintrag in dienste."
     }
   },
   "welten": {
@@ -2067,11 +2119,35 @@ keinen Publish und keine Live-Einladung.
 | Bestehende Bausteine werden geschärft, kein neues Ad-hoc-Skript | Zwei getrennte Pages-Guard-Implementierungen mit doppelter Regelmenge | `T-317` umgesetzt; `export-notebook-sync.mjs` ruft den zentralen Guard aus `ops/qa/pages-guard.mjs` und verdichtet `index.html` nur noch vorab |
 
 **Offene Punkte aus diesem Mapping:**
-`T-318 (BP-000-AGENTS-BOUNDARY (Terminal- & Dienst-SSOT))` und
-`T-319 (BP-000-AGENTS-BOUNDARY (Finale Gates & Kapitäns-Review))` bleiben
-Backlog; bis zum Review von `T-319` ist kein Publish, kein kostenpflichtiger
+`T-318 (BP-000-AGENTS-BOUNDARY (Terminal- & Dienst-SSOT))` ist mit §30
+umgesetzt und review; `T-319 (BP-000-AGENTS-BOUNDARY (Finale Gates & Kapitäns-Review))`
+bleibt Backlog; bis zu dessen Review ist kein Publish, kein kostenpflichtiger
 Provider-/OAuth-/Vision-Call, kein `19132`/UDP `7551`, keine Windows-/Firewall-
 Änderung und keine finale Live-Einladung freigegeben.
+
+## 30) T-318 (BP-000-AGENTS-BOUNDARY (Terminal- & Dienst-SSOT)) — Soll / Ist / Backlog (26.11.2026)
+
+**User-Journey ohne manuelle Klicks (§11):** Chris gibt den Supervisorauftrag;
+der Kapitän mapped ihn hierher; das Windows-Terminalprofil startet per
+`wsl -d <Distro> -e tmux new-session -A -s supervisor -c <WSL-Pfad>` genau im
+Repo-Verzeichnis; dieselbe SSOT liefert dem Export die Dienste- und
+Restart-Fakten; `live-telemetry.html` zeigt sie als Vier-Zustands-Vertrag;
+Tests und Pages-Guard prüfen den Weg ohne echten Neustart, ohne Terminal-Klick
+durch Chris und ohne Live-Eingriff.
+
+| Soll aus dem Auftrag | Ist vor `T-318 (BP-000-AGENTS-BOUNDARY (Terminal- & Dienst-SSOT))` | Backlog / Ist danach |
+| --- | --- | --- |
+| Supervisor-Terminal startet deterministisch im Repo-Verzeichnis; kein hart codierter Benutzer-/Repo-Pfad | `setup-windows-terminal.ps1` nutzte `tmux attach -t supervisor` ohne Arbeitsverzeichnis | `setup.windowsTerminal` ✅ — `new-session -A -s supervisor -c <WSL-Pfad>`, Pfad aus `$PSScriptRoot` abgeleitet, 17/17 Tests |
+| Werkbank `7070`, Gitea `3001`, Show-BDS `19133` und E2E-BDS `19134` als SSOT-Fakten in `live-telemetry.html` | SSOT kannte Ports und Rollen, aber keine Restart-Pfade; Telemetrie zeigte keine Dienste-Blöcke | `infra.dienstRestartSsot` ✅ — `ops/SYSTEM_SSOT.json → terminalUndDienste`, zwei Export-Bausteine, 45/45 Telemetrie-Prüfungen |
+| Fehlt ein echter Befehl, steht ehrlich `handlungsbedarf` | Kein Vier-Zustands-Vertrag für Dienste | Gitea `3001` ohne registrierten Restart-Befehl → `handlungsbedarf`; echte Befehle für `7070`/`19133`/`19134` aus `package.json`, `run-service.ps1` und BDS-Manager-Registry |
+| `19132` bleibt ohne Restart-Befehl; keine Weltdaten-/UDP-Berührung | Schutz galt, aber nicht explizit im Dienste-Block | Fail-closed: `live`-Port aus der SSOT abgeleitet, Eintrag in `dienste` bricht den Export ab; `7551` im Block 0 Treffer |
+| Dry-Run-Default, Fixture-Apply, Idempotenz und 0 Windows-/Firewall-Eingriffe bleiben erhalten | 10/10 Prüfungen | 17/17 Prüfungen; `-Apply` nur in temporären Fixture-Pfaden, reale `settings.json` nicht verändert, kein Dienst tatsächlich neu gestartet |
+
+**Abschluss:** Beide Capabilities (`setup.windowsTerminal`, `infra.dienstRestartSsot`)
+sind mit echten Testbelegen `verified: true`. Der Pages-Guard bleibt grün
+(6 Dateien, 0 `<script>`, alle Seiten < 179200 Byte), `notebook-pages-browser`
+meldet 0 Konsolenfehler und 0 fehlgeschlagene Requests. Kein Publish, kein
+kostenpflichtiger Provider-/OAuth-/Vision-Call, keine finale Live-Einladung.
 ```
 
 ## ops/capabilities.json
@@ -3751,9 +3827,9 @@ Provider-/OAuth-/Vision-Call, kein `19132`/UDP `7551`, keine Windows-/Firewall-
       "block_states": [
         "handlungsbedarf"
       ],
-      "doku": "ops/results/T-275.md; AGENTS.md §2; ops/SPEC_MAPPING.md §24",
+      "doku": "ops/results/T-275.md; ops/results/T-318.md; AGENTS.md §2; ops/SPEC_MAPPING.md §30",
       "verified": true,
-      "beleg": "tests/setup-windows-terminal.test.mjs 10/10: Dry-Run Default, -Apply nur in temporärer Fixture, Idempotenz, fail-closed bei fehlerhaften Pfaden/JSON, 0 Treffer auf 19132/7551"
+      "beleg": "tests/setup-windows-terminal.test.mjs 17/17: Dry-Run Default, -Apply nur in temporärer Fixture, Idempotenz, fail-closed bei fehlerhaften Pfaden/JSON, 0 Treffer auf 19132/7551. T-318: Profilbefehl 'wsl -d <Distro> -e tmux new-session -A -s supervisor -c <Repo-Verzeichnis als WSL-Pfad>'; Arbeitsverzeichnis dynamisch aus $PSScriptRoot abgeleitet, kein hart verdrahteter Benutzer-/Repo-Pfad im Skript oder Profil."
     },
     {
       "id": "ui.werkbankApi",
@@ -4315,6 +4391,34 @@ Provider-/OAuth-/Vision-Call, kein `19132`/UDP `7551`, keine Windows-/Firewall-
       "doku": "ops/tasks/T-317 (BP-000-AGENTS-BOUNDARY (Rollenmarker & Prompt-Isolation)).md, ops/SPEC_MAPPING.md §29",
       "verified": true,
       "beleg": "T-317: ops/qa/pages-guard.mjs prüft fail-closed direkte Anrede (Du/Deine/…), [ROLLE: OPENCODE]-Marker und Agenten-Imperative; export-notebook-sync.mjs nutzt denselben Baustein für Handbuchquellen und fertige Seiten. tests/pages-guard.test.mjs 28/28 inkl. Negativfälle fehlender [SSOT-FAKTEN]-Marker, 'Du musst' und 'Deine Rolle'; AGENTS.md trägt den exakten Rollenmarker ohne BOM; tests/notebook-pages-e2e.test.js 6 Dateien/4 Seiten, 0 direkte Anrede, 0 Rollenmarker, Guard grün."
+    },
+    {
+      "id": "infra.dienstRestartSsot",
+      "modul": "ops/scripts/export-notebook-sync.mjs",
+      "funktion": "baueTerminalUndDiensteFakten",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "root",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Repo-Wurzel mit ops/SYSTEM_SSOT.json als Datenquelle"
+        },
+        {
+          "name": "ssot",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "optional injizierte SSOT (Fixture-Tests); ohne Quelle gilt handlungsbedarf"
+        }
+      ],
+      "block_states": [
+        "leer",
+        "gefüllt",
+        "handlungsbedarf"
+      ],
+      "doku": "ops/SYSTEM_SSOT.json → terminalUndDienste; ops/results/T-318.md; ops/SPEC_MAPPING.md §30",
+      "verified": true,
+      "beleg": "T-318: terminalProfilHtml() und diensteBetriebHtml() lesen ausschliesslich die SSOT und zeigen Werkbank 7070, Gitea 3001 (ohne registrierten Befehl: handlungsbedarf), Showcase-BDS 19133 und E2E-BDS 19134 mit echten BDS-Manager-Pfaden. Ein Restart-Eintrag auf dem Live-Port wird fail-closed abgewiesen. tests/telemetry-pages.test.mjs 45/45, tests/setup-windows-terminal.test.mjs 17/17, notebook-pages-e2e 6 Dateien/4 Seiten, notebook-pages-browser 0 Konsolenfehler/0 fehlgeschlagene Requests, pages-guard 6 Dateien/JS-frei/< 179200 Byte."
     }
   ],
   "inventur": {
