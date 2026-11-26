@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-26T12:34:48.292Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-26T13:07:20.075Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -2209,7 +2209,7 @@ keinem Testschritt gebeten; nur die vier harten Tore bleiben bei ihm.
 | Soll aus dem Auftrag | Ist vor der Dekomposition | Backlog / Ist danach |
 | --- | --- | --- |
 | Vier isolierte OAuth-Profile ohne Secrets als SSOT-Fakten | `provider-pools.json` kannte Auth-Typen und Accounts, aber keine Laufzeitprofile | `T-320 (BP-000-OAUTH-PROFILES-SSOT (Ist-Pfade & OAuth-Profile im SSOT))` ✅ — `oauthProfile` in SSOT + Registry, strict Schema gegen Secrets/Runtime, 18/18 Tests, `lint:config` OK |
-| `--real` ohne Mock: echter, minimaler CLI-Probe im profil-eigenen Verzeichnis | Injizierte Runner bzw. echte API-Keys; kein OAuth-CLI-Beleg | `T-321 (BP-000-OAUTH-PROFILES-SSOT (Echter non-interaktiver CLI-Smoke-Probe))` — `wsl -d Ubuntu -e <binPath> --version` / Windows-`execFileSync`, `agySperre`, 20 s, `BEREIT` nur bei Exit 0 + Antwort |
+| `--real` ohne Mock: echter, minimaler CLI-Probe im profil-eigenen Verzeichnis | Injizierte Runner bzw. echte API-Keys; kein OAuth-CLI-Beleg | `T-321 (BP-000-OAUTH-PROFILES-SSOT (Echter non-interaktiver CLI-Smoke-Probe))` ✅ — `wsl -d Ubuntu --cd <profileDir> -e <binPath> --version` / Windows-`execFileSync` mit `cwd = profileDir`, `agySperre` Lock = 1, 20 s, `BEREIT` nur bei Exit 0 + Antwort; 21/21 Tests |
 | Echter 12-Account-Befund auf `live-telemetry.html` **und** `index.html` | Report lag als Trockenbefund (`modus: dry`) vor | `T-322 (BP-000-OAUTH-PROFILES-SSOT (Real-Lauf, Pages-Export & Final-Gates))` — direkter `--real`-Lauf, Export auf beiden Seiten |
 | Final-Gates, echter Publish und Merge/Push nach `main` | Publish war in `T-319 (BP-000-AGENTS-BOUNDARY (Finale Gates & Kapitäns-Review))` nicht freigegeben | `T-322 (BP-000-OAUTH-PROFILES-SSOT (Real-Lauf, Pages-Export & Final-Gates))` mit ausdrücklicher Publish-Freigabe, `pages-guard` < 175 KB / 0 `<script>`, kein Force-Push |
 
@@ -2222,8 +2222,15 @@ Windows-/Firewall-Änderung und keine finale Live-Einladung.
 `infra.oauthProfileSsot` ist mit 18/18 `provider-pools`-Prüfungen und
 `npm run lint:config` belegt `verified: true`. SSOT und Registry tragen exakt
 dieselben vier Profile; die Capability ist ein wiederverwendbarer Baustein,
-kein Ad-hoc-Skript. Es wurde noch kein CLI-Probe ausgeführt — das liegt bei
-`T-321 (BP-000-OAUTH-PROFILES-SSOT (Echter non-interaktiver CLI-Smoke-Probe))`.
+kein Ad-hoc-Skript.
+
+**Stand nach T-321 (BP-000-OAUTH-PROFILES-SSOT (Echter non-interaktiver CLI-Smoke-Probe)):**
+`qa.oauthCliSmoke` ist `verified: true`: `--real` ohne injizierte Mocks führt
+den kostenlosen `--version`-Probe für alle vier `oauth_device`-Profile
+sequenziell unter `agySperre` (Lock = 1) aus. `tests/accounts-real.test.mjs`
+21/21 grün, `npm run verify:accounts-real -- --dry-status` 12/12 ohne Socket
+und ohne CLI-Start. Der vollständige echte 12-Account-Report und der
+Pages-Export liegen bei `T-322 (BP-000-OAUTH-PROFILES-SSOT (Real-Lauf, Pages-Export & Final-Gates))`.
 ```
 
 ## ops/capabilities.json
@@ -4421,6 +4428,32 @@ kein Ad-hoc-Skript. Es wurde noch kein CLI-Probe ausgeführt — das liegt bei
       "doku": "ops/tasks/T-310 (BP-000-ACCOUNTS-AND-REALTEST (Realbetriebs-Suite: Dry-Status & ehrlicher Report)).md, ops/tasks/T-311 (BP-000-ACCOUNTS-AND-REALTEST (Kilo-/Antigravity-Mini-Subtask & Concurrency-1)).md, ops/SPEC_MAPPING.md §28",
       "verified": true,
       "beleg": "T-310: ops/qa/test-accounts-real.mjs exportiert pruefeAccountsReal() mit injiziertem Env/Fetch/Runner; 12 Slots, MISSING_CREDENTIALS/TROCKENBEFUND/BEREIT/HANDLUNGSBEDARF, 0 echte Calls. T-311: agySperre (createAgyLock, Lock = 1) erzwingt Concurrency 1 für antigravity-1/2 aus provider-pools.json; zweiter paralleler Lauf wird fail-closed abgelehnt; Temp-Worktree-Mini-Subtask mit echtem Beleg; tests/accounts-real.test.mjs 10/10 grün (0 echte Ports, 0 Secrets), npm run verify:workers 9/9, worker-orchestration-guard 11/11. T-313: Spezial-Proben pruefeVision (requestVision nur bei stage1Green + verfügbarem Vision-Budget, sonst vision_skipped ohne Model-Call, Screenshot aus ops/results/T-302-belege), pruefeFastTriage (Groq, strikt unter 4K Token, sonst handlungsbedarf) und pruefeFailover (429 -> WAITING_RATE_LIMIT mit resumeAt + Failover naechster freier Account via computeRateLimitWait() als einzige 429-Quelle); tests/accounts-real.test.mjs 16/16 grün, Budgetstatus read-only, 0 echte Calls/Sockets."
+    },
+    {
+      "id": "qa.oauthCliSmoke",
+      "modul": "ops/qa/test-accounts-real.mjs",
+      "funktion": "echterCliRunner",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "profil",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "oauthProfile aus Registry/SSOT: runtime wsl/windows, binPath, profileDir; keine Secrets"
+        },
+        {
+          "name": "optionen",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "cwd = profileDir, timeoutMs = 20000, wslDistro; cliRunner injizierbar fuer deterministische Tests"
+        }
+      ],
+      "block_states": [
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-321 (BP-000-OAUTH-PROFILES-SSOT (Echter non-interaktiver CLI-Smoke-Probe)).md, ops/SPEC_MAPPING.md §32",
+      "verified": true,
+      "beleg": "T-321: echterCliRunner/baueCliBefehl fuehren ausschliesslich `--version` aus (WSL: wsl -d Ubuntu --cd <profileDir> -e <binPath> --version; Windows: execFileSync(<binPath>, ['--version'], cwd = profileDir), 20 s). Nur Exit 0 UND nicht-leere Antwort ergeben BEREIT; Timeout/Fehler/leere Antwort werden mit Exit-Code und Antwortlaenge, aber ohne Rohausgabe/Secret gemeldet. Die vier oauth_device-Profile laufen im --real-Pfad ohne Mocks strikt sequenziell unter agySperre (Lock = 1). tests/accounts-real.test.mjs 21/21 gruen inkl. Positiv-/Negativfaellen, Dry-Modus ohne CLI-Start und echter execFileSync-Test; npm run verify:accounts-real -- --dry-status 12/12 ohne Socket/CLI. Der vollstaendige 12-Account-Real-Lauf folgt in T-322 (BP-000-OAUTH-PROFILES-SSOT (Real-Lauf, Pages-Export & Final-Gates))."
     },
     {
       "id": "qa.freeTierProbes",
