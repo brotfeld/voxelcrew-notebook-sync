@@ -22,7 +22,7 @@
 <body>
   <header>
     <h1>VoxelCrew — Gesamtspezifikation</h1>
-    <p class="meta">Exportiert am 2026-11-26T10:07:28.017Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
+    <p class="meta">Exportiert am 2026-11-26T10:22:10.769Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
     <p class="meta">Leitstelle: brotfeld/mc-bot-leitstelle · Mirror: brotfeld/voxelcrew-notebook-sync · Pages: https://github.io</p>
     <nav aria-label="Inhalt">
       <a href="#abschnitt-1">Post-Spülgang-Inventur</a>
@@ -2084,22 +2084,29 @@ nicht erfunden.
 
 | Soll aus dem Supervisorauftrag | Ist vor `T-308 (BP-000-ACCOUNTS-AND-REALTEST (Dekomposition, Capability-Mapping &amp; Board))` | Backlog / Task |
 | --- | --- | --- |
-| `.env.example` mit genau acht benannten API-Key-Slots, `.env` gitignoriert, keine Secrets im Repo | `.env`/`.env.*` sind gitignoriert und `!.env.example` ist gesetzt; `.env.example` fehlt | `infra.accountsRegistry` (neu, `verified: false`) → `T-309 (BP-000-ACCOUNTS-AND-REALTEST (.env.example &amp; 12-Account-Registry))` |
+| `.env.example` mit genau acht benannten API-Key-Slots, `.env` gitignoriert, keine Secrets im Repo | `.env`/`.env.*` sind gitignoriert und `!.env.example` ist gesetzt; `.env.example` fehlt | `infra.accountsRegistry` → `T-309 (BP-000-ACCOUNTS-AND-REALTEST (.env.example &amp; 12-Account-Registry))` ✅ umgesetzt, `verified: true`; `tests/provider-pools.test.mjs` 16/16, keine Secrets im Repo |
 | 12 Free-Tier-Slots: Kilo/Antigravity OAuth, OpenRouter/NIM/Requesty/Groq je zwei API-Key-Slots mit `costCap: 0`, Antigravity strikt `concurrency: 1` | `provider-pools.json` hat sechs Provider und sieben Accounts; das Zod-Schema ist strict und erlaubt `concurrency`/`costCap`/`keyEnv`/`modelFilter` noch nicht; `provider-pools.test.mjs:102` verbietet aktuell ausdrücklich genau 12 Accounts | `T-309`; Test mit 12er-Zahl nachziehen, keine feste Zählwerte im Code |
-| `npm run verify:accounts-real` mit `--account`, `--dry-status` und ehrlichem Report; fehlende Credentials `MISSING_CREDENTIALS` | Skript und npm-Script fehlen; `ops/scripts/verify.mjs` registriert Suiten explizit | `qa.accountsReal` (neu, `verified: false`) → `T-310 (BP-000-ACCOUNTS-AND-REALTEST (Realbetriebs-Suite: Dry-Status &amp; ehrlicher Report))` |
+| `npm run verify:accounts-real` mit `--account`, `--dry-status` und ehrlichem Report; fehlende Credentials `MISSING_CREDENTIALS` | Skript und npm-Script fehlen; `ops/scripts/verify.mjs` registriert Suiten explizit | `qa.accountsReal` → `T-310 (BP-000-ACCOUNTS-AND-REALTEST (Realbetriebs-Suite: Dry-Status &amp; ehrlicher Report))` ✅ umgesetzt, `verified: true`; Dry-Status Exit 0, 12/12 `MISSING_CREDENTIALS`, ehrlicher Report ohne Klartext-Key |
 | Vier echte OAuth-Mini-Subtasks im Temp-Worktree, Concurrency-1-Beweis | `account-profiles.mjs` (createAgyLock, Lock = 1) + `task-scope-guard.mjs` (Scope/Laufzeit aus SSOT); `test-accounts-real.mjs` erzwingt Concurrency 1 für antigravity-1/2 aus der Registry, zweiter paralleler Lauf wird fail-closed abgelehnt; Temp-Worktree-Mini-Subtask mit echtem Beleg | `T-311 (BP-000-ACCOUNTS-AND-REALTEST (Kilo-/Antigravity-Mini-Subtask &amp; Concurrency-1))` ✅ `tests/accounts-real.test.mjs` 10/10, `qa.accountsReal` verified: true |
 | Acht echte Free-Tier-API-Calls, Paid-Modell hart blockiert | `qa.freeTierProbes` mit `ops/qa/account-probes.mjs` als wiederverwendbarem Baustein: `costCap: 0`/`modelFilter: &quot;:free&quot;` vor jedem Call, Paid-Modell `HANDLUNGSBEDARF` ohne Socket, Key nur maskiert; Capability `verified: true` mit 6/6 Fixture-Tests. Echte Calls erst mit Keys/Freigabe, aktuell `MISSING_CREDENTIALS` | `T-312 (BP-000-ACCOUNTS-AND-REALTEST (Free-Tier-API-Probes &amp; Cost-Guard))` — umgesetzt und review |
 | Vision-Probe gegen `T-302-belege`, Groq-Fast-Triage &lt; 4K, 429 → `WAITING_RATE_LIMIT`/`resumeAt` + Failover | Umgesetzt in `ops/qa/test-accounts-real.mjs`: `pruefeVision` ruft `requestVision()` (vision-budget.mjs, 1/Meilenstein, 3/Tag) nur bei `stage1Green` + verfügbarem Budget auf (sonst `vision_skipped`, Screenshot aus `ops/results/T-302-belege`, kein Model-Call); `pruefeFastTriage` nutzt Groq (`costCap: 0`) und bleibt strikt unter 4K Token (sonst `handlungsbedarf`); `pruefeFailover` weist 429 auf `WAITING_RATE_LIMIT` mit `resumeAt` aus und überlässt den nächsten freien Account aus dem Pool; `computeRateLimitWait()` bleibt einzige 429-Quelle (`vision-analyze.mjs` wird nicht aufgerufen, Budget-Guard bleibt maßgeblich). Spezial-Proben sind im ehrlichen Report unter `probes.*` verdrahtet | `T-313 (BP-000-ACCOUNTS-AND-REALTEST (Spezial-Probes: Vision, Triage, Failover))`; `tests/accounts-real.test.mjs` 16/16 grün, 0 echte Calls/Sockets, Budgetstatus read-only |
-| Säule A: `live-telemetry.html`/`board-verify.html` mit Board, 12-Account-Status, `STEVE`/`ALEX`/`NOOR`/`MAKENA`, Gates, n8n-Hook | Beide Seiten sind in `pages-config.json`/`export-notebook-sync.mjs` verdrahtet, aber ohne Account-Report und n8n-Status | `export.zweiSaeulenSsot` (neu, `verified: false`) → `T-314 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Betrieb))` |
-| Säule B: `index.html`/`handbuch-komplett.html` mit BP-000–BP-016, DECISIONS/IDEAS/LESSONS und acht Handbuchkapiteln | 17 Baupläne registriert, Positivliste und Tests zählen sieben Kapitel; `08-worker-und-maschinen.md` liegt im Spiegel; Dual-Client-UI-Blueprint fehlt | `T-315 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Planung &amp; Architektur))`; Blueprint-Lücke bleibt offen |
-| Merge-Tore: `verify`, `verify:workers`, `verify:accounts-real -- --dry-status`, 0 Änderung an `ops/werkbank/public/**`, 0 Eingriff in `19132`/UDP `7551` | Dispatch aktiv (`ops/runner.stop` entfernt, `dispatchPaused: false`); UI-Freeze und Port-Schutz stehen | `T-316 (BP-000-ACCOUNTS-AND-REALTEST (Auto-Merge-Gate &amp; Kapitäns-Review))` |
+| Säule A: `live-telemetry.html`/`board-verify.html` mit Board, 12-Account-Status, `STEVE`/`ALEX`/`NOOR`/`MAKENA`, Gates, n8n-Hook | Beide Seiten sind in `pages-config.json`/`export-notebook-sync.mjs` verdrahtet, aber ohne Account-Report und n8n-Status | `export.zweiSaeulenSsot` → `T-314 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Betrieb))` ✅ umgesetzt; `accountPoolHtml`/`n8nHookHtml`/`laufendeTasksHtml`/`verifyGatesHtml` aus echten Quellen, `tests/telemetry-pages.test.mjs` 30 Prüfungen, fehlende Quellen ehrlich `handlungsbedarf` |
+| Säule B: `index.html`/`handbuch-komplett.html` mit BP-000–BP-016, DECISIONS/IDEAS/LESSONS und acht Handbuchkapiteln | 17 Baupläne registriert, Positivliste und Tests zählen sieben Kapitel; `08-worker-und-maschinen.md` liegt im Spiegel; Dual-Client-UI-Blueprint fehlt | `T-315 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Planung &amp; Architektur))` ✅ umgesetzt; 17 Baupläne/8 Kapitel im Export belegt; Blueprint-Lücke bleibt offen und wird nicht erfunden |
+| Merge-Tore: `verify`, `verify:workers`, `verify:accounts-real -- --dry-status`, 0 Änderung an `ops/werkbank/public/**`, 0 Eingriff in `19132`/UDP `7551` | Dispatch aktiv (`ops/runner.stop` entfernt, `dispatchPaused: false`); UI-Freeze und Port-Schutz stehen | `T-316 (BP-000-ACCOUNTS-AND-REALTEST (Auto-Merge-Gate &amp; Kapitäns-Review))` ✅ geprüft: `verify` 80/80, `verify:workers` 9/9, Dry-Status 12/12 `MISSING_CREDENTIALS`, UI-Freeze-Diff leer, keine Port-/Dienst-Änderung |
 
-**Trennlinie / Gaps:** Die drei neuen Capabilities bleiben `verified: false`,
-bis echte Testbelege aus den Fachkarten vorliegen. Kein echter Provider-,
-OAuth-, Paid- oder Vision-Call ohne Freigabe, kein Publish, kein
-`19132`/UDP `7551`, keine Windows-/Firewall-Änderung, keine finale
-Live-Einladung. `ops/werkbank/public/**` bleibt während des gesamten Auftrags
-unangetastet; die UI-Neuentwicklung läuft später im Dual-Client-Prozess.
+**Abschlussstand nach `T-316 (BP-000-ACCOUNTS-AND-REALTEST (Auto-Merge-Gate &amp; Kapitäns-Review))`:**
+Alle vier Capabilities dieses Supervisorauftrags (`infra.accountsRegistry`,
+`qa.accountsReal`, `qa.freeTierProbes`, `export.zweiSaeulenSsot`) sind mit echten
+Testbelegen `verified: true`. Die ehrliche Ampel bleibt rot, solange keine
+Credentials/OAuth-Logins und keine Freigabe für echte Calls vorliegen: der
+Dry-Status meldet 12/12 `MISSING_CREDENTIALS`, die Spezial-Proben
+`vision_skipped`/`ok`/`idle` ohne Model-Call. Kein echter Provider-, OAuth-,
+Paid- oder Vision-Call ohne Freigabe, kein Publish, kein `19132`/UDP `7551`,
+keine Windows-/Firewall-Änderung, keine finale Live-Einladung.
+`ops/werkbank/public/**` blieb während des gesamten Auftrags unangetastet; die
+UI-Neuentwicklung läuft später im Dual-Client-Prozess. Ein eigener
+Dual-Client-UI-Blueprint existiert weiterhin nicht und ist eine ehrlich
+benannte, offene Lücke — keine erfundene Blueprint-ID.
 </code></pre>
     </article>
     <article class="abschnitt" id="abschnitt-7">
@@ -4254,8 +4261,8 @@ unangetastet; die UI-Neuentwicklung läuft später im Dual-Client-Prozess.
         &quot;handlungsbedarf&quot;
       ],
       &quot;doku&quot;: &quot;ops/tasks/T-309 (BP-000-ACCOUNTS-AND-REALTEST (.env.example &amp; 12-Account-Registry)).md, ops/SPEC_MAPPING.md §28&quot;,
-      &quot;verified&quot;: false,
-      &quot;beleg&quot;: &quot;Backlog T-309: .env.example mit acht Key-Slots und 12 Accounts sind spezifiziert; Beleg folgt aus Schema- und Registry-Tests nach Implementierung.&quot;
+      &quot;verified&quot;: true,
+      &quot;beleg&quot;: &quot;T-309 (BP-000-ACCOUNTS-AND-REALTEST (.env.example &amp; 12-Account-Registry)): .env.example mit genau den acht benannten API-Key-Slots, .env gitignoriert; ops/config/provider-pools.json mit genau 12 Slots (kilo-1/2, antigravity-1/2 mit oauth_device und concurrency 1, openrouter-1/2, nvidia-nim-1/2, requesty-1/2, groq-1/2 mit api_key, costCap 0 und :free wo zutreffend). tests/provider-pools.test.mjs 16/16 grün, Schema strict gegen unbekannte Felder und Key-Werte; npm run verify:workers 9/9, npm run verify 80/80 (T-316 (BP-000-ACCOUNTS-AND-REALTEST (Auto-Merge-Gate &amp; Kapitäns-Review))). Keine Secrets im Repo, keine echten Provider-Calls.&quot;
     },
     {
       &quot;id&quot;: &quot;qa.accountsReal&quot;,
@@ -4314,8 +4321,8 @@ unangetastet; die UI-Neuentwicklung läuft später im Dual-Client-Prozess.
         &quot;handlungsbedarf&quot;
       ],
       &quot;doku&quot;: &quot;ops/tasks/T-314 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Betrieb)).md, ops/tasks/T-315 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Planung &amp; Architektur)).md, ops/SPEC_MAPPING.md §28&quot;,
-      &quot;verified&quot;: false,
-      &quot;beleg&quot;: &quot;Backlog T-314/T-315: vier Seiten sind bereits registriert; Inhalte und Belege werden nach Implementierung geprüft. Dual-Client-UI-Blueprint fehlt noch als eigene Karte.&quot;
+      &quot;verified&quot;: true,
+      &quot;beleg&quot;: &quot;T-314 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Betrieb)), T-315 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Planung &amp; Architektur)), T-316 (BP-000-ACCOUNTS-AND-REALTEST (Auto-Merge-Gate &amp; Kapitäns-Review)): Säule A (live-telemetry.html/board-verify.html) zeigt 12-Account-Pool-Status, Maschinen-Steckbriefe, n8n-Hook-Status, laufende Tasks und Verify-Gates aus echten Quellen; Säule B (index.html/handbuch-komplett.html) bündelt BP-000–BP-016, DECISIONS/IDEAS/LESSONS und acht Handbuchkapitel. tests/telemetry-pages.test.mjs 30 Prüfungen, tests/notebook-pages-e2e.test.js 6 Dateien/4 Seiten/0 Altlasten, notebook-pages-browser 0 Konsolenfehler/0 fehlgeschlagene Requests, Seiten JS-frei und &lt; 179200 Byte, Negativliste 0 Treffer. Offene Lücke: ein eigener Dual-Client-UI-Blueprint existiert nicht und wird nicht erfunden; ops/werkbank/public/** bleibt eingefroren.&quot;
     }
   ],
   &quot;inventur&quot;: {
