@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-26T04:14:36.132Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-26T04:47:29.353Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -1989,7 +1989,7 @@ Generierung aus der SSOT). Die Wellen laufen über `agent-run.mjs`.
 | `vision_audit` mit OpenRouter + `T-199 (OpenRouter-Modellausfall: Preset prüfen und freigeben)`-Fallback und `WAITING_RATE_LIMIT` | Konten und Fallbackkette vorhanden; `getVisionAuditConfig()` ohne `model`-Feld | `T-295 (BP-000-SSOT-SYNC (Vision-Audit: OpenRouter-Modell & Fallback-Kette))` |
 | `/api/dienste` 200 und echte Provider-/Pool-Endpunkte | Endpunkt existiert, Adapter wird importiert; Auth-Feld im Formular folgt in `T-299` | `T-296 (BP-000-SSOT-SYNC (Werkbank-API: /api/dienste & Provider-Adapter))` ✅, `T-297 (BP-000-SSOT-SYNC (Provider-Registry: beliebig viele Accounts & Auth-Typ))` ✅, `werkbank.providerHealth ✅ T-298 (BP-000-SSOT-SYNC (Provider-Live-Test & ehrliche Ampel)) / kilo1 (Kapitäns-Review), tests/provider-health.test.mjs 13/13 + tests/provider-api.test.mjs 33/33 mit fixture-injizierter Journey, POST /api/provider/:id/pruefen` |
 | Beliebig viele Accounts je Provider mit automatisch erkanntem `authType` (`api_key`/`oauth_device`/`cli_login`), 1-Klick-Browser-Login, Keys nur in `.env` | `ops/config/provider-pools.json` mit sechs Providern (Kilo, Antigravity, OpenRouter, Nvidia NIM, Requesty 200/Tag, Groq) und dynamisch nummerierten Accounts (OpenRouter #1/#2); `detectAuthTyp()` erkennt den Typ aus `provider.type`; `loginDescriptor()` liefert 1-Klick-Browser-Login (`browser:true`/`terminal:false`); `apiKeyPraesenz()` liest Keys nur als Praesenz aus der git-ignorierten `.env`; `GET/POST /api/provider` dynamisch, keine feste 12er-Zahl | `infra.providerRegistry` ✅ `T-297 (BP-000-SSOT-SYNC (Provider-Registry: beliebig viele Accounts & Auth-Typ))` / kilo2, `tests/provider-pools.test.mjs` 16/16, `tests/provider-adapters.test.mjs` 13/13, `tests/provider-api.test.mjs` 20/20 |
-| Kind-/Bauleiter-Modus, 4-Stufen-UI-Prozess, Ideen-Chat am Free-Pool | Kein Umschalter; harter Untertitel `kilo1–kilo5`; Chat meldet dauerhaft Gateway-Fehler | `ui.vertragSSotSync` ✅ (Stufe 1–3) `T-299 (BP-000-SSOT-SYNC (UI-Vertrag Stufen 1–3: Kind/Bauleiter & Provider-Formular))` / kilo5 — Vertrag `ops/werkbank/UI_VERTRAG_KIND_BAULEITER.md`, `verified:false` bis Stufe 4; Umsetzung `T-300 (BP-000-SSOT-SYNC (Kind-/Bauleiter-Modus & dynamische Schaltzentrale))`, Ideen-Chat `T-301 (BP-000-SSOT-SYNC (Ideen-Chat an aktivem Free-Pool))`, Abnahme `T-302 (BP-000-SSOT-SYNC (Stufe-4-Browserabnahme Werkbank))` |
+| Kind-/Bauleiter-Modus, 4-Stufen-UI-Prozess, Ideen-Chat am Free-Pool | Kein Umschalter; harter Untertitel `kilo1–kilo5`; Chat meldet dauerhaft Gateway-Fehler | `ui.vertragSSotSync` ✅ (Stufe 1–3) `T-299 (BP-000-SSOT-SYNC (UI-Vertrag Stufen 1–3: Kind/Bauleiter & Provider-Formular))` / kilo5 — Vertrag `ops/werkbank/UI_VERTRAG_KIND_BAULEITER.md`, `verified:false` bis Stufe 4; Umsetzung `T-300 (BP-000-SSOT-SYNC (Kind-/Bauleiter-Modus & dynamische Schaltzentrale))` ✅, Ideen-Chat `T-301 (BP-000-SSOT-SYNC (Ideen-Chat an aktivem Free-Pool))` ✅ / kilo1 (Kapitäns-Review), `tests/werkbank-api-registries.test.mjs` 96/96 mit Fixture-Beweis für grünen Account, maskierten Key, ehrlichem `handlungsbedarf` und 0 echten Calls; Abnahme `T-302 (BP-000-SSOT-SYNC (Stufe-4-Browserabnahme Werkbank))` |
 | Pages mit offiziellen Namen, Steckbriefen und Klartext-Tabellen | `export-notebook-sync.mjs` rendert Servernamen/Akteure/Worker/Baupläne aus SSOT und Registry, dazu Maschinen-Steckbriefe als JSON-Block und Klartext-Tabelle; lokale Maschine aus `ramSchutz.maschineErkennung`, alle anderen Nodes mit `quelle: fehlt`/`laufzeit: null` ohne erfundene Werte; Budget `179200` Byte aus `pages-config.json` | `export.ssotPagesSync` ✅ `T-303 (BP-000-SSOT-SYNC (Pages-Export: offizielle Namen & Maschinen-Steckbriefe))`, `tests/notebook-pages-e2e.test.js` mit SSOT-getriebenen Belegen |
 | Repo-Gedächtnis und Handbuch 08 für Laien | `DECISIONS.md`/`IDEAS.md` fehlen; Vault-Junction leer; Handbuch-Spiegel vorhanden | `T-304 (BP-000-SSOT-SYNC (Repo-Gedächtnis DECISIONS/IDEAS/LESSONS/BP-014))`, `T-305 (BP-000-SSOT-SYNC (Handbuch 08: Worker, Maschinen & Laienbedienung))` |
 | Worker-Schutz mit Timeout/Scope und Auto-Merge-Gate | Hygiene für Worktrees/Locks vorhanden; kein Task-Frontmatter-Scope-Guard | `T-306 (BP-000-SSOT-SYNC (Worker-Schutz: harte Timeouts & Scope-Guard))`, `T-307 (BP-000-SSOT-SYNC (Auto-Merge-Gate & Kapitäns-Review))` |
@@ -3532,6 +3532,46 @@ Firewall-Änderung, keine finale Live-Einladung, alle Baupläne bleiben `manual`
       "doku": "ops/results/T-297.md; ops/werkbank/server.mjs GET/POST /api/provider; ops/SPEC_MAPPING.md §25",
       "verified": true,
       "beleg": "tests/provider-pools.test.mjs 16/16: sechs Provider (Kilo, Antigravity, OpenRouter, Nvidia NIM, Requesty, Groq), dynamische Account-Zaehlung, authTyp automatisch, 0 Secrets; GET /api/provider liefert dynamische Labels und Login-Deskriptoren, POST /api/provider erkennt authTyp automatisch und liest Key-Praesenz nur aus .env"
+    },
+    {
+      "id": "werkbank.ideenChat",
+      "modul": "ops/werkbank/lib/ideen-chat.mjs",
+      "funktion": "antwortErzeugen / chatConfig",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "frage",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Chat-Nachricht aus dem Ideen-Tab"
+        },
+        {
+          "name": "providerConfigDatei",
+          "typ": "string",
+          "pflicht": false,
+          "beschreibung": "Pfad zu provider-pools.json; Default aus REPO_ROOT"
+        },
+        {
+          "name": "pruefeEndpoint",
+          "typ": "Function",
+          "pflicht": false,
+          "beschreibung": "Injizierte Health-Pruefung; ohne sie bleibt die Ampel ehrlich handlungsbedarf"
+        },
+        {
+          "name": "fetchImpl",
+          "typ": "Function",
+          "pflicht": false,
+          "beschreibung": "Injizierter Fetcher fuer Fixture-Antworten; 0 echte Provider-Calls"
+        }
+      ],
+      "block_states": [
+        "bereit",
+        "handlungsbedarf",
+        "offline-0€"
+      ],
+      "doku": "ops/tasks/T-301.md; ops/werkbank/server.mjs GET/POST /api/ideen/chat; ops/SPEC_MAPPING.md §27",
+      "verified": true,
+      "beleg": "tests/werkbank-api-registries.test.mjs 96/96: gruener cli_login- und api_key-Account antworten aus dem Free-Pool mit quelleDetails und maskiertem Key; ohne gruenen Account oder ohne injizierten Health-Check ehrlich handlungsbedarf; 0 echte Calls, kein Klartext-Key, keine Live-Ports"
     },
     {
       "id": "werkbank.providerHealth",
