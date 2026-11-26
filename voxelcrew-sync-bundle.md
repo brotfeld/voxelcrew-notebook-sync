@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-26T14:00:10.782Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-26T14:35:09.782Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -53,6 +53,81 @@
     "notebookPagesUrl": "https://github.io",
     "vaultSlugQuelle": "git remote get-url origin im Vault-Repo (read-only; SSOT-Wert muss damit übereinstimmen)",
     "hinweis": "Der Vault-Slug wird beim Export aus dem echten Vault-Remote gelesen und gegen diesen Wert geprüft; fehlt der Vault im CI, gilt der SSOT-Wert."
+  },
+  "hybridStack": {
+    "stand": "2026-11-26",
+    "quelle": "infra/hybrid-stack/docker-compose.yml; docker ps (read-only); ops/results/n8n-inventory.json",
+    "zweck": "Einzige Quelle für den nativen Hybrid-Stack. n8n ist die Control Plane; keine zweite Node-Orchestrierung.",
+    "netz": "hybrid-internal (bridge)",
+    "container": [
+      {
+        "name": "hybrid-postgres",
+        "image": "postgres:15-alpine",
+        "bind": "127.0.0.1",
+        "port": 5432,
+        "zustand": "Up (healthy, beobachtet 2026-11-26)",
+        "datenbank": "hybrid (Standard aus POSTGRES_DB)",
+        "volume": "postgres_data:/var/lib/postgresql/data",
+        "healthcheck": "pg_isready alle 10 s"
+      },
+      {
+        "name": "hybrid-n8n",
+        "image": "n8nio/n8n:1.121.0",
+        "bind": "127.0.0.1",
+        "port": 5678,
+        "zustand": "Up (beobachtet 2026-11-26)",
+        "datenbank": "postgresdb, Host postgres:5432, DB hybrid",
+        "volume": "n8n_data:/home/node/.n8n",
+        "webhookUrl": "http://127.0.0.1:5678/",
+        "basicAuth": false,
+        "hinweis": "REST /rest/workflows liefert ohne Session 401; read-only Auslese über n8n-CLI und Postgres."
+      },
+      {
+        "name": "hybrid-gitea",
+        "image": "gitea/gitea:1.22",
+        "bind": "127.0.0.1",
+        "ports": [
+          3001,
+          2222
+        ],
+        "zustand": "Up (beobachtet 2026-11-26)",
+        "volume": "gitea_data:/data",
+        "rootUrl": "http://127.0.0.1:3001/"
+      }
+    ],
+    "secrets": "POSTGRES_*/GITEA_*/N8N_ENCRYPTION_KEY ausschließlich aus Environment; keine Werte in SSOT oder Inventar.",
+    "n8n": {
+      "inventar": "ops/results/n8n-inventory.json",
+      "anzahlWorkflows": 1,
+      "anzahlCredentials": 1,
+      "workflows": [
+        {
+          "id": "eMl9Munj6ZB26rdh",
+          "name": "VoxelCrew WoL Dispatch Trigger",
+          "active": true,
+          "triggerCount": 2,
+          "triggerTypen": [
+            "n8n-nodes-base.webhook",
+            "n8n-nodes-base.scheduleTrigger"
+          ],
+          "nodeAnzahl": 9,
+          "webhooks": [
+            {
+              "pfad": "node-telemetry",
+              "methode": "POST",
+              "node": "Webhook Node Telemetry"
+            }
+          ],
+          "credentials": [
+            {
+              "name": "Postgres account",
+              "typ": "postgres"
+            }
+          ]
+        }
+      ],
+      "regel": "Kein doppelter Node-Daemon; Wake/Dispatch über n8n-Webhooks und Zero-Token-Bremse."
+    }
   },
   "dispatch": {
     "paused": false,
@@ -2231,6 +2306,20 @@ sequenziell unter `agySperre` (Lock = 1) aus. `tests/accounts-real.test.mjs`
 21/21 grün, `npm run verify:accounts-real -- --dry-status` 12/12 ohne Socket
 und ohne CLI-Start. Der vollständige echte 12-Account-Report und der
 Pages-Export liegen bei `T-322 (BP-000-OAUTH-PROFILES-SSOT (Real-Lauf, Pages-Export & Final-Gates))`.
+
+## 33) System-Auftrag 1 (hybrid-n8n Bestandsaufnahme & SSOT-Verankerung) — Soll / Ist / Backlog (26.11.2026)
+
+| Soll aus dem Auftrag | Ist / Beleg | Backlog / nächster Schritt |
+| --- | --- | --- |
+| Nativer n8n-Stand geheimnisfrei inventarisiert, keine doppelten Daemons | `T-323 (System-Auftrag 1 (Bestandsaufnahme hybrid-n8n & geheimnisfreies Inventar))` — `ops/results/n8n-inventory.json` aus `workflow_entity`/`webhook_entity`/`credentials_entity`: 1 aktiver Workflow, 9 Nodes, 1 POST-Webhook, 1 Credential nur als Name/Typ; `credentials_entity.data` nie gelesen | keiner; Capability-Baustein `qa.n8nInventory` über `tests/n8n-inventory.test.mjs` in `npm run verify` verankert |
+| Acht `.env`-Keys korrekt in den 12-Account-Probe injizieren, 0 Geheimnisse in Report/Diff | `T-324 (System-Auftrag 1 (.env-Anbindung der 8 API-Keys im Account-Probe))` — `ladeEnvWerteFuerProbe` liest nur registrierte `keyEnv`-Namen in den Speicher; kostenloser `GET /models`-Check statt ungültigem Platzhalter-Modell; 12/12 `BEREIT`, 0 Key-Werte im Report | keiner; Capability `qa.freeTierProbes` unverändert, Review und Verify-Beleg gepusht |
+| Stack, Workflow-Fakten und OAuth-Pfade als einzige Quelle in der SSOT; Entscheidung im Repo-Gedächtnis | `T-325 (System-Auftrag 1 (SSOT-/DECISIONS-Verankerung des Hybrid-Stacks))` — `ops/SYSTEM_SSOT.json → hybridStack` (3 Container, Ports, Volumes, n8n-Workflow aus T-323), vier STEVE-Profile bereits aus `T-320 (BP-000-OAUTH-PROFILES-SSOT (Ist-Pfade & OAuth-Profile im SSOT))`; `ops/DECISIONS.md` fixiert „Native n8n-Orchestrierung statt doppelter Node-Daemons“ | keiner; generierte Dateien bleiben unverändert, Review gepusht |
+| Aktueller Account-/Stack-Stand auf den Pages, Final-Gates grün, echter Publish | `T-326 (System-Auftrag 1 (Pages-Spiegel, Final-Gates & Publish))` — `hybridStackHtml()` aus `ops/SYSTEM_SSOT.json → hybridStack` auf `live-telemetry.html` und `board-verify.html`; Capability `export.hybridStackSsot`; `notebook:pages`, `pages-guard`, `notebook:pages:browser`, `npm run verify`, Publish über `pages-publish.mjs` | Final-Gates und Publish in dieser Karte; danach Regie-Merge nach `main` |
+
+**Journey:** read-only Inventur → `.env`-gebundener, kostenloser Real-Probe →
+SSOT/Entscheidung → automatischer Pages-Export mit Vier-Zustands-Vertrag →
+Pages-Guard/Browser-Test → Publish. Chris wird zu keinem manuellen Testschritt
+gebeten; die vier harten Tore aus `AGENTS.md` §7 bleiben unangetastet.
 ```
 
 ## ops/capabilities.json
@@ -4476,6 +4565,54 @@ Pages-Export liegen bei `T-322 (BP-000-OAUTH-PROFILES-SSOT (Real-Lauf, Pages-Exp
       "beleg": "T-312: ops/qa/account-probes.mjs ist der wiederverwendbare Free-Tier-Probe-Baustein für die acht api_key-Slots; tests/account-probes.test.mjs 6/6 grün (Cost-Guard und modelFilter blockieren vor dem Call, fehlender Key → MISSING_CREDENTIALS ohne Socket, BEREIT nur mit injiziertem Fetch, Key nur als ••••-Maske, 429 → WAITING_RATE_LIMIT ohne doppelte Fallback-Logik, probeAllAccounts nur api_key-Slots). 0 echte Sockets, 0 Secrets im Report."
     },
     {
+      "id": "qa.n8nInventory",
+      "modul": "ops/scripts/verify.mjs",
+      "funktion": "registriereSuite n8n-inventory",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "inventar",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "ops/results/n8n-inventory.json aus read-only workflow_entity/webhook_entity/credentials_entity; credentials_entity.data wird nie gelesen"
+        }
+      ],
+      "block_states": [
+        "gefüllt",
+        "handlungsbedarf"
+      ],
+      "doku": "ops/results/T-323.md; ops/results/n8n-inventory.json; ops/SPEC_MAPPING.md §33",
+      "verified": true,
+      "beleg": "T-323: tests/n8n-inventory.test.mjs 2/2 grün (Struktur und 0 Geheimnismuster), in ops/scripts/verify.mjs als Suite n8n-inventory registriert; finales npm run verify -- --out ops/results/T-323.verify.json 81/81, 0 Fehler. Read-only Befund: 1 aktiver Workflow VoxelCrew WoL Dispatch Trigger (9 Nodes, 2 Trigger), 1 POST-Webhook node-telemetry, 1 Postgres-Credential nur als Name/Typ. Kein Schreibzugriff auf n8n/Postgres, keine zweiten Node-Daemons."
+    },
+    {
+      "id": "export.hybridStackSsot",
+      "modul": "ops/scripts/export-notebook-sync.mjs",
+      "funktion": "hybridStackHtml",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "root",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Repo-Wurzel mit ops/SYSTEM_SSOT.json als Datenquelle"
+        },
+        {
+          "name": "ssot",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "optional injizierte SSOT (Fixture-Tests); ohne Quelle gilt handlungsbedarf"
+        }
+      ],
+      "block_states": [
+        "gefüllt",
+        "handlungsbedarf"
+      ],
+      "doku": "ops/SYSTEM_SSOT.json → hybridStack; ops/SPEC_MAPPING.md §33; ops/results/T-326.md",
+      "verified": true,
+      "beleg": "T-326: hybridStackHtml() zeigt Container, Images, Ports, Volumes und den geheimnisfreien n8n-Workflow-Stand ausschliesslich aus ops/SYSTEM_SSOT.json → hybridStack; keine festen Zahlen im Code. Auf live-telemetry.html und board-verify.html eingebunden. tests/telemetry-pages.test.mjs 63 Prüfungen grün inklusive Fail-Closed ohne SSOT, Redaction und identischem JS-freien Block auf beiden Seiten."
+    },
+    {
       "id": "export.zweiSaeulenSsot",
       "modul": "ops/scripts/export-notebook-sync.mjs",
       "funktion": "baueSeiten",
@@ -4768,6 +4905,7 @@ Stand: 2026-11-26. Park-Notizen dauerhaft im Repo, damit sie im Pages-Export auf
 ## Hybrid-Architektur (Entscheidung)
 
 - **n8n Zero-Token-Control-Plane**: Supervisor auf dem Hauptrechner, Queue/Dispatch über n8n-Webhooks; bei leerer Queue oder `WAITING_RATE_LIMIT` mit `resumeAt`-Countdown keine Token-Verbrauch (Zero-Token-Bremse). Wake durch n8n/Werkbank-Trigger, nicht durch Polling.
+- **Native n8n-Orchestrierung statt doppelter Node-Daemons** (2026-11-26, System-Auftrag 1): Der reale Stack läuft als `hybrid-n8n` (`n8nio/n8n:1.121.0`, `127.0.0.1:5678`) gegen `hybrid-postgres` (`127.0.0.1:5432`); `hybrid-gitea` ist nur die lokale Code-Ablage. Der read-only Befund aus `T-323 (System-Auftrag 1 (Bestandsaufnahme hybrid-n8n & geheimnisfreies Inventar))` belegt genau einen aktiven Workflow (`VoxelCrew WoL Dispatch Trigger`, Webhook + Schedule). Es wird **kein** zweiter Node-Daemon neben n8n gebaut; Wake/Dispatch bleiben bei der n8n-Control-Plane mit Zero-Token-Bremse. Grund: zwei Orchestratoren erzeugen zwei Wahrheiten und damit falsche Freigaben. SSOT-Anker: `ops/SYSTEM_SSOT.json → hybridStack`.
 - **Home Assistant / ZHA via `usbipd-win`**: USB-Geräte (Zigbee-Stick) werden per `usbipd-win` in die WSL2-Umgebung durchgereicht; HA läuft dort als Service, ZHA als Integration. Keine Firewall-/Port-Freigabe über das lokale Netz hinaus.
 - **Caddy / DuckDNS**: Caddy als Reverse-Proxy mit automatischem TLS, DuckDNS für dynamisches DNS; nur notwendige Ports, keine öffentliche Erreichbarkeit ohne Chris-Tor.
 - **On-Demand-Linux mit ZRAM / WoL**: FELDBOOK-Maschinen (`kilo3`, `kilo4`) bleiben `offline_migration_pending`; Wake-on-LAN nur bei erlaubtem Queue-Ziel, sonst `shouldWake=false`. RAM-Entlastung über ZRAM auf 4-GB-Nodes. Kein WoL ohne Freigabe (§7).
