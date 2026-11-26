@@ -22,7 +22,7 @@
 <body>
   <header>
     <h1>VoxelCrew — Gesamtspezifikation</h1>
-    <p class="meta">Exportiert am 2026-11-26T02:05:24.849Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
+    <p class="meta">Exportiert am 2026-11-26T03:05:30.268Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
     <p class="meta">Leitstelle: brotfeld/mc-bot-leitstelle · Mirror: brotfeld/voxelcrew-notebook-sync · Pages: https://github.io</p>
     <nav aria-label="Inhalt">
       <a href="#abschnitt-1">Post-Spülgang-Inventur</a>
@@ -2049,7 +2049,7 @@ Generierung aus der SSOT). Die Wellen laufen über `agent-run.mjs`.
 | `/api/dienste` 200 und echte Provider-/Pool-Endpunkte | Endpunkt existiert, Adapter wird importiert; Auth-Feld im Formular folgt in `T-299` | `T-296 (BP-000-SSOT-SYNC (Werkbank-API: /api/dienste &amp; Provider-Adapter))` ✅, `T-297 (BP-000-SSOT-SYNC (Provider-Registry: beliebig viele Accounts &amp; Auth-Typ))` ✅, `T-298 (BP-000-SSOT-SYNC (Provider-Live-Test &amp; ehrliche Ampel))` |
 | Beliebig viele Accounts je Provider mit automatisch erkanntem `authType` (`api_key`/`oauth_device`/`cli_login`), 1-Klick-Browser-Login, Keys nur in `.env` | `ops/config/provider-pools.json` mit sechs Providern (Kilo, Antigravity, OpenRouter, Nvidia NIM, Requesty 200/Tag, Groq) und dynamisch nummerierten Accounts (OpenRouter #1/#2); `detectAuthTyp()` erkennt den Typ aus `provider.type`; `loginDescriptor()` liefert 1-Klick-Browser-Login (`browser:true`/`terminal:false`); `apiKeyPraesenz()` liest Keys nur als Praesenz aus der git-ignorierten `.env`; `GET/POST /api/provider` dynamisch, keine feste 12er-Zahl | `infra.providerRegistry` ✅ `T-297 (BP-000-SSOT-SYNC (Provider-Registry: beliebig viele Accounts &amp; Auth-Typ))` / kilo2, `tests/provider-pools.test.mjs` 16/16, `tests/provider-adapters.test.mjs` 13/13, `tests/provider-api.test.mjs` 20/20 |
 | Kind-/Bauleiter-Modus, 4-Stufen-UI-Prozess, Ideen-Chat am Free-Pool | Kein Umschalter; harter Untertitel `kilo1–kilo5`; Chat meldet dauerhaft Gateway-Fehler | `T-299 (BP-000-SSOT-SYNC (UI-Vertrag Stufen 1–3: Kind/Bauleiter &amp; Provider-Formular))` bis `T-302 (BP-000-SSOT-SYNC (Stufe-4-Browserabnahme Werkbank))` |
-| Pages mit offiziellen Namen, Steckbriefen und Klartext-Tabellen | Export hartcodiert (Worker, Kapitel, Baupläne, `pagesUrl`); keine Registry-Daten; Budget `179200` Byte entspricht korrekt `&lt; 175 KiB` | `T-303 (BP-000-SSOT-SYNC (Pages-Export: offizielle Namen &amp; Maschinen-Steckbriefe))` |
+| Pages mit offiziellen Namen, Steckbriefen und Klartext-Tabellen | `export-notebook-sync.mjs` rendert Servernamen/Akteure/Worker/Baupläne aus SSOT und Registry, dazu Maschinen-Steckbriefe als JSON-Block und Klartext-Tabelle; lokale Maschine aus `ramSchutz.maschineErkennung`, alle anderen Nodes mit `quelle: fehlt`/`laufzeit: null` ohne erfundene Werte; Budget `179200` Byte aus `pages-config.json` | `export.ssotPagesSync` ✅ `T-303 (BP-000-SSOT-SYNC (Pages-Export: offizielle Namen &amp; Maschinen-Steckbriefe))`, `tests/notebook-pages-e2e.test.js` mit SSOT-getriebenen Belegen |
 | Repo-Gedächtnis und Handbuch 08 für Laien | `DECISIONS.md`/`IDEAS.md` fehlen; Vault-Junction leer; Handbuch-Spiegel vorhanden | `T-304 (BP-000-SSOT-SYNC (Repo-Gedächtnis DECISIONS/IDEAS/LESSONS/BP-014))`, `T-305 (BP-000-SSOT-SYNC (Handbuch 08: Worker, Maschinen &amp; Laienbedienung))` |
 | Worker-Schutz mit Timeout/Scope und Auto-Merge-Gate | Hygiene für Worktrees/Locks vorhanden; kein Task-Frontmatter-Scope-Guard | `T-306 (BP-000-SSOT-SYNC (Worker-Schutz: harte Timeouts &amp; Scope-Guard))`, `T-307 (BP-000-SSOT-SYNC (Auto-Merge-Gate &amp; Kapitäns-Review))` |
 
@@ -4016,13 +4016,10 @@ Firewall-Änderung, keine finale Live-Einladung, alle Baupläne bleiben `manual`
           &quot;beschreibung&quot;: &quot;SSOT-, Registry- und Handbuchquellen als Fixture&quot;
         }
       ],
-      &quot;block_states&quot;: [
-        &quot;gefüllt&quot;,
-        &quot;handlungsbedarf&quot;
-      ],
+      &quot;block_states&quot;: [],
       &quot;doku&quot;: &quot;ops/tasks/T-303 (BP-000-SSOT-SYNC (Pages-Export: offizielle Namen &amp; Maschinen-Steckbriefe)).md, ops/SPEC_MAPPING.md §27, ops/config/pages-config.json&quot;,
-      &quot;verified&quot;: false,
-      &quot;beleg&quot;: &quot;Backlog BP-000-SSOT-SYNC / T-303 (BP-000-SSOT-SYNC (Pages-Export: offizielle Namen &amp; Maschinen-Steckbriefe)): Pages enthalten noch keine Registry-Steckbriefe; Klartext-Tabellen und dynamische Namen sind nicht belegt.&quot;
+      &quot;verified&quot;: true,
+      &quot;beleg&quot;: &quot;T-303 umgesetzt: export-notebook-sync.mjs rendert offizielle Servernamen und Akteure aus der SSOT sowie Maschinen-Steckbriefe als JSON-Block + Klartext-Tabelle — lokale Maschine aus ramSchutz.maschineErkennung (MCBOT_MACHINE/Default), echte Laufzeitwerte nur dort, alle anderen Nodes mit quelle fehlt/laufzeit null; tests/notebook-export-bundle.test.mjs und npm run verify (75/75) grün&quot;
     },
     {
       &quot;id&quot;: &quot;governance.taskScopeGuard&quot;,
