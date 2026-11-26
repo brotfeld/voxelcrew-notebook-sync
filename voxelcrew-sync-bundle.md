@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-25T22:52:07.847Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-26T00:04:22.675Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -1944,6 +1944,38 @@ Kein Capability-Eintrag wird ohne Testbeleg auf
 `verified: true` gesetzt; kein Live-`19132`/UDP `7551`, kein Paid-/Vision-Call,
 keine Windows-/Firewall-Änderung, keine finale Live-Einladung, alle Baupläne
 bleiben `manual`.
+
+## 27) BP-000-SSOT-SYNC — SSOT-, Pages-, Werkbank- und Gedächtnis-Nachzug (Soll → Ist → Backlog, 26.11.2026)
+
+**User Journey ohne manuelle Klicks (§11):** Chris gibt den Supervisor-Auftrag
+→ der Kapitän mappt ihn hierher, zerlegt ihn in `T-290 (BP-000-SSOT-SYNC (Dekomposition, Capability-Mapping & Board))`
+bis `T-307 (BP-000-SSOT-SYNC (Auto-Merge-Gate & Kapitäns-Review))` und plant
+Wellen mit 20-Minuten-Limit → die Worker bauen SSOT, Registry, Vision-Routing,
+Werkbank, Pages und Handbuch als wiederverwendbare Bausteine → der Kapitän
+prüft Verify, Browser-Test und Pages-Gate → erst bei vollständigem Grün und
+Chris' Tor gibt es eine Live-Einladung. `ops/runner.stop` bleibt während der
+Planung aktiv; Delegation ist vorbereitet, kein Dispatch gestartet.
+
+| Soll aus dem Supervisor-Auftrag | Ist vor `T-290 (BP-000-SSOT-SYNC (Dekomposition, Capability-Mapping & Board))` | Backlog / Task |
+| --- | --- | --- |
+| Offizielle Servernamen, Rollen, Transport und LAN in SSOT sowie Akteure ohne Relikte | Servernamen stimmen; `WaechterBot`/`BauBot` stehen noch in SSOT und `ops/lib/actor-profile-guard.cjs`; `AGENTS.md` §2 enthält dieselben Namen, bleibt aber ohne Freigabe unverändert | `T-291 (BP-000-SSOT-SYNC (SSOT-Servernamen, Rollen & Akteure bereinigen))`; `AGENTS.md`-Bereinigung bleibt offener Punkt für Chris |
+| Generische Nodes `STEVE`, `ALEX`, `NOOR`, `MAKENA` ohne Hardware-Hardcode | `FELDBOOK (Alt-Laptop)` in SSOT und Werkbank-UI; Registry mit eigenen Defaults | `T-292 (BP-000-SSOT-SYNC (Generische Maschinen-Nodes & Registry-Quelle))` |
+| Selbstentdeckende Steckbriefe: OS, RAM, Disk, Shells, Tools, Bindungen, dynamische Slots | Registry speichert nur Struktur; `machine-monitor.mjs` nutzt harten Default-Key; keine Shell-/Tool-Discovery | `T-293 (BP-000-SSOT-SYNC (Maschinen-Self-Discovery: OS, RAM, Disk, Slots))`, `T-294 (BP-000-SSOT-SYNC (Shell- & Toolchain-Steckbrief inkl. Copy-Paste-Regeln))` |
+| `vision_audit` mit OpenRouter + `T-199 (OpenRouter-Modellausfall: Preset prüfen und freigeben)`-Fallback und `WAITING_RATE_LIMIT` | Konten und Fallbackkette vorhanden; `getVisionAuditConfig()` ohne `model`-Feld | `T-295 (BP-000-SSOT-SYNC (Vision-Audit: OpenRouter-Modell & Fallback-Kette))` |
+| `/api/dienste` 200 und echte Provider-/Pool-Endpunkte | Endpunkt existiert, Adapter wird nicht importiert; Auth-Feld fehlt im Formular | `T-296 (BP-000-SSOT-SYNC (Werkbank-API: /api/dienste & Provider-Adapter))`, `T-297 (BP-000-SSOT-SYNC (Provider-Registry: beliebig viele Accounts & Auth-Typ))`, `T-298 (BP-000-SSOT-SYNC (Provider-Live-Test & ehrliche Ampel))` |
+| Kind-/Bauleiter-Modus, 4-Stufen-UI-Prozess, Ideen-Chat am Free-Pool | Kein Umschalter; harter Untertitel `kilo1–kilo5`; Chat meldet dauerhaft Gateway-Fehler | `T-299 (BP-000-SSOT-SYNC (UI-Vertrag Stufen 1–3: Kind/Bauleiter & Provider-Formular))` bis `T-302 (BP-000-SSOT-SYNC (Stufe-4-Browserabnahme Werkbank))` |
+| Pages mit offiziellen Namen, Steckbriefen und Klartext-Tabellen | Export hartcodiert (Worker, Kapitel, Baupläne, `pagesUrl`); keine Registry-Daten; Budget `179200` Byte entspricht korrekt `< 175 KiB` | `T-303 (BP-000-SSOT-SYNC (Pages-Export: offizielle Namen & Maschinen-Steckbriefe))` |
+| Repo-Gedächtnis und Handbuch 08 für Laien | `DECISIONS.md`/`IDEAS.md` fehlen; Vault-Junction leer; Handbuch-Spiegel vorhanden | `T-304 (BP-000-SSOT-SYNC (Repo-Gedächtnis DECISIONS/IDEAS/LESSONS/BP-014))`, `T-305 (BP-000-SSOT-SYNC (Handbuch 08: Worker, Maschinen & Laienbedienung))` |
+| Worker-Schutz mit Timeout/Scope und Auto-Merge-Gate | Hygiene für Worktrees/Locks vorhanden; kein Task-Frontmatter-Scope-Guard | `T-306 (BP-000-SSOT-SYNC (Worker-Schutz: harte Timeouts & Scope-Guard))`, `T-307 (BP-000-SSOT-SYNC (Auto-Merge-Gate & Kapitäns-Review))` |
+
+**Trennlinie / Gaps:** Alle hier gelisteten Backlog-Karten sind `ready`, aber
+nicht dispatched, solange `ops/runner.stop` und `dispatch.paused` aktiv sind.
+Keine Capability wird ohne Testbeleg auf `verified: true` gesetzt. Die
+Vault-Junction ist leer; Handbuch-Inhalte laufen über den regulären Spiegel
+`ops/notebook-sync/quellen/handbuch/**`. Die veralteten Namen in `AGENTS.md` §2
+brauchen Chris' Freigabe und bleiben daher als offener Punkt dokumentiert.
+Kein Live-`19132`/UDP `7551`, kein Paid-/Vision-/OAuth-Call, keine Windows-/
+Firewall-Änderung, keine finale Live-Einladung, alle Baupläne bleiben `manual`.
 ```
 
 ## ops/capabilities.json
@@ -3716,6 +3748,221 @@ bleiben `manual`.
       "doku": "ops/results/T-287.md; ops/SPEC_MAPPING.md §26; AGENTS.md §10.1/§17",
       "verified": true,
       "beleg": "tests/pre-wave-hygiene.test.mjs 14/14 (Dry-Run-Default, Idempotenz, PID-/Lock-Check, datiertes Archiv, pids.json unveraendert, 0 echte Writes); echter Dry-Run 0/0/0; Verify 74/74"
+    },
+    {
+      "id": "ssot.akteureUndServer",
+      "modul": "ops/qa/ssot-akteure-guard.mjs",
+      "funktion": "pruefeProfile",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "server",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Port oder SSOT-Servername, dessen Erlaubnisliste geprueft wird"
+        },
+        {
+          "name": "profil",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Akteursprofil, das gegen die SSOT geprueft wird"
+        }
+      ],
+      "block_states": [
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-291 (BP-000-SSOT-SYNC (SSOT-Servernamen, Rollen & Akteure bereinigen)).md, ops/SPEC_MAPPING.md §27, ops/SYSTEM_SSOT.json",
+      "verified": false,
+      "beleg": "Backlog BP-000-SSOT-SYNC / T-291 (BP-000-SSOT-SYNC (SSOT-Servernamen, Rollen & Akteure bereinigen)): SSOT und Guard enthalten noch WaechterBot/BauBot; Testbeleg steht nach der Bereinigung aus."
+    },
+    {
+      "id": "runtime.machineDiscovery",
+      "modul": "ops/runtime/machine-discovery.mjs",
+      "funktion": "discover",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "machine",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Generischer Node-Name aus der SSOT-Registry"
+        },
+        {
+          "name": "env",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "Fixture-Umgebung fuer Tests ohne echte Systemzugriffe"
+        }
+      ],
+      "block_states": [
+        "leer",
+        "gefüllt",
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-293 (BP-000-SSOT-SYNC (Maschinen-Self-Discovery: OS, RAM, Disk, Slots)).md, ops/SPEC_MAPPING.md §27",
+      "verified": false,
+      "beleg": "Backlog BP-000-SSOT-SYNC / T-293 (BP-000-SSOT-SYNC (Maschinen-Self-Discovery: OS, RAM, Disk, Slots)): OS, RAM, Disk, WSL2 und dynamische Slots sind noch nicht als Registry-Baustein belegt."
+    },
+    {
+      "id": "runtime.machineShellProfil",
+      "modul": "ops/runtime/machine-shell-profile.mjs",
+      "funktion": "erkenneProfil",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "shell",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Erkannte Shell inklusive Versionsangabe"
+        },
+        {
+          "name": "env",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "Fixture-Umgebung fuer Tests ohne echte Shell-Ausfuehrung"
+        }
+      ],
+      "block_states": [
+        "gefüllt",
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-294 (BP-000-SSOT-SYNC (Shell- & Toolchain-Steckbrief inkl. Copy-Paste-Regeln)).md, ops/SPEC_MAPPING.md §27, ops/LESSONS_LEARNED.md",
+      "verified": false,
+      "beleg": "Backlog BP-000-SSOT-SYNC / T-294 (BP-000-SSOT-SYNC (Shell- & Toolchain-Steckbrief inkl. Copy-Paste-Regeln)): Shell-, Tool- und Copy-Paste-Regeln sowie Bindungshinweise sind noch nicht belegt."
+    },
+    {
+      "id": "orchestration.visionAuditModel",
+      "modul": "ops/kilo-handler/task-type-router.mjs",
+      "funktion": "getVisionAuditConfig",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "taskType",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Task-Typ, der das Vision-Routing ausloest"
+        },
+        {
+          "name": "limits",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "Fixture-Limits aus RPM, Stunde und Tag"
+        }
+      ],
+      "block_states": [
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-295 (BP-000-SSOT-SYNC (Vision-Audit: OpenRouter-Modell & Fallback-Kette)).md, ops/SPEC_MAPPING.md §27, T-199 (OpenRouter-Modellausfall: Preset prüfen und freigeben)",
+      "verified": false,
+      "beleg": "Backlog BP-000-SSOT-SYNC / T-295 (BP-000-SSOT-SYNC (Vision-Audit: OpenRouter-Modell & Fallback-Kette)): getVisionAuditConfig liefert heute kein model-Feld; Testbeleg mit WAITING_RATE_LIMIT steht aus."
+    },
+    {
+      "id": "ui.werkbankKindModus",
+      "modul": "ops/werkbank/public/app.js",
+      "funktion": "renderModus",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "modus",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Kind- oder Bauleiter-Modus der Werkbank"
+        },
+        {
+          "name": "daten",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "API-Daten fuer Worker, Provider und Maschinen"
+        }
+      ],
+      "block_states": [
+        "leer",
+        "lädt",
+        "gefüllt",
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-299 (BP-000-SSOT-SYNC (UI-Vertrag Stufen 1–3: Kind/Bauleiter & Provider-Formular)).md, ops/tasks/T-300 (BP-000-SSOT-SYNC (Kind-/Bauleiter-Modus & dynamische Schaltzentrale)).md, ops/SPEC_MAPPING.md §27",
+      "verified": false,
+      "beleg": "Backlog BP-000-SSOT-SYNC / T-299 (BP-000-SSOT-SYNC (UI-Vertrag Stufen 1–3: Kind/Bauleiter & Provider-Formular)) und T-300 (BP-000-SSOT-SYNC (Kind-/Bauleiter-Modus & dynamische Schaltzentrale)): Umschalter, große Karten und dynamische Schaltzentrale sind noch nicht abgenommen."
+    },
+    {
+      "id": "export.ssotPagesSync",
+      "modul": "ops/scripts/export-notebook-sync.mjs",
+      "funktion": "exportierePages",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "pagesDir",
+          "typ": "path",
+          "pflicht": true,
+          "beschreibung": "Zielordner fuer die registrierten HTML-Seiten"
+        },
+        {
+          "name": "quellen",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "SSOT-, Registry- und Handbuchquellen als Fixture"
+        }
+      ],
+      "block_states": [
+        "gefüllt",
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-303 (BP-000-SSOT-SYNC (Pages-Export: offizielle Namen & Maschinen-Steckbriefe)).md, ops/SPEC_MAPPING.md §27, ops/config/pages-config.json",
+      "verified": false,
+      "beleg": "Backlog BP-000-SSOT-SYNC / T-303 (BP-000-SSOT-SYNC (Pages-Export: offizielle Namen & Maschinen-Steckbriefe)): Pages enthalten noch keine Registry-Steckbriefe; Klartext-Tabellen und dynamische Namen sind nicht belegt."
+    },
+    {
+      "id": "governance.taskScopeGuard",
+      "modul": "ops/runtime/task-scope-guard.mjs",
+      "funktion": "pruefeScope",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "task",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Task-ID, deren Frontmatter geprueft wird"
+        },
+        {
+          "name": "dateien",
+          "typ": "array",
+          "pflicht": true,
+          "beschreibung": "Geaenderte Dateipfade im Task-Worktree"
+        }
+      ],
+      "block_states": [
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-306 (BP-000-SSOT-SYNC (Worker-Schutz: harte Timeouts & Scope-Guard)).md, ops/SPEC_MAPPING.md §27, AGENTS.md §14",
+      "verified": false,
+      "beleg": "Backlog BP-000-SSOT-SYNC / T-306 (BP-000-SSOT-SYNC (Worker-Schutz: harte Timeouts & Scope-Guard)): 20-Minuten-Limit und Datei-Scope werden noch nicht aus dem Task-Frontmatter erzwungen."
+    },
+    {
+      "id": "governance.ssotSyncReview",
+      "modul": "ops/scripts/verify.mjs",
+      "funktion": "pruefeAutoMergeGate",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "verify",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "Vollstaendiger Verify-Report ohne Fehler"
+        },
+        {
+          "name": "pages",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "Pages-Guard mit jsfreien Seiten unter 175 KiB"
+        }
+      ],
+      "block_states": [
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-307 (BP-000-SSOT-SYNC (Auto-Merge-Gate & Kapitäns-Review)).md, ops/SPEC_MAPPING.md §27, AGENTS.md §16",
+      "verified": false,
+      "beleg": "Backlog BP-000-SSOT-SYNC / T-307 (BP-000-SSOT-SYNC (Auto-Merge-Gate & Kapitäns-Review)): Kapitäns-Review und Merge erfolgen erst nach allen gruenen Belegen; finale Live-Einladung bleibt Chris' Tor."
     }
   ],
   "inventur": {
