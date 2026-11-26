@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-26T11:16:12.346Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-26T12:25:30.745Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -2171,6 +2171,26 @@ Testschritt und keiner Live-Präsentation gebeten.
 und trägt den T-319-Endstand; `SPEC_MAPPING.md` §29–§31 deckt alle drei Karten
 ab. Finale Live-Einladung, Publish und kostenpflichtige Provider-/OAuth-/
 Vision-Calls bleiben ausdrücklich Chris' Tor.
+
+## 32) BP-000-OAUTH-PROFILES-SSOT (Dekomposition, 26.11.2026)
+
+**User-Journey ohne manuelle Klicks (§11):** Chris gibt den Superauftrag; die
+Kapitäns-Karten führen von den echten Ist-Pfaden über den kostenlosen
+non-interaktiven Smoke-Probe zum echten 12-Account-Report, der automatisch auf
+beiden Pages erscheint und nach grünen Gates veröffentlicht wird. Chris wird zu
+keinem Testschritt gebeten; nur die vier harten Tore bleiben bei ihm.
+
+| Soll aus dem Auftrag | Ist vor der Dekomposition | Backlog / Ist danach |
+| --- | --- | --- |
+| Vier isolierte OAuth-Profile ohne Secrets als SSOT-Fakten | `provider-pools.json` kannte Auth-Typen und Accounts, aber keine Laufzeitprofile | `T-320 (BP-000-OAUTH-PROFILES-SSOT (Ist-Pfade & OAuth-Profile im SSOT))` — `oauthProfile` in SSOT + Registry, strict Schema gegen Secrets/Runtime |
+| `--real` ohne Mock: echter, minimaler CLI-Probe im profil-eigenen Verzeichnis | Injizierte Runner bzw. echte API-Keys; kein OAuth-CLI-Beleg | `T-321 (BP-000-OAUTH-PROFILES-SSOT (Echter non-interaktiver CLI-Smoke-Probe))` — `wsl -d Ubuntu -e … --version` / Windows-`execFileSync`, `agySperre`, 20 s, `BEREIT` nur bei Exit 0 + Antwort |
+| Echter 12-Account-Befund auf `live-telemetry.html` **und** `index.html` | Report lag als Trockenbefund (`modus: dry`) vor | `T-322 (BP-000-OAUTH-PROFILES-SSOT (Real-Lauf, Pages-Export & Final-Gates))` — direkter `--real`-Lauf, Export auf beiden Seiten |
+| Final-Gates, echter Publish und Merge/Push nach `main` | Publish war in `T-319 (BP-000-AGENTS-BOUNDARY (Finale Gates & Kapitäns-Review))` nicht freigegeben | `T-322 (BP-000-OAUTH-PROFILES-SSOT (Real-Lauf, Pages-Export & Final-Gates))` mit ausdrücklicher Publish-Freigabe, `pages-guard` < 175 KB / 0 `<script>`, kein Force-Push |
+
+**Abgrenzung:** Kein kostenpflichtiger Provider-, OAuth- oder Vision-Call; der
+einzige echte Aufruf ist der freigegebene `--version`-Smoke-Probe.
+`ops/werkbank/public/**` bleibt unverändert, `19132`/UDP 7551 tabu, keine
+Windows-/Firewall-Änderung und keine finale Live-Einladung.
 ```
 
 ## ops/capabilities.json
