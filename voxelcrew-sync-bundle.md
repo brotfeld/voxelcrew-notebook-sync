@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-26T00:13:19.010Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-26T00:34:23.849Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -340,14 +340,12 @@
   },
   "akteure": {
     "regeln": [
-      "Live-Bots (WaechterBot, BauBot, SWARM_BOT) dürfen niemals auf 19133/19134 eingeloggt werden.",
-      "Auf 19133/19134 laufen ausschließlich SHOW_ACTOR- und OBSERVER-Profile.",
+      "Auf 19132 (VoxelCrew:Oberwelt, live) ist ausschließlich SWARM_BOT erlaubt.",
+      "Auf 19133/19134 (VoxelCrew:Nether/VoxelCrew:Ende) laufen ausschließlich SHOW_ACTOR- und OBSERVER-Profile.",
       "Umgekehrt dürfen SHOW_ACTOR/OBSERVER niemals auf 19132 eingeloggt werden.",
       "Die Prüfung erfolgt zentral in ops/lib/actor-profile-guard.cjs vor jedem Verbindungsaufbau."
     ],
     "live": [
-      "WaechterBot",
-      "BauBot",
       "SWARM_BOT"
     ],
     "showcase": [
