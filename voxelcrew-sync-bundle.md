@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-26T00:42:16.598Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-26T00:53:17.034Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -3827,8 +3827,8 @@ Firewall-Änderung, keine finale Live-Einladung, alle Baupläne bleiben `manual`
         "handlungsbedarf"
       ],
       "doku": "ops/tasks/T-293 (BP-000-SSOT-SYNC (Maschinen-Self-Discovery: OS, RAM, Disk, Slots)).md, ops/SPEC_MAPPING.md §27",
-      "verified": false,
-      "beleg": "Backlog BP-000-SSOT-SYNC / T-293 (BP-000-SSOT-SYNC (Maschinen-Self-Discovery: OS, RAM, Disk, Slots)): OS, RAM, Disk, WSL2 und dynamische Slots sind noch nicht als Registry-Baustein belegt."
+      "verified": true,
+      "beleg": "tests/machine-discovery.test.mjs 3/3 + tests/machine-registry-felder.test.mjs: OS/RAM/Disk/WSL2 aus Fixture-Env, maxParallelWorkers aus RAM, Registry übernimmt Felder"
     },
     {
       "id": "runtime.machineShellProfil",
