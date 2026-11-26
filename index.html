@@ -22,7 +22,7 @@
 <body>
   <header>
     <h1>VoxelCrew — Gesamtspezifikation</h1>
-    <p class="meta">Exportiert am 2026-11-26T01:47:36.962Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
+    <p class="meta">Exportiert am 2026-11-26T02:05:24.849Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
     <p class="meta">Leitstelle: brotfeld/mc-bot-leitstelle · Mirror: brotfeld/voxelcrew-notebook-sync · Pages: https://github.io</p>
     <nav aria-label="Inhalt">
       <a href="#abschnitt-1">Post-Spülgang-Inventur</a>
@@ -1884,7 +1884,7 @@ finale Einladung.
 | WSL2-tmux `supervisor` mit PID-Lock, Restart-Loop, Zero-Token-Bremse (`/api/queue/summary` `pendingCount == 0` oder `WAITING_RATE_LIMIT`), Wake durch n8n `:5678`/Werkbank | `/api/queue/summary` mit `{ pendingCount, activeCount, offlineNodes }` vorhanden; `machine-monitor` sendet Webhook; `ensure-supervisor.sh` fehlt | `infra.supervisor` ⬜ `T-256 (Infra-Hybrid (Supervisor-Zero-Token-Bremse))` / kilo1 |
 | Windows-Watchdog: Systemstart + 60 s für tmux, Werkbank `7070`, Heartbeat `POST :5678/webhook/node-telemetry`; `19132` tabu | `localMachineSnapshot({ webhookUrl })` mit injizierbarer URL; Watchdog-Skripte fehlen | `infra.watchdog` ⬜ `T-257 (Infra-Hybrid (Windows-Watchdog &amp; Scheduled Tasks))` / kilo5 |
 | `npm run doctor:env`: `.env`, API-Key-Präsenz ohne Klartext, n8n `5678`, Gitea `3001`, Postgres `5432`, Werkbank `7070`, tmux | `.env.example` + `docker-compose.yml` im Hybrid-Stack; Diagnose-Baustein fehlt | `infra.doctorEnv` ⬜ `T-258 (Infra-Hybrid (doctor:env ohne Secret-Leak))` / kilo2 |
-| Beliebig viele Accounts je Provider (Kilo, agy, OpenRouter, Nokia, Requesty 200/Tag) + künftige, per Config erweiterbar | Sechs feste Profile in `account-profiles.mjs` + Requesty-Fallbackrollen; keine generality-fähige Pool-Config | `infra.providerPools` ⬜ `T-259 (Infra-Hybrid (Provider-Pool-Registry &amp; Schema))` / kilo2 |
+| Beliebig viele Accounts je Provider (Kilo, Antigravity, OpenRouter, Nvidia NIM, Requesty 200/Tag, Groq) + künftige, per Config erweiterbar | Sechs feste Profile in `account-profiles.mjs` + Requesty-Fallbackrollen; keine generality-fähige Pool-Config | `infra.providerPools` ✅ `T-259 (Infra-Hybrid (Provider-Pool-Registry &amp; Schema))`, erweitert durch `infra.providerRegistry` ✅ `T-297 (BP-000-SSOT-SYNC (Provider-Registry: beliebig viele Accounts &amp; Auth-Typ))` / kilo2 |
 | Telemetrie pro Aufruf/Rate-Limit/`resumeAt`-Countdown/Cooldown/Rest in SSOT-Zeiger + Werkbank-API | `ops/runtime/provider-telemetry.mjs` (T-260) mit `recordCall`/`recordRateLimit`/`recordCooldown`/`snapshot`/`writeSnapshot`; injizierte Uhr, `remaining` aus der Config (Requesty 200, sonst `null` mit `quelle: &#39;fehlt&#39;`), Redaction ohne Secrets, Persistenz nur ueber `writeSnapshot()`. `ops/runtime/provider-telemetry-stream.mjs` (T-261) projiziert den Snapshot ueber `providerPools.telemetryDatei` mit vier Zuständen und read-only Ephemeral-Stream; `GET /api/provider-pools` liefert `{ ok, pools, telemetry, zustand, grund }` ohne Secrets und ohne echte Calls. `computeRateLimitWait` aus `T-243` bleibt die einzige 429-Logik, kein zweiter Wartemechanismus | `infra.providerTelemetry` ✅ `T-260 (Infra-Hybrid (Provider-Telemetrie &amp; Countdowns))` / kilo1, `tests/provider-telemetry.test.mjs` 14/14; `infra.providerTelemetryStream` ✅ `T-261 (Infra-Hybrid (Telemetrie-Stream &amp; Werkbank-API))` / kilo5, `tests/provider-api.test.mjs` |
 | Werkbank-Ein-Pult: vier Bereiche, 4-Stufen-Prozess vor dem Coding, Stufe-4-Browser-Test 0/0 | Vier Zustände und Bot-Hilfe bereits als SSOT-Regel; UI-Vertrag für die vier neuen Bereiche fehlt | `ui.infraCockpit` ⬜ `T-262 (Infra-Hybrid (UI-Vertrag Stufen 1–3))` / kilo2 → `T-263 (Infra-Hybrid (Werkbank-Backend: Status, Log, Aktionen))` / kilo1 → `T-264 (Infra-Hybrid (Werkbank-Cockpit &amp; Stufe-4-Gate))` / kilo2 → `T-265 (Infra-Hybrid (Capability-Belege Infrastruktur))` / kilo5 |
 | FELDBOOK erst Phase 3 Linux; Registry-Status `offline_migration_pending`, kein WoL/Alarm | SSOT-Status ab `T-254 (Infra-Hybrid (Dekomposition, Capability-Mapping &amp; Board))` verankert; `system-config-sync.mjs` übernimmt `status`/`migration` in `ops/workers.json` und `ops/runner.feldbuch.json`, der n8n-Knoten `Evaluate Queue For WoL` filtert gesperrte Nodes hart aus (`shouldWake=false` ohne erlaubtes Ziel), Guard `ops/qa/feldbuch-migration-guard.mjs` + `tests/feldbuch-migration-guard.test.mjs` grün | `maschinen.feldbuch.status` ✅ `T-255 (Infra-Hybrid (FELDBOOK-Status &amp; WoL-Sperre))` / kilo5 |
@@ -1933,7 +1933,7 @@ Pages-Guard 0 Treffer).
 | Soll aus der Festlegung | Ist (25.11.2026, vor der Umsetzung) | Backlog / Task |
 | --- | --- | --- |
 | Vier-Stufen-Prozess und API-Vertrag vor jedem UI-Code; sechs Bereiche `Ideen`, `Baupläne &amp; Tasks`, `Chris-Tore (N)`, `Showcase`, `Schaltzentrale`, `Handbuch &amp; Karte` | Werkbank hat sechs alte Tabs (Ideen/Baupläne/Fragen/Handlungen/Showcase/Maschinen); `uiProzess` in der SSOT vorhanden, kein Vertrag für die neue Sechs-Aufteilung | `ui.vertrag` ✅ `T-271 (BP-006-W2-FINAL (Dekomposition, Capability-Mapping &amp; Board))` (Kapitän) → `ui.aktuell` ✅ `T-276 (BP-006-W2-FINAL (Werkbank: sechs Bereiche &amp; Karten))` / kilo5 (Review, Stufe 4 in `T-278 (BP-006-W2-FINAL (Stufe-4-Browser-Abnahme &amp; Vision-Plausibilität))`) |
-| Beliebig viele Engines und Provider mit `api_key`, `oauth_url`, `local_cli`; kein hart codierter Name | Feste Worker-/Account-Profile; `ops/config/` noch nicht angelegt; keine generischen Auth-Typen | `engine.providerRegistry` ✅ `T-272 (BP-006-W2-FINAL (Generische Engine-/Provider-Registry &amp; Auth-Typen))` / kilo2 |
+| Beliebig viele Engines und Provider mit automatisch erkanntem `api_key`, `oauth_device`, `cli_login`; kein hart codierter Name | Feste Worker-/Account-Profile; `ops/config/` noch nicht angelegt; keine generischen Auth-Typen | `engine.providerRegistry` ✅ `T-272 (BP-006-W2-FINAL (Generische Engine-/Provider-Registry &amp; Auth-Typen))` / kilo2, in `T-297 (BP-000-SSOT-SYNC (Provider-Registry: beliebig viele Accounts &amp; Auth-Typ))` auf automatische `authType`-Erkennung erweitert |
 | Maschinen melden Rolle, Status, RAM/CPU und Slots selbst; `offline_migration_pending` neutral | `ops/runtime/machine-registry.mjs` mit `letztesSignal`, aber ohne Rolle/Status/Slots; RAM/CPU ohne Eintrag `null` | `maschinen.registry` ✅ `T-273 (BP-006-W2-FINAL (Maschinen-Registry: Rolle, Status, Slots, Telemetrie))` / kilo1 |
 | Baupläne mit `category`, `status`, `zielPort`, verknüpften Tasks; datengetriebene Gruppen und Chris-Tore | `ops/blueprints/registry.json` ohne diese Metadaten; UI zeigt pauschal „entwurf&quot; | `blueprint.metadaten` ✅ `T-274 (BP-006-W2-FINAL (Bauplan-Metadaten &amp; dynamische Gruppierung))` / kilo5 |
 | Zero-Terminal-Setup: `~/.tmux.conf` mit `set -g mouse on`, Windows-Terminal-Profil `VoxelCrew Supervisor` (`wsl -d Ubuntu -e tmux attach -t supervisor`) | `ensure-supervisor.sh` hält tmux; Profil und Maus-Zeile fehlen | `setup.windowsTerminal` ✅ `T-275 (BP-006-W2-FINAL (Zero-Terminal-Setup: tmux &amp; Windows Terminal))` / kilo5 |
@@ -2046,7 +2046,8 @@ Generierung aus der SSOT). Die Wellen laufen über `agent-run.mjs`.
 | Generische Nodes `STEVE`, `ALEX`, `NOOR`, `MAKENA` ohne Hardware-Hardcode | `FELDBOOK (Alt-Laptop)` in SSOT und Werkbank-UI; Registry mit eigenen Defaults | `T-292 (BP-000-SSOT-SYNC (Generische Maschinen-Nodes &amp; Registry-Quelle))` |
 | Selbstentdeckende Steckbriefe: OS, RAM, Disk, Shells, Tools, Bindungen, dynamische Slots | Registry speichert nur Struktur; `machine-monitor.mjs` nutzt harten Default-Key; keine Shell-/Tool-Discovery | `T-293 (BP-000-SSOT-SYNC (Maschinen-Self-Discovery: OS, RAM, Disk, Slots))`, `T-294 (BP-000-SSOT-SYNC (Shell- &amp; Toolchain-Steckbrief inkl. Copy-Paste-Regeln))` |
 | `vision_audit` mit OpenRouter + `T-199 (OpenRouter-Modellausfall: Preset prüfen und freigeben)`-Fallback und `WAITING_RATE_LIMIT` | Konten und Fallbackkette vorhanden; `getVisionAuditConfig()` ohne `model`-Feld | `T-295 (BP-000-SSOT-SYNC (Vision-Audit: OpenRouter-Modell &amp; Fallback-Kette))` |
-| `/api/dienste` 200 und echte Provider-/Pool-Endpunkte | Endpunkt existiert, Adapter wird nicht importiert; Auth-Feld fehlt im Formular | `T-296 (BP-000-SSOT-SYNC (Werkbank-API: /api/dienste &amp; Provider-Adapter))`, `T-297 (BP-000-SSOT-SYNC (Provider-Registry: beliebig viele Accounts &amp; Auth-Typ))`, `T-298 (BP-000-SSOT-SYNC (Provider-Live-Test &amp; ehrliche Ampel))` |
+| `/api/dienste` 200 und echte Provider-/Pool-Endpunkte | Endpunkt existiert, Adapter wird importiert; Auth-Feld im Formular folgt in `T-299` | `T-296 (BP-000-SSOT-SYNC (Werkbank-API: /api/dienste &amp; Provider-Adapter))` ✅, `T-297 (BP-000-SSOT-SYNC (Provider-Registry: beliebig viele Accounts &amp; Auth-Typ))` ✅, `T-298 (BP-000-SSOT-SYNC (Provider-Live-Test &amp; ehrliche Ampel))` |
+| Beliebig viele Accounts je Provider mit automatisch erkanntem `authType` (`api_key`/`oauth_device`/`cli_login`), 1-Klick-Browser-Login, Keys nur in `.env` | `ops/config/provider-pools.json` mit sechs Providern (Kilo, Antigravity, OpenRouter, Nvidia NIM, Requesty 200/Tag, Groq) und dynamisch nummerierten Accounts (OpenRouter #1/#2); `detectAuthTyp()` erkennt den Typ aus `provider.type`; `loginDescriptor()` liefert 1-Klick-Browser-Login (`browser:true`/`terminal:false`); `apiKeyPraesenz()` liest Keys nur als Praesenz aus der git-ignorierten `.env`; `GET/POST /api/provider` dynamisch, keine feste 12er-Zahl | `infra.providerRegistry` ✅ `T-297 (BP-000-SSOT-SYNC (Provider-Registry: beliebig viele Accounts &amp; Auth-Typ))` / kilo2, `tests/provider-pools.test.mjs` 16/16, `tests/provider-adapters.test.mjs` 13/13, `tests/provider-api.test.mjs` 20/20 |
 | Kind-/Bauleiter-Modus, 4-Stufen-UI-Prozess, Ideen-Chat am Free-Pool | Kein Umschalter; harter Untertitel `kilo1–kilo5`; Chat meldet dauerhaft Gateway-Fehler | `T-299 (BP-000-SSOT-SYNC (UI-Vertrag Stufen 1–3: Kind/Bauleiter &amp; Provider-Formular))` bis `T-302 (BP-000-SSOT-SYNC (Stufe-4-Browserabnahme Werkbank))` |
 | Pages mit offiziellen Namen, Steckbriefen und Klartext-Tabellen | Export hartcodiert (Worker, Kapitel, Baupläne, `pagesUrl`); keine Registry-Daten; Budget `179200` Byte entspricht korrekt `&lt; 175 KiB` | `T-303 (BP-000-SSOT-SYNC (Pages-Export: offizielle Namen &amp; Maschinen-Steckbriefe))` |
 | Repo-Gedächtnis und Handbuch 08 für Laien | `DECISIONS.md`/`IDEAS.md` fehlen; Vault-Junction leer; Handbuch-Spiegel vorhanden | `T-304 (BP-000-SSOT-SYNC (Repo-Gedächtnis DECISIONS/IDEAS/LESSONS/BP-014))`, `T-305 (BP-000-SSOT-SYNC (Handbuch 08: Worker, Maschinen &amp; Laienbedienung))` |
@@ -3512,28 +3513,54 @@ Firewall-Änderung, keine finale Live-Einladung, alle Baupläne bleiben `manual`
     {
       &quot;id&quot;: &quot;engine.providerRegistry&quot;,
       &quot;modul&quot;: &quot;ops/config/provider-adapters.mjs&quot;,
-      &quot;funktion&quot;: &quot;loeseAuthTyp&quot;,
+      &quot;funktion&quot;: &quot;detectAuthTyp&quot;,
       &quot;zeile&quot;: null,
       &quot;parameter&quot;: [
         {
-          &quot;name&quot;: &quot;eintrag&quot;,
+          &quot;name&quot;: &quot;provider&quot;,
           &quot;typ&quot;: &quot;object&quot;,
           &quot;pflicht&quot;: true,
-          &quot;beschreibung&quot;: &quot;Provider-Eintrag aus ops/config/provider-pools.json mit einem der drei Auth-Typen&quot;
+          &quot;beschreibung&quot;: &quot;Provider-Eintrag aus ops/config/provider-pools.json; authTyp wird automatisch aus provider.type (api/cli/oauth) erkannt&quot;
         },
         {
-          &quot;name&quot;: &quot;session&quot;,
+          &quot;name&quot;: &quot;authTyp&quot;,
           &quot;typ&quot;: &quot;string&quot;,
           &quot;pflicht&quot;: false,
-          &quot;beschreibung&quot;: &quot;vorhandene lokale CLI-Session; ohne Session entsteht handlungsbedarf&quot;
+          &quot;beschreibung&quot;: &quot;expliziter Auth-Typ (api_key/oauth_device/cli_login) hat Vorrang vor der Erkennung&quot;
         }
       ],
       &quot;block_states&quot;: [
         &quot;handlungsbedarf&quot;
       ],
-      &quot;doku&quot;: &quot;ops/results/T-272.md; ops/config/provider-pools.json; ops/SPEC_MAPPING.md §24&quot;,
+      &quot;doku&quot;: &quot;ops/results/T-272.md; ops/results/T-297.md; ops/config/provider-pools.json; ops/SPEC_MAPPING.md §24&quot;,
       &quot;verified&quot;: true,
-      &quot;beleg&quot;: &quot;tests/provider-adapters.test.mjs 8/8: neuer Provider nur per Eintrag, OAuth-URL ohne Zeilenumbrüche, Key nie im Response, unbekannter Auth-Typ fail-closed&quot;
+      &quot;beleg&quot;: &quot;tests/provider-adapters.test.mjs 13/13: automatische authTyp-Erkennung aus provider.type (kein Name im Code), 1-Klick-Browser-Login (browser:true/terminal:false) fuer oauth_device/cli_login, API-Key-Praesenz nur aus temporaerer Env-Fixture (kein Klartext), unbekannter Auth-Typ fail-closed; tests/provider-pools.test.mjs 16/16&quot;
+    },
+    {
+      &quot;id&quot;: &quot;infra.providerRegistry&quot;,
+      &quot;modul&quot;: &quot;ops/config/provider-pools.json&quot;,
+      &quot;funktion&quot;: &quot;detectAuthTyp&quot;,
+      &quot;zeile&quot;: null,
+      &quot;parameter&quot;: [
+        {
+          &quot;name&quot;: &quot;name&quot;,
+          &quot;typ&quot;: &quot;string&quot;,
+          &quot;pflicht&quot;: true,
+          &quot;beschreibung&quot;: &quot;dynamisch: Provider-Name; Accounts werden pro Provider nummeriert (OpenRouter #1, OpenRouter #2 …), keine feste Zahl&quot;
+        },
+        {
+          &quot;name&quot;: &quot;engine&quot;,
+          &quot;typ&quot;: &quot;string&quot;,
+          &quot;pflicht&quot;: false,
+          &quot;beschreibung&quot;: &quot;api/cli/oauth; bestimmt den automatisch erkannten authTyp, wenn kein expliziter gesetzt ist&quot;
+        }
+      ],
+      &quot;block_states&quot;: [
+        &quot;handlungsbedarf&quot;
+      ],
+      &quot;doku&quot;: &quot;ops/results/T-297.md; ops/werkbank/server.mjs GET/POST /api/provider; ops/SPEC_MAPPING.md §25&quot;,
+      &quot;verified&quot;: true,
+      &quot;beleg&quot;: &quot;tests/provider-pools.test.mjs 16/16: sechs Provider (Kilo, Antigravity, OpenRouter, Nvidia NIM, Requesty, Groq), dynamische Account-Zaehlung, authTyp automatisch, 0 Secrets; GET /api/provider liefert dynamische Labels und Login-Deskriptoren, POST /api/provider erkennt authTyp automatisch und liest Key-Praesenz nur aus .env&quot;
     },
     {
       &quot;id&quot;: &quot;blueprint.metadaten&quot;,
