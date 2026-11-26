@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-26T03:39:56.815Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-26T03:50:54.009Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -1989,7 +1989,7 @@ Generierung aus der SSOT). Die Wellen laufen über `agent-run.mjs`.
 | `vision_audit` mit OpenRouter + `T-199 (OpenRouter-Modellausfall: Preset prüfen und freigeben)`-Fallback und `WAITING_RATE_LIMIT` | Konten und Fallbackkette vorhanden; `getVisionAuditConfig()` ohne `model`-Feld | `T-295 (BP-000-SSOT-SYNC (Vision-Audit: OpenRouter-Modell & Fallback-Kette))` |
 | `/api/dienste` 200 und echte Provider-/Pool-Endpunkte | Endpunkt existiert, Adapter wird importiert; Auth-Feld im Formular folgt in `T-299` | `T-296 (BP-000-SSOT-SYNC (Werkbank-API: /api/dienste & Provider-Adapter))` ✅, `T-297 (BP-000-SSOT-SYNC (Provider-Registry: beliebig viele Accounts & Auth-Typ))` ✅, `werkbank.providerHealth ✅ T-298 (BP-000-SSOT-SYNC (Provider-Live-Test & ehrliche Ampel)) / kilo1 (Kapitäns-Review), tests/provider-health.test.mjs 13/13 + tests/provider-api.test.mjs 33/33 mit fixture-injizierter Journey, POST /api/provider/:id/pruefen` |
 | Beliebig viele Accounts je Provider mit automatisch erkanntem `authType` (`api_key`/`oauth_device`/`cli_login`), 1-Klick-Browser-Login, Keys nur in `.env` | `ops/config/provider-pools.json` mit sechs Providern (Kilo, Antigravity, OpenRouter, Nvidia NIM, Requesty 200/Tag, Groq) und dynamisch nummerierten Accounts (OpenRouter #1/#2); `detectAuthTyp()` erkennt den Typ aus `provider.type`; `loginDescriptor()` liefert 1-Klick-Browser-Login (`browser:true`/`terminal:false`); `apiKeyPraesenz()` liest Keys nur als Praesenz aus der git-ignorierten `.env`; `GET/POST /api/provider` dynamisch, keine feste 12er-Zahl | `infra.providerRegistry` ✅ `T-297 (BP-000-SSOT-SYNC (Provider-Registry: beliebig viele Accounts & Auth-Typ))` / kilo2, `tests/provider-pools.test.mjs` 16/16, `tests/provider-adapters.test.mjs` 13/13, `tests/provider-api.test.mjs` 20/20 |
-| Kind-/Bauleiter-Modus, 4-Stufen-UI-Prozess, Ideen-Chat am Free-Pool | Kein Umschalter; harter Untertitel `kilo1–kilo5`; Chat meldet dauerhaft Gateway-Fehler | `T-299 (BP-000-SSOT-SYNC (UI-Vertrag Stufen 1–3: Kind/Bauleiter & Provider-Formular))` bis `T-302 (BP-000-SSOT-SYNC (Stufe-4-Browserabnahme Werkbank))` |
+| Kind-/Bauleiter-Modus, 4-Stufen-UI-Prozess, Ideen-Chat am Free-Pool | Kein Umschalter; harter Untertitel `kilo1–kilo5`; Chat meldet dauerhaft Gateway-Fehler | `ui.vertragSSotSync` ✅ (Stufe 1–3) `T-299 (BP-000-SSOT-SYNC (UI-Vertrag Stufen 1–3: Kind/Bauleiter & Provider-Formular))` / kilo5 — Vertrag `ops/werkbank/UI_VERTRAG_KIND_BAULEITER.md`, `verified:false` bis Stufe 4; Umsetzung `T-300 (BP-000-SSOT-SYNC (Kind-/Bauleiter-Modus & dynamische Schaltzentrale))`, Ideen-Chat `T-301 (BP-000-SSOT-SYNC (Ideen-Chat an aktivem Free-Pool))`, Abnahme `T-302 (BP-000-SSOT-SYNC (Stufe-4-Browserabnahme Werkbank))` |
 | Pages mit offiziellen Namen, Steckbriefen und Klartext-Tabellen | `export-notebook-sync.mjs` rendert Servernamen/Akteure/Worker/Baupläne aus SSOT und Registry, dazu Maschinen-Steckbriefe als JSON-Block und Klartext-Tabelle; lokale Maschine aus `ramSchutz.maschineErkennung`, alle anderen Nodes mit `quelle: fehlt`/`laufzeit: null` ohne erfundene Werte; Budget `179200` Byte aus `pages-config.json` | `export.ssotPagesSync` ✅ `T-303 (BP-000-SSOT-SYNC (Pages-Export: offizielle Namen & Maschinen-Steckbriefe))`, `tests/notebook-pages-e2e.test.js` mit SSOT-getriebenen Belegen |
 | Repo-Gedächtnis und Handbuch 08 für Laien | `DECISIONS.md`/`IDEAS.md` fehlen; Vault-Junction leer; Handbuch-Spiegel vorhanden | `T-304 (BP-000-SSOT-SYNC (Repo-Gedächtnis DECISIONS/IDEAS/LESSONS/BP-014))`, `T-305 (BP-000-SSOT-SYNC (Handbuch 08: Worker, Maschinen & Laienbedienung))` |
 | Worker-Schutz mit Timeout/Scope und Auto-Merge-Gate | Hygiene für Worktrees/Locks vorhanden; kein Task-Frontmatter-Scope-Guard | `T-306 (BP-000-SSOT-SYNC (Worker-Schutz: harte Timeouts & Scope-Guard))`, `T-307 (BP-000-SSOT-SYNC (Auto-Merge-Gate & Kapitäns-Review))` |
@@ -3451,6 +3451,35 @@ Firewall-Änderung, keine finale Live-Einladung, alle Baupläne bleiben `manual`
       "doku": "ops/results/T-271.md; AGENTS.md §13; ops/SPEC_MAPPING.md §24",
       "verified": true,
       "beleg": "ops/results/T-271.md: sechs Job-to-be-Done-Sätze, Vier-Zustands-Vertrag mit Beweisquellen, ASCII-Wireframe mit Klickzielen und exakter API-Vertrag vor jedem UI-Code"
+    },
+    {
+      "id": "ui.vertragSSotSync",
+      "modul": "ops/werkbank/UI_VERTRAG_KIND_BAULEITER.md",
+      "funktion": "definiereKindBauleiterUndProviderVertrag",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "modus",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "Kind- oder Bauleiter-Modus der Werkbank mit Job-to-be-Done und drei Klicks"
+        },
+        {
+          "name": "endpunkt",
+          "typ": "string",
+          "pflicht": true,
+          "beschreibung": "API-Vertrag mit Methode, Request, Response und Fehlercode für Dienste und Provider-Formular"
+        }
+      ],
+      "block_states": [
+        "leer",
+        "lädt",
+        "gefüllt",
+        "handlungsbedarf"
+      ],
+      "doku": "ops/results/T-299.md; ops/tasks/T-299.md; ops/werkbank/UI_VERTRAG_KIND_BAULEITER.md; AGENTS.md §13; ops/SPEC_MAPPING.md §27",
+      "verified": false,
+      "beleg": "ops/results/T-299.md: Stufe 1–3 (Job-to-be-Done, Vier-Zustands-Vertrag, ASCII-Wireframe + exakter API-Vertrag) für Kind/Bauleiter und Provider-Formular; echte Fixture-Antworten auf ephemeralem Port; Umsetzung Stufe 4 in T-302 (BP-000-SSOT-SYNC (Stufe-4-Browserabnahme Werkbank)), daher verified:false"
     },
     {
       "id": "engine.providerRegistry",
