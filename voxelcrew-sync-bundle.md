@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-26T11:04:16.830Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-26T11:16:12.346Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -2148,6 +2148,29 @@ sind mit echten Testbelegen `verified: true`. Der Pages-Guard bleibt grün
 (6 Dateien, 0 `<script>`, alle Seiten < 179200 Byte), `notebook-pages-browser`
 meldet 0 Konsolenfehler und 0 fehlgeschlagene Requests. Kein Publish, kein
 kostenpflichtiger Provider-/OAuth-/Vision-Call, keine finale Live-Einladung.
+
+## 31) T-319 (BP-000-AGENTS-BOUNDARY (Finale Gates & Kapitäns-Review)) — Endstand (26.11.2026)
+
+**User-Journey ohne manuelle Klicks (§11):** Chris gibt den Supervisorauftrag;
+der Kapitän prüft die drei Karten im operablen System — Rollenmarker und
+Prompt-Isolation auf den Pages, Supervisor-Terminal und Dienst-SSOT in
+`live-telemetry.html`, danach Verify, Worker-Szenarien, Pages-Guard und
+Publish-Trockenlauf. Das Ergebnis liegt als Beleg vor; Chris wird zu keinem
+Testschritt und keiner Live-Präsentation gebeten.
+
+| Finales Gate | Ist / Beleg |
+| --- | --- |
+| Drei Karten lückenlos auf `main` | `T-317 (BP-000-AGENTS-BOUNDARY (Rollenmarker & Prompt-Isolation))` und `T-318 (BP-000-AGENTS-BOUNDARY (Terminal- & Dienst-SSOT))` per Review-Merge auf `main`; `T-319 (BP-000-AGENTS-BOUNDARY (Finale Gates & Kapitäns-Review))` folgt im selben normalen Merge/Push, ohne Force-Push und ohne Rebase |
+| `npm run verify -- --out ops/results/T-319.verify.json` | 80/80 Suiten grün, 0 Fehler, 272,2 s; `pages-guard`, `setup-windows-terminal` 17/17, `telemetry-pages`, `verify-workers` 9/9 und beide Browser-Suites mit 0 Konsolenfehlern/0 fehlgeschlagenen Requests |
+| `npm run verify:workers` | 9/9 Szenarien, 0 kostenpflichtige Calls, 0 echte Ports |
+| `pages-guard` / `pages-publish --dry-run` | 6 Dateien, 0 `<script>`, alle vier HTML-Seiten < 179200 Byte; Dry-Run ohne Push und ohne HTTP-Call |
+| `pages-publish --verify-only` | Pfad mit lokaler Fixture: 4/4 HTTP-200-Beweise mit exakten Bytezahlen, 0 echte HTTP-Calls, 0 Push. Der Aufruf gegen die öffentliche URL ist erwartungsgemäß rot: die veröffentlichten Seiten tragen CI-Metadaten (Commit-SHA `5595fffe…`, Zeitstempel, Linux-Maschinenwerte), eine lokale Ausgabe `commitSha: "lokal"` und Windows-Maschinenwerte. Ohne Publish-Freigabe wird das nicht korrigiert. |
+| Geschützte Pfade | `ops/werkbank/public/**`, `server/**`, Weltdaten, Auth-Caches und `ops/runtime/pids.json` unverändert; `19132`/UDP `7551` nicht berührt |
+
+**Abschluss:** `pages.publishVerifiziert` bleibt `verified: true` (T-282-Push)
+und trägt den T-319-Endstand; `SPEC_MAPPING.md` §29–§31 deckt alle drei Karten
+ab. Finale Live-Einladung, Publish und kostenpflichtige Provider-/OAuth-/
+Vision-Calls bleiben ausdrücklich Chris' Tor.
 ```
 
 ## ops/capabilities.json
@@ -4012,7 +4035,7 @@ kostenpflichtiger Provider-/OAuth-/Vision-Call, keine finale Live-Einladung.
       ],
       "doku": "ops/results/T-282.md; package.json → notebook:publish; ops/SPEC_MAPPING.md §25",
       "verified": true,
-      "beleg": "ops/results/T-282.md: echter Push nach brotfeld/voxelcrew-pages @ 65e7f62f mit vier HTML-Seiten, stand.json und .nojekyll; Live-Verify 4/4 HTTP 200, 0 Skripte, jede Seite < 179200 Byte, kein Token im Repo/Log/URL"
+      "beleg": "ops/results/T-282.md: echter Push nach brotfeld/voxelcrew-pages @ 65e7f62f mit vier HTML-Seiten, stand.json und .nojekyll; Live-Verify 4/4 HTTP 200, 0 Skripte, jede Seite < 179200 Byte, kein Token im Repo/Log/URL. T-319 (BP-000-AGENTS-BOUNDARY (Finale Gates & Kapitäns-Review)): --dry-run 6/6 Dateien ohne Push und ohne HTTP-Call; verify-only-Pfad mit lokaler Fixture 4/4 HTTP-200-Beweise mit exakten Bytezahlen, 0 echte HTTP-Calls; pages-guard 6 Dateien, 0 <script>, alle Seiten < 179200 Byte. Der Abgleich gegen die öffentliche URL bleibt nachgestellt rot, weil die veröffentlichten Seiten flüchtige CI-Metadaten (echter Commit-SHA, Zeitstempel, Maschinenwerte) tragen; ohne Freigabe wird nicht publiziert."
     },
     {
       "id": "orchestration.capabilityRouter",
