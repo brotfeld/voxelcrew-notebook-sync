@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-26T09:00:44.758Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-26T09:19:14.528Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -9,7 +9,7 @@
 - Post-Spülgang-Inventur (Ebene 1 & 2, Negativliste): GRÜN / 0 Treffer
 - `ops/SYSTEM_SSOT.json` inkl. `repos` (Slugs und Pages-URL)
 - `AGENTS.md`, `ops/WORLD_INVARIANTS.md`, `ops/SPEC_MAPPING.md`, `ops/capabilities.json`, `ops/blueprints/registry.json`
-- Handbuchkapitel: 7 (01–07)
+- Handbuchkapitel: 8 (01–08)
 - Konzept-/Anlagendokumente: 20
 - Baupläne: 17 (BP-000–BP-016)
 
@@ -4444,6 +4444,141 @@ unangetastet; die UI-Neuentwicklung läuft später im Dual-Client-Prozess.
 }
 ```
 
+## ops/DECISIONS.md
+
+```markdown
+# DECISIONS.md — Repo-Gedächtnis (Entscheidungen)
+
+Stand: 2026-11-26. Park-Notizen dauerhaft im Repo, damit sie im Pages-Export auffindbar sind.
+
+## Hybrid-Architektur (Entscheidung)
+
+- **n8n Zero-Token-Control-Plane**: Supervisor auf dem Hauptrechner, Queue/Dispatch über n8n-Webhooks; bei leerer Queue oder `WAITING_RATE_LIMIT` mit `resumeAt`-Countdown keine Token-Verbrauch (Zero-Token-Bremse). Wake durch n8n/Werkbank-Trigger, nicht durch Polling.
+- **Home Assistant / ZHA via `usbipd-win`**: USB-Geräte (Zigbee-Stick) werden per `usbipd-win` in die WSL2-Umgebung durchgereicht; HA läuft dort als Service, ZHA als Integration. Keine Firewall-/Port-Freigabe über das lokale Netz hinaus.
+- **Caddy / DuckDNS**: Caddy als Reverse-Proxy mit automatischem TLS, DuckDNS für dynamisches DNS; nur notwendige Ports, keine öffentliche Erreichbarkeit ohne Chris-Tor.
+- **On-Demand-Linux mit ZRAM / WoL**: FELDBOOK-Maschinen (`kilo3`, `kilo4`) bleiben `offline_migration_pending`; Wake-on-LAN nur bei erlaubtem Queue-Ziel, sonst `shouldWake=false`. RAM-Entlastung über ZRAM auf 4-GB-Nodes. Kein WoL ohne Freigabe (§7).
+
+## Phasen 1–4
+
+1. **Phase 1 — Fundament**: SSOT, Maschinen-Registry, Self-Discovery, Shell-Profile (T-290…T-294). Generierte Configs aus SSOT, kein manuelles Editieren.
+2. **Phase 2 — Provider & Telemetrie**: Provider-Pools, Telemetrie-Stream, Werkbank-API (T-296…T-298). Ehrliche Ampel, keine erfundenen Limits.
+3. **Phase 3 — UI & Laienbedienung**: 4-Stufen-UI-Prozess, Kind-/Bauleiter-Modus, dynamische Schaltzentrale (T-299…T-302).
+4. **Phase 4 — Gedächtnis & Abnahme**: Repo-Gedächtnis (diese Datei), Handbuch 08, Worker-Schutz, Auto-Merge-Gate (T-304…T-307). Keine finale Live-Einladung ohne grüne Gates.
+
+Alle Baupläne bleiben `freigabe: manual`.
+```
+
+## ops/IDEAS.md
+
+```markdown
+# IDEAS.md — Park-Notizen (Ideen)
+
+Stand: 2026-11-26. Park-Notizen dauerhaft im Repo, damit sie im Pages-Export auffindbar sind.
+
+## VoxelCrew Frontier (offene Idee, `BP-014`, `freigabe: manual`)
+
+- 13 Berufe + 4 Specials
+- Sammler
+- 11 Multiblocks
+- 3 Karawanenphasen
+- 6 Biom-Specials
+- Kinderhandbuch
+
+Alle Zahlen/Werte/IDs bleiben `TODO_VERIFY`, bis kuratierte Quellen oder das echte System sie belegen. Keine geratenen Minecraft-IDs/Härtewerte/Rezepte.
+
+## Farm-/Redstone-Akademie (offene Idee)
+
+- Tick-genauer Flugschreiber für Redstone-/Farm-Mechaniken.
+- Beobachtung und Abnahme über Observer-Beweis (4/4 Gate-Punkte), keine Selbstaussage.
+
+## Weitere Frontier-/Tribes-Ideen
+
+- Eine Instanz pro Welt, `world_context_id` trennt strikt (M1).
+- SQLite-Schema `world_landmarks`, `trade_routes`, `semantic_zones`, `semantic_zone_dependencies` (M2).
+- Atomarer Master-Reset leert Gedächtnis vor Bot-Join (wiederverwenden).
+- Kollisionsfreie Navigation, Stufen/Diagonal-Schutz (Pathfinder wiederverwenden).
+- Lokales WS/HTTP-IPC, `session_ports.json` (M3, keine neuen Außen-Ports).
+
+Alle Baupläne bleiben `freigabe: manual`; keine echten Provider-/OAuth-/Vision-Calls.
+```
+
+## ops/LESSONS_LEARNED.md
+
+```markdown
+# LESSONS_LEARNED.md — gelöste Fallstricke
+
+Lern-Tagebuch aus `BP-000 (Werkstatt-Feinschliff & Dauerbetriebs-Härtung)`.
+Nur gelöste, wiederkehrende Fallstricke mit Quelle und Begründung. Keine
+Vermutungen, keine Geheimnisse, keine Weltdaten.
+
+### `runtime-guard.mjs` beim Import startet seine CLI
+
+- Problem: Ein direkter `import` von `ops/runtime/runtime-guard.mjs` aus dem BDS-Manager hätte beim Laden `main()` ausgeführt und den Prozess mit `process.exit()` beendet.
+- Lösung: Der Manager schreibt den Registry-Eintrag atomar selbst (tmp + `rename`) im selben Format, das der Guard liest. Kein Modul-Import, kein Seiteneffekt.
+- Quelle: T-226 (Werkstatt-Feinschliff — FW-Base, Serverhoheit, UI, Spectator und BP-000), Baustein 1
+- Begründung: Jeder künftige BDS-Manager darf die Prozesskontrolle nicht versehentlich ausführen.
+
+### Explizite Weltart darf nicht von Text-Hinweisen überstimmt werden
+
+- Problem: Die Weltwahl hat eine ausdrückliche `weltArt: FW-Base` mit einem Biom-Wort im Bauplan-Titel überschrieben und fälschlich `level-seed` gewählt.
+- Lösung: Ausdrückliche Vorgaben (`FW-Base`, `level-seed`, `flach`, `gelände`, …) haben immer Vorrang; die Textanalyse greift nur ohne Vorgabe.
+- Quelle: T-226 (Werkstatt-Feinschliff — FW-Base, Serverhoheit, UI, Spectator und BP-000), `tests/wissenanalyse-pipeline.test.js`
+- Begründung: Ein Bauplan darf nicht stillschweigend eine andere Weltart bekommen als die, die er verlangt.
+
+### Verspätete Reset-Pakete überschreiben gesetzte Kulissenblöcke
+
+- Problem: Bei 2500 ms Wartezeit nach dem Master-Reset überschrieb ein nachträgliches `air`-Paket das gesetzte Quartz-`update_block` der Kulisse und ließ einen korrekten Lauf fälschlich rot werden.
+- Lösung: 8000 ms Schutzfenster nach dem atomaren Reset, bevor Bot/Observer joinen (`ops/scripts/run-show-acceptance.mjs`, `ops/wissenanalyse/pipeline.mjs`).
+- Quelle: T-216 (Tanzshow-Regie), `ops/SPEC_MAPPING.md` Abschnitt 2; übernommen in T-226
+- Begründung: Wiederholbare Abnahme ohne Flaky-Gate.
+
+### Live-BDS 19132 nur attachieren, nie ansprechen
+
+- Problem: Ein BDS-Manager, der den bereits laufenden Live-Prozess als eigenen Child-Prozess behandelt, würde beim Stoppen oder Senden von Konsolenbefehlen die Live-Welt gefährden.
+- Lösung: `ServerManager.attachExternal()` setzt `external: true`, sperrt `sendConsoleCommand()` und `stop()` und registriert die bestehende PID mit `protected: true`, ohne stdin zu öffnen.
+- Quelle: T-226 (Werkstatt-Feinschliff — FW-Base, Serverhoheit, UI, Spectator und BP-000), Baustein 1
+- Begründung: Die höchste Schutzgrenze des Systems muss auch im Code hart sein, nicht nur in der Doku.
+
+- Klarstellung (2026-11-25): Live-BDS (19132) wird lokal durch unseren eigenen BDS Server Manager gesteuert (managedBy: 'bds-server-manager'). AttachExternal / external: true ist nur ein internes Schreibschutz-Flag ohne stdin-Zugriff, kein externer Server.
+
+### Neun System-Invarianten — verbindliche Dauerregeln
+
+Ausführliche Fassung in `AGENTS.md` §17. Quelle für alle neun Punkte: FESTLEGUNG `BP-006-W2-UI-FINAL` (Chris/Mastermind, 2026-11-25), übernommen in `T-283 (BP-006-W2-UI-FINAL (Neun System-Invarianten & MCP-Bereinigung))`.
+
+| Invariante | Kurzregel | Begründung |
+| --- | --- | --- |
+| 1. 0 Hardcoding / keine festen Zählwerte | Zahlen und Grenzen aus SSOT oder echten Daten, nie fest verdrahtet | Ein harter Wert wird beim nächsten Umbau zur falschen Abnahme |
+| 2. Kontext-Wahrheit & Zero-Terminal-First | Wahrheit aus Systemkontext/Paketbeweisen, Werkbank ohne Terminal | Berichte über das System ersetzen nicht das System selbst |
+| 3. SSOT-Disziplin | Eine Quelle, generierte Dateien nie manuell editieren | Zwei Wahrheiten erzeugen widersprüchliche Läufe |
+| 4. Umgebungs-Gedächtnis | Geklärte Pfade/Personae/Ports über Sitzungen behalten | Neu-Einrichten erzeugt unterschiedliche Setups |
+| 5. Out-of-the-Box-Lücken-Schließen | Fehlteile als wiederverwendbare Bausteine, kein `_dbg` | Ad-hoc-Skripte hinterlassen die Lücke beim nächsten Task |
+| 6. Laien-/Kind-Abnahme vor Vollzug | Klartext-Check ab 10 Jahren, max. 3 Klicks, dokumentiert | Experten-Sprache ist nicht auslieferbar |
+| 7. Informationsfluss-Lotse | Herkunft, Zustand und nächstes Tor sichtbar | Sonst ist nicht erkennbar, ob ein Feld echt ist |
+| 8. Blinde-Flecken-Radar | Alle Seiten/Worker/Tore/Pfade aktiv prüfen, auch Mojibake | Ungesuchte Stellen werden trotzdem „grün" gemeldet |
+| 9. Anti-Truncate-URL-Regel | URLs vollständig, nie gekürzt oder rekonstruiert | Eine gekürzte URL verweist auf eine andere Ressource |
+
+### RAM-Drosselung für 4-GB-Nodes
+
+- Problem: Auf Maschinen mit 4 GB RAM laufen Worker und E2E-Läufe in den Speicherengpass; OOM-Failsafe greift zu spät.
+- Lösung: RAM-Wächter-Schwellen aus SSOT (`maschinen.<name>.ram`): Warnstufe > 85 % oder < 3 GB frei → keine neuen Worker-Tasks/E2E; Notbremse > 90 % oder < 1,5 GB frei → Sofortstopp in fester Reihenfolge. ZRAM auf 4-GB-Nodes als Entlastung.
+- Quelle: T-228 (Zero-Terminal-Betrieb), §10.1
+- Begründung: Der Live-Server 19132 genießt höchsten Schutz und wird nie beendet.
+
+### Anti-Truncate-URL-Regel
+
+- Problem: Abgeschnittene URLs (mit `…`) verweisen auf andere Ressourcen oder gar nicht; Pages-Publish braucht den exakten Endpunkt.
+- Lösung: URLs werden niemals gekürzt, mit `…` fortgesetzt oder aus Teilzeichenketten rekonstruiert; die vollständige Adresse wird unverändert angezeigt, geprüft und protokolliert.
+- Quelle: BP-006-W2-UI-FINAL (Chris/Mastermind, 2026-11-25), T-283, AGENTS.md §17 Invariante 9
+- Begründung: Eine abgeschnittene URL verweist auf eine andere Ressource oder gar nicht.
+
+### Pflicht zum vollständigen SSOT-Pages-Export
+
+- Problem: Ein Pages-Export, der nur einen Teil der SSOT-Quellen enthält, zeigt einen unvollständigen Systemstand (Blinde Flecken).
+- Lösung: Pages-Export umfasst alle vier HTML-Seiten (`index.html`, `live-telemetry.html`, `board-verify.html`, `handbuch-komplett.html`) plus `stand.json` und `.nojekyll`; Guard prüft alle sechs Dateien, 0 JS, 0 externe Requests, < 179200 Byte je Datei.
+- Quelle: T-266 (Vier Pages-Quellen im Exporter), T-268 (Pages-Guard auf vier Seiten)
+- Begründung: Was nicht systematisch exportiert wird, bleibt unentdeckt und wird trotzdem „grün" gemeldet.
+```
+
 ## ops/blueprints/BP-000.json
 
 ```json
@@ -6819,6 +6954,284 @@ Der Baustein `ops/runtime/bot-hilfe.mjs` ist **eine** wiederverwendbare Plattfor
 | In-Game-Kompass | ja (T-228 / BP-011) | E2E auf `19134` nach Freigabe | vertraglich festgelegt, Umsetzung in BP-011 |
 
 **Offen (nicht geraten):** Die konkreten Emote-UUIDs für Winken/Klatschen/Folge-mir sind im Vault ausdrücklich „live erfassen"; sie werden nicht erfunden. Die In-Game-Dialoge entstehen erst mit Freigabe von `BP-011`.
+```
+
+## vault/handbuch/08-worker-und-maschinen.md
+
+```markdown
+---
+status: aktiv
+quelle: T-305 (BP-000-SSOT-SYNC (Handbuch 08: Worker, Maschinen & Laienbedienung))
+datum: 2026-11-26
+bezugsstand: SSOT 2026-11-24, Code-Stand nach T-297/T-298/T-300/T-301/T-306
+---
+
+# 08 — Worker, Maschinen & Laienbedienung
+
+Dieses Kapitel erklärt in verständlicher Sprache, wie das System Worker auswählt, wie Modelle und Fallbacks funktionieren, was passiert wenn Limits erreicht werden, und wie Maschinen sich selbst erkennen. Keine Fachbegriffe ohne Erklärung, keine erfundenen Werte.
+
+---
+
+## 1. Wer macht was? — Die fünf Worker
+
+Es gibt **fünf Worker** (Arbeiter-Prozesse), die auf **zwei Maschinen** laufen. Jeder Worker hat einen Namen, einen Typ und ein festes Zuhause.
+
+| Worker | Typ | Modell | Maschine | Erklärung |
+|--------|-----|--------|----------|-----------|
+| **kilo1** | Gateway | `kilo-auto/free` (kostenlos) | Hauptrechner | Allgemeine Code-/Test-Aufgaben |
+| **kilo2** | OpenRouter | Fallback-Kette (nur kostenlose Modelle) | Hauptrechner | Spezialisiert auf Vision-Audits (Bildprüfungen) |
+| **kilo3** | Gateway | `kilo-auto/free` | FELDBOOK (Alt-Laptop) | Wartung, offline-Migration läuft |
+| **kilo4** | Gateway | `kilo-auto/free` | FELDBOOK (Alt-Laptop) | Wartung, offline-Migration läuft |
+| **kilo5** | Gateway | `kilo-auto/free` | Hauptrechner | Allgemeine Code-/Test-Aufgaben |
+
+**Quelle:** `ops/SYSTEM_SSOT.json → workers[]` und `→ maschinen.hauptrechner/feldbuch.allowedWorkers`
+
+### Was bedeuten die Typen?
+
+- **Gateway** = direkter Zugang zum kostenlosen Kilo-Modell `kilo-auto/free`. Keine API-Kosten, keine Keys nötig.
+- **OpenRouter** = Zugang über OpenRouter mit einer **Fallback-Kette** aus mehreren kostenlosen Modellen (siehe Abschnitt 3).
+
+### Wie viele Worker laufen gleichzeitig?
+
+Pro Maschine maximal **2 parallel**:
+- Hauptrechner: `kilo1`, `kilo2`, `kilo5` teilen sich 2 Slots
+- FELDBOOK: `kilo3`, `kilo4` teilen sich 2 Slots
+
+**Quelle:** `ops/SYSTEM_SSOT.json → maschinen.hauptrechner.maxParallelByHost = 2`, `→ maschinen.feldbuch.maxParallelByHost = 2`
+
+### RAM-Schutz (Wächter)
+
+Der **RAM-Wächter** passt auf, dass die Maschinen nicht überlastet werden:
+
+| Maschine | Warnung bei | Notbremse bei |
+|----------|-------------|---------------|
+| Hauptrechner | 80 % belegt **oder** < 3 GB frei | 90 % belegt **oder** < 1,5 GB frei |
+| FELDBOOK | 85 % belegt **oder** < 3 GB frei | 90 % belegt **oder** < 1,5 GB frei |
+
+Bei **Warnung**: Keine neuen Worker-Tasks starten, keine neuen E2E-Läufe.
+Bei **Notbremse**: Laufende Prozesse werden in fester Reihenfolge gestoppt (1. hängende git-/Testprozesse, 2. E2E-Server 19134, 3. Show-Server 19133).
+**Der Live-Server 19132 wird NIEMALS beendet** — er genießt höchsten Schutz.
+
+**Quelle:** `ops/SYSTEM_SSOT.json → maschinen.<name>.ram` und `→ governance.orchestration.ramWatcher`
+
+---
+
+## 2. Wie wird das Modell gewählt? — Worker-Typ entscheidet
+
+**Die Regel ist einfach: Der Worker-Typ bestimmt das Modell.**
+
+| Worker-Typ | Modell | Woher kommt die Entscheidung? |
+|------------|--------|-------------------------------|
+| Gateway (`kilo1`, `kilo3`, `kilo4`, `kilo5`) | Fest: `kilo-auto/free` | `ops/kilo-handler/handler.mjs:65` (Default), `ops/workers.json` |
+| OpenRouter (`kilo2`) | Aus der Fallback-Kette (nur `:free`-Modelle) | `ops/kilo-handler/openrouter-preset.json`, `ops/kilo-handler/model-router.mjs` |
+
+**Es gibt keine manuelle Modellwahl pro Task.** Der Dispatcher schaut: Welcher Worker ist frei? Welcher Typ wird gebraucht? Und wählt entsprechend.
+
+### Bei Vision-Audits (Bildprüfungen) immer kilo2
+
+Der Task-Typ `vision_audit` wird **ausschließlich** an `kilo2` (OpenRouter) geroutet. Alle anderen Task-Typen (`code`, `test`, `doku`, `analyse`) laufen über Gateway-Worker ohne Vision-Budget.
+
+**Quelle:** `ops/kilo-handler/task-type-router.mjs:11-33` (seit T-242), `ops/SYSTEM_SSOT.json → orchestration.fallbackChain.worker = "kilo2"`
+
+---
+
+## 3. Die OpenRouter-Fallbackkette (T-199) — Was passiert, wenn ein Modell ausfällt?
+
+`kilo2` nutzt **nicht** ein einzelnes Modell, sondern eine **Kette** aus kostenlosen Modellen. Fällt das erste aus, rutscht das nächste nach.
+
+**Die Kette (Stand 2026-11-24):**
+
+1. **Primary:** `nvidia/nemotron-3.5-lightning:free`
+2. **Primary:** `nvidia/nemotron-3-ultra-550b-a55b:free`
+3. **Primary:** `particle-ai/particle-1:free`
+4. **Fallback:** `inclusionai/ling-3.2-flash:free`
+
+**Wichtige Regeln:**
+- **Nur `:free`-Modelle** — jedes nicht-kostenlose Modell wirft einen harten Fehler (`STRICT_FREE_CHAIN`).
+- **`openrouter/free` ist bewusst NICHT in der Kette** (entfernt am 21.11.2026).
+- **`kiloAutoFinalTry` ist AUS** — es gibt keinen automatischen Abschlussversuch auf `kilo-auto/free` nach der Kette.
+- Die Kette ist in `ops/kilo-handler/openrouter-preset.json` definiert und wird von `ops/kilo-handler/model-router.mjs:57-88` zur Laufzeit gebaut.
+
+**Quelle:** `ops/SYSTEM_SSOT.json → orchestration.fallbackChain` (Task T-199, Preset `ops/kilo-handler/openrouter-preset.json`, Worker `kilo2`, Router `ops/kilo-handler/model-router.mjs`)
+
+---
+
+## 4. Limits & Warteschlange — WAITING_RATE_LIMIT mit resumeAt
+
+Wenn ein Provider (OpenRouter, Gateway, Requesty) **429 "Too Many Requests"** zurückgibt, ist das **kein Task-Fehler**.
+
+### Was passiert statt dessen?
+
+1. Der Task-Claim wird **sofort freigegeben**.
+2. Der Task bleibt im Status **`ready`** (bereit für nächsten Versuch).
+3. Die **Warteschlange läuft weiter** — andere Tasks werden nicht blockiert.
+4. Der Handler berechnet aus den 429-Headern (`x-ratelimit-reset*`, `retry-after`) einen **`resumeAt`-Zeitstempel** (Epoche-Millisekunden).
+5. Der Task-Zustand wird auf **`WAITING_RATE_LIMIT`** gesetzt mit `resumeAt` und Grund.
+6. Der **Watcher** (Hintergrund-Prozess) prüft regelmäßig: Ist `resumeAt` erreicht? → Task automatisch wieder `ready`.
+
+### Kein Task-Level-Cooldown
+
+Es gibt **keinen** festen Cooldown pro Task nach 429. Die Sperre ist **kontingent-basiert** (pro Modell/Worker-Typ) und läuft über `resumeAt`. Sobald die Zeit vorbei ist, darf der Task sofort wieder laufen.
+
+**Quelle:** `ops/kilo-handler/rate-limit-wait.mjs:20-27` (T-243), `ops/kilo-handler/handler.mjs:888-904`, `ops/scripts/agent-watch.mjs → autoResumeDue()/autoResumableTasks()` (T-244), `ops/SYSTEM_SSOT.json → governance.orchestration.cooldown.keinTaskLevelCooldownBei429 = true`
+
+### Sichtbar im Cockpit & Feed
+
+Im Werkbank-Cockpit (Tab "Worker") und im Feed sieht man:
+- Zustand: `waiting_rate_limit`
+- Countdown bis `resumeAt` (aus dem echten Zeitstempel berechnet, kein erfundener Wert)
+- Welches Modell/Konto betroffen ist
+- Board-Zeile mit dem Wartegrund
+
+---
+
+## 5. Selbstentdeckende Maschinen — STEVE, ALEX, NOOR, MAKENA
+
+Neben den zwei festen Maschinen (`hauptrechner`, `feldbuch`) kennt das System **vier generische Maschinen-Nodes**, die sich **selbst erkennen** — ganz ohne hartcodierte Host-Keys oder feste Slot-Zahlen.
+
+### Die vier Nodes (aus der SSOT)
+
+| Name | Label | Rolle |
+|------|-------|-------|
+| **STEVE** | STEVE | Generischer Node (z. B. zukünftiger Linux-Server) |
+| **ALEX** | ALEX | Generischer Node |
+| **NOOR** | NOOR | Generischer Node |
+| **MAKENA** | MAKENA | Generischer Node |
+
+**Quelle:** `ops/SYSTEM_SSOT.json → maschinen.STEVE/ALEX/NOOR/MAKENA` (nur `label`, keine Hardware-Annahmen)
+
+### Wie funktioniert die Selbstentdeckung?
+
+Der Baustein `ops/runtime/machine-discovery.mjs` liefert **echte Systemwerte** zur Laufzeit:
+
+```javascript
+// Was discover() zurückgibt (Beispiel vom Hauptrechner):
+{
+  os: "windows",                    // Betriebssystem
+  release: "10.0.19045",            // OS-Release
+  arch: "x64",                      // Architektur
+  wsl2: { aktiv: true, distro: "Ubuntu" },  // WSL2 erkannt
+  ramTotalGb: 23.9,                 // Gesamter RAM in GB (gerundet auf 0,1 GB)
+  ramFreeGb: 10.2,                  // Freier RAM in GB
+  diskFreeGb: 44.5,                 // Freier Plattenplatz in GB
+  maxParallelWorkers: 5             // Berechnet aus RAM: floor(GB / 4), min 1
+}
+```
+
+**Keine Werte werden erfunden.** Fehlt etwas (z. B. `statfsSync` schlägt fehl), bleibt der Wert `null` mit `quelle: "fehlt"`.
+
+### Wie wird die Registry befüllt?
+
+`ops/runtime/machine-registry.mjs` registriert Maschinen **dynamisch aus der SSOT**:
+
+```javascript
+// Registrierung nutzt NUR die SSOT als Quelle
+maschinenAusSsot()  // → ["hauptrechner", "feldbuch", "STEVE", "ALEX", "NOOR", "MAKENA"]
+ssotMaschinenEintrag("STEVE")  // → { label: "STEVE" }  (keine Hardware-Daten in der SSOT)
+```
+
+Die echten Hardware-Daten kommen **erst zur Laufzeit** durch `machine-discovery.mjs` und werden in die Registry geschrieben (`registerMachine()` mit `ramTotalGb`, `diskFreeGb`, `maxParallelWorkers` etc.).
+
+**Quelle:** `ops/runtime/machine-registry.mjs:69-81` (`maschinenAusSsot`, `ssotMaschinenEintrag`), `ops/runtime/machine-discovery.mjs:86-126` (`discover`, `maxParallelWorkersFromRam`)
+
+### Copy-Paste-Regeln für Shells (aus machine-shell-profile.mjs)
+
+Das System erkennt **automatisch**, welche Shell verfügbar ist, und gibt **Copy-Paste-freundliche Regeln** vor:
+
+**Bevorzugungsreihenfolge:**
+1. **pwsh** (PowerShell Core 7+) — POSIX-ähnlich, UTF-8, `curl.exe`, Operator `;`
+2. **powershell 7+** (powershell.exe) — POSIX-ähnlich, UTF-8, `curl.exe`, Operator `;`
+3. **bash** (Git Bash / WSL / MSYS2) — Nativer POSIX, `&&`, `curl`, UTF-8
+4. **powershell 5.1** — `;`, `curl.exe`, UTF8
+
+**Echtes Beispiel (Hauptrechner, Stand 2026-11-24):**
+```json
+{
+  "shell": {
+    "preferred": "pwsh",
+    "operator": ";",
+    "curl": "curl.exe",
+    "encoding": "UTF8",
+    "note": "PowerShell Core (pwsh) bevorzugt — POSIX-ähnlich, UTF-8, curl.exe"
+  }
+}
+```
+
+**Copy-Paste-Beispiel für pwsh:**
+```powershell
+# Statt && (bash) nutzt pwsh ; als Befehlstrenner
+node ops/scripts/verify.mjs ; git status --short
+# curl.exe statt curl (Windows-Alias-Vermeidung)
+curl.exe -s http://localhost:7070/api/health
+```
+
+**Echtes Beispiel für bash (Git Bash/WSL):**
+```bash
+# Nativer POSIX-Operator
+node ops/scripts/verify.mjs && git status --short
+# Echter curl
+curl -s http://localhost:7070/api/health
+```
+
+**Quelle:** `ops/runtime/machine-shell-profile.mjs:56-167` (`detectPwsh`, `detectPowerShellVersion`, `detectBash`, `deriveShellRules`)
+
+### Schutzports — Nie hartcodiert (Invariante 17/1)
+
+Die **geschützten Ports** (Live-BDS 19132, UDP 7551, Show 19133, E2E 19134, Werkbank 7070, alle laufenden Prozesse) kommen **aus der SSOT und der echten PID-Registry** — niemals als feste Zahlen im Code.
+
+```javascript
+// Aus machine-shell-profile.mjs:34-53
+geschuetztePorts()  // → Map: 19132 → "Live-BDS-Schutzbindung", 7551 → "Live-BDS-Schutzbindung", 19133 → "System-Schutzbindung", ...
+```
+
+Der Live-Server liefert den Hinweis **"Live-BDS-Schutzbindung"**, alle übrigen **"System-Schutzbindung"**.
+
+---
+
+## 6. Wie kommt der Text ins Handbuch? — Regulärer Pages-Export
+
+Dieses Kapitel liegt im **regulären Spiegel** `ops/notebook-sync/quellen/handbuch/08-worker-und-maschinen.md`. Die Vault-Junction ist in dieser Umgebung leer; ergänzende Härtungsthemen stehen im regulären Behelf `ops/notebook-sync/quellen/handbuch/08_Worker_Haertung_Capability_Tags_Graceful_Degradation.md`.
+
+Der **Pages-Export** (Capability `export.notebookPages` aus `ops/scripts/export-notebook-sync.mjs`) liest genau diese Datei und baut daraus die öffentliche Seite `handbuch-komplett.html` (eine von vier JS-freien Seiten unter 175 KB).
+
+**Kein Wegwerf-Skript, kein Vault-Schreibzugriff.** Der Export ist der **reguläre Plattform-Baustein**, der bei jedem Push auf `main` automatisch läuft (GitHub Action `notebook-pages.yml`).
+
+**Prüfung:** `npm run verify` enthält den Pages-Export-Test (`tests/notebook-pages-e2e.test.js`, `tests/notebook-pages-browser.test.js`) — 0 Browser-Konsolenfehler, 0 fehlgeschlagene API-Requests, alle Seiten < 179 200 Byte (175 KiB, Wert aus `pages-config.json`), JS-frei.
+
+---
+
+## 7. Zusammenfassung für Laien & Bauleiter
+
+| Frage | Antwort in einem Satz |
+|-------|----------------------|
+| **Wer wählt das Modell?** | Der Worker-Typ: Gateway = `kilo-auto/free`, OpenRouter = Fallback-Kette. |
+| **Was passiert bei Limit (429)?** | Task wartet mit `WAITING_RATE_LIMIT` und `resumeAt`, Queue läuft weiter, kein Task-Fehler. |
+| **Wer macht Vision-Audits?** | Immer `kilo2` (OpenRouter) mit der T-199-Kette. |
+| **Wie erkennen sich Maschinen?** | `machine-discovery.mjs` liest echte OS/RAM/Disk/WSL2-Werte, Registry kommt aus SSOT. |
+| **Was sind STEVE/ALEX/NOOR/MAKENA?** | Generische Nodes für künftige Maschinen (Linux, Docker), nur Label in SSOT, Hardware zur Laufzeit. |
+| **Wie kopiere ich Befehle sicher?** | Shell-Regeln aus `machine-shell-profile.mjs`: pwsh/PS7+ nutzen `;`, bash nutzt `&&`, curl heißt `curl.exe` auf Windows. |
+| **Wo steht das im Handbuch?** | Im regulären Pages-Export erreichbar — `npm run verify` prüft es automatisch. |
+
+---
+
+## 8. Quellen & Belege (nur echte Dateien, keine geratenen Werte)
+
+| Thema | Quelle |
+|-------|--------|
+| Worker-Zuordnung, Maschinen, RAM-Schutz | `ops/SYSTEM_SSOT.json` → `workers[]`, `maschinen`, `governance.orchestration.ramWatcher` |
+| Modellwahl Gateway vs. OpenRouter | `ops/kilo-handler/handler.mjs:65`, `ops/workers.json`, `ops/kilo-handler/task-type-router.mjs` |
+| OpenRouter-Fallbackkette (T-199) | `ops/kilo-handler/openrouter-preset.json`, `ops/kilo-handler/model-router.mjs:57-88`, `ops/SYSTEM_SSOT.json → orchestration.fallbackChain` |
+| WAITING_RATE_LIMIT, resumeAt, Auto-Resume | `ops/kilo-handler/rate-limit-wait.mjs`, `ops/kilo-handler/handler.mjs:888-904`, `ops/scripts/agent-watch.mjs`, `ops/cockpit/lib/worker-status.mjs` |
+| Maschinen-Selbstentdeckung (discover, maxParallelWorkersFromRam) | `ops/runtime/machine-discovery.mjs:86-126` |
+| Maschinen-Registry (maschinenAusSsot, ssotMaschinenEintrag, registerMachine) | `ops/runtime/machine-registry.mjs:69-142` |
+| Shell-Erkennung, Copy-Paste-Regeln, Schutzports | `ops/runtime/machine-shell-profile.mjs:56-241` |
+| Pages-Export & Verankerung | `ops/scripts/export-notebook-sync.mjs` (Capability `export.notebookPages`), `tests/notebook-pages-e2e.test.js`, `tests/notebook-pages-browser.test.js` |
+| Account-Profile, vision_audit-Kette | `ops/kilo-handler/account-profiles.mjs:165-177` (`getVisionAuditAccountChain`) |
+| Capability-Tags, graceful Degradation | `ops/SYSTEM_SSOT.json → capabilityTags`, `→ gracefulDegradation`, `ops/runtime/graceful-degradation.mjs` |
+
+---
+
+*Ende von Kapitel 08. Alle Aussagen stammen aus Code, SSOT und verifizierten Resultaten. Keine Secrets, keine Tokens, keine echten Kontodaten, keine geratenen Werte.*
 ```
 
 ## vault/konzept/00_README_KONZEPT_INDEX.md
