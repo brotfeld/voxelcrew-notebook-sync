@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-26T08:15:13.887Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-26T08:36:03.562Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -2004,6 +2004,39 @@ veralteten Namen in `AGENTS.md §2` sind auf ausdrückliche Freigabe entfernt;
 `SWARM_BOT` bleibt auf `19132`, `SHOW_ACTOR`/`OBSERVER` auf `19133`/`19134`.
 Kein Live-`19132`/UDP `7551`, kein Paid-/Vision-/OAuth-Call, keine Windows-/
 Firewall-Änderung, keine finale Live-Einladung, alle Baupläne bleiben `manual`.
+
+## 28) BP-000-ACCOUNTS-AND-REALTEST — 12 Accounts, ehrlicher Realbetrieb & Zwei-Säulen-SSOT (Soll → Ist → Backlog, 26.11.2026)
+
+**User Journey ohne manuelle Klicks (§11):** Chris erteilt den Supervisorauftrag
+→ der Kapitän mappt ihn hierher, zerlegt ihn in
+`T-308 (BP-000-ACCOUNTS-AND-REALTEST (Dekomposition, Capability-Mapping & Board))`
+bis `T-316 (BP-000-ACCOUNTS-AND-REALTEST (Auto-Merge-Gate & Kapitäns-Review))`
+→ die Worker bauen `.env.example`, 12-Slot-Registry, ehrliche Realbetriebssuite
+und die zwei SSOT-Säulen als wiederverwendbare Bausteine → der Kapitän prüft
+`npm run verify`, `verify:workers` und den Dry-Status serialisiert → erst bei
+Grün und Chris' Tor gibt es eine Live-Einladung. Die bestehende Werkbank-UI
+(`ops/werkbank/public/**`) bleibt strikt eingefroren; ein eigener
+Dual-Client-UI-Blueprint existiert nicht und wird als offene Lücke geführt,
+nicht erfunden.
+
+| Soll aus dem Supervisorauftrag | Ist vor `T-308 (BP-000-ACCOUNTS-AND-REALTEST (Dekomposition, Capability-Mapping & Board))` | Backlog / Task |
+| --- | --- | --- |
+| `.env.example` mit genau acht benannten API-Key-Slots, `.env` gitignoriert, keine Secrets im Repo | `.env`/`.env.*` sind gitignoriert und `!.env.example` ist gesetzt; `.env.example` fehlt | `infra.accountsRegistry` (neu, `verified: false`) → `T-309 (BP-000-ACCOUNTS-AND-REALTEST (.env.example & 12-Account-Registry))` |
+| 12 Free-Tier-Slots: Kilo/Antigravity OAuth, OpenRouter/NIM/Requesty/Groq je zwei API-Key-Slots mit `costCap: 0`, Antigravity strikt `concurrency: 1` | `provider-pools.json` hat sechs Provider und sieben Accounts; das Zod-Schema ist strict und erlaubt `concurrency`/`costCap`/`keyEnv`/`modelFilter` noch nicht; `provider-pools.test.mjs:102` verbietet aktuell ausdrücklich genau 12 Accounts | `T-309`; Test mit 12er-Zahl nachziehen, keine feste Zählwerte im Code |
+| `npm run verify:accounts-real` mit `--account`, `--dry-status` und ehrlichem Report; fehlende Credentials `MISSING_CREDENTIALS` | Skript und npm-Script fehlen; `ops/scripts/verify.mjs` registriert Suiten explizit | `qa.accountsReal` (neu, `verified: false`) → `T-310 (BP-000-ACCOUNTS-AND-REALTEST (Realbetriebs-Suite: Dry-Status & ehrlicher Report))` |
+| Vier echte OAuth-Mini-Subtasks im Temp-Worktree, Concurrency-1-Beweis | `account-profiles.mjs` kennt eine harte Lock-1 für `agy`; `task-scope-guard.mjs` begrenzt Scope/Laufzeit aus der SSOT | `T-311 (BP-000-ACCOUNTS-AND-REALTEST (Kilo-/Antigravity-Mini-Subtask & Concurrency-1))` |
+| Acht echte Free-Tier-API-Calls, Paid-Modell hart blockiert | `isFreeModel()`/`STRICT_FREE_CHAIN` und `free-model-check.mjs` vorhanden; kein Account-Probenträger | `T-312 (BP-000-ACCOUNTS-AND-REALTEST (Free-Tier-API-Probes & Cost-Guard))` |
+| Vision-Probe gegen `T-302-belege`, Groq-Fast-Triage < 4K, 429 → `WAITING_RATE_LIMIT`/`resumeAt` + Failover | `vision-budget.mjs` (1/Meilenstein, 3/Tag), `computeRateLimitWait()` und `provider-telemetry.mjs` vorhanden; `vision-analyze.mjs` umgeht den Budget-Guard | `T-313 (BP-000-ACCOUNTS-AND-REALTEST (Spezial-Probes: Vision, Triage, Failover))`; Budget-Guard bleibt maßgeblich |
+| Säule A: `live-telemetry.html`/`board-verify.html` mit Board, 12-Account-Status, `STEVE`/`ALEX`/`NOOR`/`MAKENA`, Gates, n8n-Hook | Beide Seiten sind in `pages-config.json`/`export-notebook-sync.mjs` verdrahtet, aber ohne Account-Report und n8n-Status | `export.zweiSaeulenSsot` (neu, `verified: false`) → `T-314 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Betrieb))` |
+| Säule B: `index.html`/`handbuch-komplett.html` mit BP-000–BP-016, DECISIONS/IDEAS/LESSONS und acht Handbuchkapiteln | 17 Baupläne registriert, Positivliste und Tests zählen sieben Kapitel; `08-worker-und-maschinen.md` liegt im Spiegel; Dual-Client-UI-Blueprint fehlt | `T-315 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Planung & Architektur))`; Blueprint-Lücke bleibt offen |
+| Merge-Tore: `verify`, `verify:workers`, `verify:accounts-real -- --dry-status`, 0 Änderung an `ops/werkbank/public/**`, 0 Eingriff in `19132`/UDP `7551` | Dispatch aktiv (`ops/runner.stop` entfernt, `dispatchPaused: false`); UI-Freeze und Port-Schutz stehen | `T-316 (BP-000-ACCOUNTS-AND-REALTEST (Auto-Merge-Gate & Kapitäns-Review))` |
+
+**Trennlinie / Gaps:** Die drei neuen Capabilities bleiben `verified: false`,
+bis echte Testbelege aus den Fachkarten vorliegen. Kein echter Provider-,
+OAuth-, Paid- oder Vision-Call ohne Freigabe, kein Publish, kein
+`19132`/UDP `7551`, keine Windows-/Firewall-Änderung, keine finale
+Live-Einladung. `ops/werkbank/public/**` bleibt während des gesamten Auftrags
+unangetastet; die UI-Neuentwicklung läuft später im Dual-Client-Prozess.
 ```
 
 ## ops/capabilities.json
@@ -4141,6 +4174,66 @@ Firewall-Änderung, keine finale Live-Einladung, alle Baupläne bleiben `manual`
       "doku": "ops/tasks/T-307 (BP-000-SSOT-SYNC (Auto-Merge-Gate & Kapitäns-Review)).md, ops/SPEC_MAPPING.md §27, AGENTS.md §16",
       "verified": false,
       "beleg": "Backlog BP-000-SSOT-SYNC / T-307 (BP-000-SSOT-SYNC (Auto-Merge-Gate & Kapitäns-Review)): Kapitäns-Review und Merge erfolgen erst nach allen gruenen Belegen; finale Live-Einladung bleibt Chris' Tor."
+    },
+    {
+      "id": "infra.accountsRegistry",
+      "modul": "ops/config/provider-pools.json",
+      "funktion": "validateProviderPools",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "pools",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "12 Free-Tier-Slots mit authTyp, costCap, concurrency, keyEnv und modelFilter aus der Registry; keine Secrets im Repo"
+        }
+      ],
+      "block_states": [
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-309 (BP-000-ACCOUNTS-AND-REALTEST (.env.example & 12-Account-Registry)).md, ops/SPEC_MAPPING.md §28",
+      "verified": false,
+      "beleg": "Backlog T-309: .env.example mit acht Key-Slots und 12 Accounts sind spezifiziert; Beleg folgt aus Schema- und Registry-Tests nach Implementierung."
+    },
+    {
+      "id": "qa.accountsReal",
+      "modul": "ops/qa/test-accounts-real.mjs",
+      "funktion": "pruefeAccountsReal",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "optionen",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "dry-status, real, account; liest Slots aus der Registry, injiziert Env/Calls, schreibt ops/results/accounts-real-report.json"
+        }
+      ],
+      "block_states": [
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-310 (BP-000-ACCOUNTS-AND-REALTEST (Realbetriebs-Suite: Dry-Status & ehrlicher Report)).md, ops/SPEC_MAPPING.md §28",
+      "verified": false,
+      "beleg": "Backlog T-310 bis T-313: ehrliche Ampel mit MISSING_CREDENTIALS, Free-Guard, Vision-Budget und WAITING_RATE_LIMIT; Beleg folgt aus Suite und Tests."
+    },
+    {
+      "id": "export.zweiSaeulenSsot",
+      "modul": "ops/scripts/export-notebook-sync.mjs",
+      "funktion": "baueSeiten",
+      "zeile": null,
+      "parameter": [
+        {
+          "name": "quellen",
+          "typ": "object",
+          "pflicht": true,
+          "beschreibung": "Säule A aus Board, Account-Report, Registry, Gates; Säule B aus Bauplänen, DECISIONS/IDEAS/LESSONS und acht Handbuchkapiteln"
+        }
+      ],
+      "block_states": [
+        "handlungsbedarf"
+      ],
+      "doku": "ops/tasks/T-314 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Betrieb)).md, ops/tasks/T-315 (BP-000-ACCOUNTS-AND-REALTEST (Zwei-Säulen-SSOT: Planung & Architektur)).md, ops/SPEC_MAPPING.md §28",
+      "verified": false,
+      "beleg": "Backlog T-314/T-315: vier Seiten sind bereits registriert; Inhalte und Belege werden nach Implementierung geprüft. Dual-Client-UI-Blueprint fehlt noch als eigene Karte."
     }
   ],
   "inventur": {
