@@ -22,7 +22,7 @@
 <body>
   <header>
     <h1>VoxelCrew — Gesamtspezifikation</h1>
-    <p class="meta">Exportiert am 2026-11-26T00:04:47.288Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
+    <p class="meta">Exportiert am 2026-11-26T00:13:19.010Z · Quellmodus: spiegel · Negativliste: 0 Treffer · Gesamturteil: GRÜN</p>
     <p class="meta">Leitstelle: brotfeld/mc-bot-leitstelle · Mirror: brotfeld/voxelcrew-notebook-sync · Pages: https://github.io</p>
     <nav aria-label="Inhalt">
       <a href="#abschnitt-1">Post-Spülgang-Inventur</a>
@@ -118,9 +118,16 @@
     &quot;hinweis&quot;: &quot;Der Vault-Slug wird beim Export aus dem echten Vault-Remote gelesen und gegen diesen Wert geprüft; fehlt der Vault im CI, gilt der SSOT-Wert.&quot;
   },
   &quot;dispatch&quot;: {
-    &quot;paused&quot;: true,
-    &quot;grund&quot;: &quot;Neuaufbau läuft; Freigabe erst nach grünem Test und Live-Laden der Werkbank&quot;,
-    &quot;pause_datei&quot;: &quot;ops/runner.stop&quot;
+    &quot;paused&quot;: false,
+    &quot;grund&quot;: &quot;Kontrolliert freigegeben für BP-000-SSOT-SYNC (T-291 bis T-307): Wellen 0–9 nach Board-Plan; Resume durch Mastermind auf ausdrücklichen Auftrag vom 26.11.2026, Worker-Orchestrierung unverändert&quot;,
+    &quot;pause_datei&quot;: &quot;ops/runner.stop&quot;,
+    &quot;resume&quot;: {
+      &quot;datum&quot;: &quot;2026-11-26&quot;,
+      &quot;aktor&quot;: &quot;mastermind (Resident-Agent)&quot;,
+      &quot;auftrag&quot;: &quot;Ausdrückliche Nutzeranforderung: Pause für BP-000-SSOT-SYNC aufheben und Wellen bis zum grünen Auto-Merge ausführen&quot;,
+      &quot;mechanismus&quot;: &quot;ops/scripts/global-pause.mjs (setGlobalPause paused:false) + system-config-sync.mjs&quot;,
+      &quot;grenzen&quot;: &quot;Kein 19132/UDP 7551, keine Weltdaten/Auth/Secrets, keine Paid-/Vision-/OAuth-Calls, keine Windows-/Firewall-/GitHub-Sichtbarkeitsänderung, keine finale Live-Einladung&quot;
+    }
   },
   &quot;maschinen&quot;: {
     &quot;hauptrechner&quot;: {
@@ -760,13 +767,16 @@ Das Task-Frontmatter `repo:` bestimmt das Ziel-Repository (Standard `leitstelle`
     `19133`/`19134` haben LAN `false`, eigene UDP-Ports und direkten,
     port-exakten Endpunkt. Die frühere Regel „19133/19134 = RakNet&quot; ist
     damit ausdrücklich ersetzt.
-  * **Akteurs-Isolation:** Live-Profile (`WaechterBot`, `BauBot`, `SWARM_BOT`)
-    niemals auf 19133/19134; dort nur `SHOW_ACTOR`/`OBSERVER` — und umgekehrt.
-    Erzwungen in `ops/lib/actor-profile-guard.cjs` vor jedem Verbindungsaufbau.
+  * **Akteurs-Isolation:** `SWARM_BOT` ist das einzige Live-Profil auf `19132`
+    (`VoxelCrew:Oberwelt`) und niemals auf `19133`/`19134`. Dort laufen
+    ausschließlich `SHOW_ACTOR` und `OBSERVER`, niemals auf `19132`.
+    `WaechterBot` und `BauBot` sind entfernt. Erzwungen in
+    `ops/lib/actor-profile-guard.cjs` vor jedem Verbindungsaufbau.
 * **Single Source of Truth:** `ops/SYSTEM_SSOT.json` ist maßgeblich für Worker-,
   Maschinen-, Server-, Vision-, Prozess- und Freigaberegeln. Generierte Dateien
   (`ops/runner.json`, `ops/runner.feldbuch.json`, `ops/workers.json`) werden
   mit `node ops/scripts/system-config-sync.mjs` erzeugt und nie manuell gepflegt.
+* **Dispatch-Status (26.11.2026):** Für `BP-000-SSOT-SYNC (SSOT-, Pages-, Werkbank- und Gedächtnis-Nachzug)` ist der Dispatch kontrolliert freigegeben: `ops/runner.stop` entfernt, `dispatch.paused: false`, generierte Worker-Configs aus der SSOT. Die Worker-Orchestrierung (Reihenfolge, Free-Tier-Fallback, Cooldowns, RAM-Wächter) bleibt unverändert; eine erneute Pause erfolgt nur über `global-pause.mjs`.
 * Tests: `npm test`. Einzelne Datei: `node tests/&lt;datei&gt;.test.js`.
 * **UI-Änderungen an `ops/cockpit` brauchen zusätzlich den echten Browser-Test** `npm run test:browser` (Headless-Chromium gegen temporären Fixture-Server). Die Verankerung steht in §10.4.
 * Keine neuen Abhängigkeiten ohne Freigabe im Task. `playwright` ist mit Chris&#39; Freigabe vom 22.11.2026 für den Browser-Test freigegeben.
@@ -1012,7 +1022,10 @@ Runden und Cooldown).
 Ausnahmen, die beim Mastermind verbleiben: Governance-/Meta-Tasks wie
 `T-239 (BP-000 (Governance — Kapitäns-Rolle, Kilo-Orchestrierung &amp; Handlungs-Blaupause))`,
 SafetyGuard, Auth, Secrets, echte Konten, Vault-Tore sowie alle Lagen mit aktivem
-`ops/runner.stop` (Dispatch pausiert). Der Kapitän prüft und mergt nach grünem Review;
+`ops/runner.stop` (Dispatch pausiert). Die Wellen von
+`BP-000-SSOT-SYNC (SSOT-, Pages-, Werkbank- und Gedächtnis-Nachzug)` laufen nach
+der kontrollierten Freigabe vom 26.11.2026 über die regulären Worker; der Kapitän
+prüft und mergt nach grünem Review;
 er ist kein manueller Test-Klicker (§11).
 
 ## 15. Schutz der Kilo-Orchestrierung &amp; Handlungs-Blaupause (Chris, 24.11.2026)
@@ -2012,12 +2025,14 @@ bis `T-307 (BP-000-SSOT-SYNC (Auto-Merge-Gate &amp; Kapitäns-Review))` und plan
 Wellen mit 20-Minuten-Limit → die Worker bauen SSOT, Registry, Vision-Routing,
 Werkbank, Pages und Handbuch als wiederverwendbare Bausteine → der Kapitän
 prüft Verify, Browser-Test und Pages-Gate → erst bei vollständigem Grün und
-Chris&#39; Tor gibt es eine Live-Einladung. `ops/runner.stop` bleibt während der
-Planung aktiv; Delegation ist vorbereitet, kein Dispatch gestartet.
+Chris&#39; Tor gibt es eine Live-Einladung. Die Planung lief mit aktivem
+`ops/runner.stop`; am 26.11.2026 wurde der Dispatch auf ausdrücklichen Auftrag
+kontrolliert freigegeben (`global-pause.mjs`, `dispatch.paused: false`,
+Generierung aus der SSOT). Die Wellen laufen über `agent-run.mjs`.
 
 | Soll aus dem Supervisor-Auftrag | Ist vor `T-290 (BP-000-SSOT-SYNC (Dekomposition, Capability-Mapping &amp; Board))` | Backlog / Task |
 | --- | --- | --- |
-| Offizielle Servernamen, Rollen, Transport und LAN in SSOT sowie Akteure ohne Relikte | Servernamen stimmen; `WaechterBot`/`BauBot` stehen noch in SSOT und `ops/lib/actor-profile-guard.cjs`; `AGENTS.md` §2 enthält dieselben Namen, bleibt aber ohne Freigabe unverändert | `T-291 (BP-000-SSOT-SYNC (SSOT-Servernamen, Rollen &amp; Akteure bereinigen))`; `AGENTS.md`-Bereinigung bleibt offener Punkt für Chris |
+| Offizielle Servernamen, Rollen, Transport und LAN in SSOT sowie Akteure ohne Relikte | Servernamen stimmen; `WaechterBot`/`BauBot` stehen noch in SSOT und `ops/lib/actor-profile-guard.cjs`; `AGENTS.md` §2 enthält dieselben Namen, bleibt aber ohne Freigabe unverändert | `T-291 (BP-000-SSOT-SYNC (SSOT-Servernamen, Rollen &amp; Akteure bereinigen))`; `AGENTS.md §2` am 26.11.2026 vom Kapitän auf ausdrückliche Freigabe bereinigt |
 | Generische Nodes `STEVE`, `ALEX`, `NOOR`, `MAKENA` ohne Hardware-Hardcode | `FELDBOOK (Alt-Laptop)` in SSOT und Werkbank-UI; Registry mit eigenen Defaults | `T-292 (BP-000-SSOT-SYNC (Generische Maschinen-Nodes &amp; Registry-Quelle))` |
 | Selbstentdeckende Steckbriefe: OS, RAM, Disk, Shells, Tools, Bindungen, dynamische Slots | Registry speichert nur Struktur; `machine-monitor.mjs` nutzt harten Default-Key; keine Shell-/Tool-Discovery | `T-293 (BP-000-SSOT-SYNC (Maschinen-Self-Discovery: OS, RAM, Disk, Slots))`, `T-294 (BP-000-SSOT-SYNC (Shell- &amp; Toolchain-Steckbrief inkl. Copy-Paste-Regeln))` |
 | `vision_audit` mit OpenRouter + `T-199 (OpenRouter-Modellausfall: Preset prüfen und freigeben)`-Fallback und `WAITING_RATE_LIMIT` | Konten und Fallbackkette vorhanden; `getVisionAuditConfig()` ohne `model`-Feld | `T-295 (BP-000-SSOT-SYNC (Vision-Audit: OpenRouter-Modell &amp; Fallback-Kette))` |
@@ -2027,12 +2042,14 @@ Planung aktiv; Delegation ist vorbereitet, kein Dispatch gestartet.
 | Repo-Gedächtnis und Handbuch 08 für Laien | `DECISIONS.md`/`IDEAS.md` fehlen; Vault-Junction leer; Handbuch-Spiegel vorhanden | `T-304 (BP-000-SSOT-SYNC (Repo-Gedächtnis DECISIONS/IDEAS/LESSONS/BP-014))`, `T-305 (BP-000-SSOT-SYNC (Handbuch 08: Worker, Maschinen &amp; Laienbedienung))` |
 | Worker-Schutz mit Timeout/Scope und Auto-Merge-Gate | Hygiene für Worktrees/Locks vorhanden; kein Task-Frontmatter-Scope-Guard | `T-306 (BP-000-SSOT-SYNC (Worker-Schutz: harte Timeouts &amp; Scope-Guard))`, `T-307 (BP-000-SSOT-SYNC (Auto-Merge-Gate &amp; Kapitäns-Review))` |
 
-**Trennlinie / Gaps:** Alle hier gelisteten Backlog-Karten sind `ready`, aber
-nicht dispatched, solange `ops/runner.stop` und `dispatch.paused` aktiv sind.
-Keine Capability wird ohne Testbeleg auf `verified: true` gesetzt. Die
-Vault-Junction ist leer; Handbuch-Inhalte laufen über den regulären Spiegel
-`ops/notebook-sync/quellen/handbuch/**`. Die veralteten Namen in `AGENTS.md` §2
-brauchen Chris&#39; Freigabe und bleiben daher als offener Punkt dokumentiert.
+**Trennlinie / Gaps:** Alle hier gelisteten Karten sind `ready` und werden seit
+der kontrollierten Freigabe vom 26.11.2026 über `agent-run.mjs` dispatched;
+`ops/runner.stop` ist entfernt, `dispatch.paused: false`, der
+Worker-Orchestrierungs-Guard bleibt 11/11. Keine Capability wird ohne Testbeleg
+auf `verified: true` gesetzt. Die Vault-Junction ist leer; Handbuch-Inhalte
+laufen über den regulären Spiegel `ops/notebook-sync/quellen/handbuch/**`. Die
+veralteten Namen in `AGENTS.md §2` sind auf ausdrückliche Freigabe entfernt;
+`SWARM_BOT` bleibt auf `19132`, `SHOW_ACTOR`/`OBSERVER` auf `19133`/`19134`.
 Kein Live-`19132`/UDP `7551`, kein Paid-/Vision-/OAuth-Call, keine Windows-/
 Firewall-Änderung, keine finale Live-Einladung, alle Baupläne bleiben `manual`.
 </code></pre>
