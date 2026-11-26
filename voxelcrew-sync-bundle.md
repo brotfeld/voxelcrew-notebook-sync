@@ -1,6 +1,6 @@
 # VoxelCrew — Sync-Bundle (Gesamtspezifikation)
 
-> Erzeugt am 2026-11-26T04:48:04.662Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
+> Erzeugt am 2026-11-26T05:03:07.194Z aus dem laufenden Repo · schreibgeschützte Konsolidierung für dein Notizbuch.
 > Eine Datei statt vieler: Inventur, SSOT, Regeln, Welt-Invarianten, Mapping, Capabilities, Registry, alle Baupläne, Handbuch und Konzept/Anlagen.
 > Quellmodus: eingecheckter Quellspiegel (CI-Fallback) · Negativliste: 0 Treffer
 
@@ -1992,7 +1992,7 @@ Generierung aus der SSOT). Die Wellen laufen über `agent-run.mjs`.
 | Kind-/Bauleiter-Modus, 4-Stufen-UI-Prozess, Ideen-Chat am Free-Pool | Kein Umschalter; harter Untertitel `kilo1–kilo5`; Chat meldet dauerhaft Gateway-Fehler | `ui.vertragSSotSync` ✅ (Stufe 1–3) `T-299 (BP-000-SSOT-SYNC (UI-Vertrag Stufen 1–3: Kind/Bauleiter & Provider-Formular))` / kilo5 — Vertrag `ops/werkbank/UI_VERTRAG_KIND_BAULEITER.md`, `verified:false` bis Stufe 4; Umsetzung `T-300 (BP-000-SSOT-SYNC (Kind-/Bauleiter-Modus & dynamische Schaltzentrale))` ✅, Ideen-Chat `T-301 (BP-000-SSOT-SYNC (Ideen-Chat an aktivem Free-Pool))` ✅ / kilo1 (Kapitäns-Review), `tests/werkbank-api-registries.test.mjs` 96/96 mit Fixture-Beweis für grünen Account, maskierten Key, ehrlichem `handlungsbedarf` und 0 echten Calls; Abnahme `T-302 (BP-000-SSOT-SYNC (Stufe-4-Browserabnahme Werkbank))` |
 | Pages mit offiziellen Namen, Steckbriefen und Klartext-Tabellen | `export-notebook-sync.mjs` rendert Servernamen/Akteure/Worker/Baupläne aus SSOT und Registry, dazu Maschinen-Steckbriefe als JSON-Block und Klartext-Tabelle; lokale Maschine aus `ramSchutz.maschineErkennung`, alle anderen Nodes mit `quelle: fehlt`/`laufzeit: null` ohne erfundene Werte; Budget `179200` Byte aus `pages-config.json` | `export.ssotPagesSync` ✅ `T-303 (BP-000-SSOT-SYNC (Pages-Export: offizielle Namen & Maschinen-Steckbriefe))`, `tests/notebook-pages-e2e.test.js` mit SSOT-getriebenen Belegen |
 | Repo-Gedächtnis und Handbuch 08 für Laien | `DECISIONS.md`/`IDEAS.md` fehlen; Vault-Junction leer; Handbuch-Spiegel vorhanden | `T-304 (BP-000-SSOT-SYNC (Repo-Gedächtnis DECISIONS/IDEAS/LESSONS/BP-014))`, `T-305 (BP-000-SSOT-SYNC (Handbuch 08: Worker, Maschinen & Laienbedienung))` |
-| Worker-Schutz mit Timeout/Scope und Auto-Merge-Gate | Hygiene für Worktrees/Locks vorhanden; kein Task-Frontmatter-Scope-Guard | `T-306 (BP-000-SSOT-SYNC (Worker-Schutz: harte Timeouts & Scope-Guard))`, `T-307 (BP-000-SSOT-SYNC (Auto-Merge-Gate & Kapitäns-Review))` |
+| Worker-Schutz mit Timeout/Scope und Auto-Merge-Gate | Hygiene für Worktrees/Locks vorhanden; `governance.taskScopeGuard` ✅ `T-306 (BP-000-SSOT-SYNC (Worker-Schutz: harte Timeouts & Scope-Guard))` / kilo5 — `ops/runtime/task-scope-guard.mjs` liest `scope`/`timeout_min` aus dem Task-Frontmatter und die Grenzen aus `governance.captain.subtaskRegeln`/`orchestration` der SSOT (keine hartcodierten Werte), bricht bei Datei außerhalb des Scopes oder `timeout_min` über dem Limit ab; `pre-wave-hygiene.mjs` meldet verwaiste Worktrees/Locks ohne `--force` und ohne Datenverlust; `tests/task-scope-guard.test.mjs` 15/15 | `T-307 (BP-000-SSOT-SYNC (Auto-Merge-Gate & Kapitäns-Review))`, `governance.ssotSyncReview` |
 
 **Trennlinie / Gaps:** Alle hier gelisteten Karten sind `ready` und werden seit
 der kontrollierten Freigabe vom 26.11.2026 über `agent-run.mjs` dispatched;
@@ -4099,28 +4099,22 @@ Firewall-Änderung, keine finale Live-Einladung, alle Baupläne bleiben `manual`
     {
       "id": "governance.taskScopeGuard",
       "modul": "ops/runtime/task-scope-guard.mjs",
-      "funktion": "pruefeScope",
+      "funktion": "pruefeTaskScope",
       "zeile": null,
       "parameter": [
         {
-          "name": "task",
-          "typ": "string",
-          "pflicht": true,
-          "beschreibung": "Task-ID, deren Frontmatter geprueft wird"
-        },
-        {
-          "name": "dateien",
-          "typ": "array",
-          "pflicht": true,
-          "beschreibung": "Geaenderte Dateipfade im Task-Worktree"
+          "name": "options",
+          "typ": "object",
+          "pflicht": false,
+          "beschreibung": "id/root/frontmatter/files/ssot; liest scope und timeout_min aus dem Task-Frontmatter, Grenzen aus governance.captain.subtaskRegeln und orchestration aus der SSOT"
         }
       ],
       "block_states": [
         "handlungsbedarf"
       ],
       "doku": "ops/tasks/T-306 (BP-000-SSOT-SYNC (Worker-Schutz: harte Timeouts & Scope-Guard)).md, ops/SPEC_MAPPING.md §27, AGENTS.md §14",
-      "verified": false,
-      "beleg": "Backlog BP-000-SSOT-SYNC / T-306 (BP-000-SSOT-SYNC (Worker-Schutz: harte Timeouts & Scope-Guard)): 20-Minuten-Limit und Datei-Scope werden noch nicht aus dem Task-Frontmatter erzwungen."
+      "verified": true,
+      "beleg": "T-306 umgesetzt: tests/task-scope-guard.test.mjs 15/15 gruen — Guard liest scope/timeout_min aus dem Frontmatter, bricht bei Datei ausserhalb des Scopes und timeout_min ueber dem SSOT-Limit (laufzeitMinutenMax) ab, keine hartcodierten Grenzen/Namen (kein 19132/7551/kilo1-5), RAM 80/90+85/90, WAITING_RATE_LIMIT-Queue und T-199-Fallbackkette unveraendert belegt; pre-wave-hygiene meldet verwaiste Worktrees/Locks ohne --force und ohne Datenverlust"
     },
     {
       "id": "governance.ssotSyncReview",
